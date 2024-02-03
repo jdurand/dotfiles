@@ -1,0 +1,59 @@
+" Configuration files
+" ----------------------------------------------------------------------------------------------------
+
+" Define the leader key
+" ----------------------------------------------------------------------------------------------------
+" let mapleader = ";"
+" let g:mapleader = ";"
+
+" Global Settings
+source $HOME/.vim/config/settings.vim
+
+" Plugin Settings
+source $HOME/.vim/config/plugin-settings.vim
+
+" Custom Keymaps
+source $HOME/.vim/config/keymaps.vim
+
+" High Level Configuration
+" ----------------------------------------------------------------------------------------------------
+
+" Color Scheme
+" colorscheme monokai-nightasty
+colorscheme tokyonight
+" colorscheme solarized-osaka
+" colorscheme solarized
+
+" Make it possible to place the tags file somewhere else than the root directory
+set notagrelative
+" Look for a tags file in ./tmp, in the current directory and up and up until $HOME
+set tags=tmp/tags,tags
+
+" Turn hybrid line numbers on
+set number relativenumber
+set nu rnu
+
+" " Turn hybrid line numbers off
+" set nonumber norelativenumber
+" set nonu nornu
+
+" " Toggle hybrid line numbers
+" set number! relativenumber!
+" set nu! rnu!
+
+" No random French UI in nvim!
+language en_US
+
+" No automatic line jump at end of file
+" set nofixendofline
+
+" Theme Customizations
+" ----------------------------------------------------------------------------------------------------
+
+" let g:airline_theme = 'solarized'
+let g:airline_powerline_fonts = 1
+" let g:airline#extensions#tabline#enabled = 1
+" let g:airline#extensions#tabline#left_sep = ' '
+" let g:airline#extensions#tabline#left_alt_sep = '|'
+let g:airline#extensions#tmuxline#enabled = 1
+

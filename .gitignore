@@ -1,0 +1,6 @@
+vendor/
+
+tmux/resurrect/
+tmux/plugins/
+
+nvim/lazy-lock.json

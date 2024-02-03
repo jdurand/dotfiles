@@ -5,6 +5,12 @@ noremap <silent> ø mo<Esc>o<Esc>k`o
 noremap <silent> Ø mo<Esc>O<Esc>j`o
 noremap K <Esc>i<CR><Esc><Esc>
 
+" Save with CTRL-S
+" ----------------------------------------------------------------------------------------------------
+noremap <silent> <C-S> :update<CR>
+vnoremap <silent> <C-S> <C-C>:update<CR>
+inoremap <silent> <C-S> <C-O>:update<CR>
+
 " Custom comment maps
 " ----------------------------------------------------------------------------------------------------
 nmap <Leader>cc <Plug>CommentaryLine

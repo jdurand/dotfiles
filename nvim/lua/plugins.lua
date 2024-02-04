@@ -21,6 +21,7 @@ require("lazy").setup({
   'craftzdog/solarized-osaka.nvim',
   'polirritmico/monokai-nightasty.nvim',
   'folke/tokyonight.nvim',
+  'catppuccin/vim',
   -- plugins
   'rstacruz/vim-closer',
   'mileszs/ack.vim',

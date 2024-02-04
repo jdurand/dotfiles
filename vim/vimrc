@@ -18,12 +18,6 @@ source $HOME/.vim/config/keymaps.vim
 " High Level Configuration
 " ----------------------------------------------------------------------------------------------------
 
-" Color Scheme
-" colorscheme monokai-nightasty
-colorscheme tokyonight
-" colorscheme solarized-osaka
-" colorscheme solarized
-
 " Make it possible to place the tags file somewhere else than the root directory
 set notagrelative
 " Look for a tags file in ./tmp, in the current directory and up and up until $HOME
@@ -50,8 +44,20 @@ language en_US
 " Theme Customizations
 " ----------------------------------------------------------------------------------------------------
 
+" Vim Color Scheme
+" colorscheme monokai-nightasty
+" colorscheme tokyonight
+" colorscheme solarized-osaka
+" colorscheme solarized
+colorscheme catppuccin_mocha
+
+" Airline Theme
 " let g:airline_theme = 'solarized'
-let g:airline_powerline_fonts = 1
+" let g:airline_theme = 'base16_monokai'
+" let g:airline_theme = 'molokai'
+let g:airline_theme = 'catppuccin_mocha'
+
+" let g:airline_powerline_fonts = 1
 " let g:airline#extensions#tabline#enabled = 1
 " let g:airline#extensions#tabline#left_sep = ' '
 " let g:airline#extensions#tabline#left_alt_sep = '|'

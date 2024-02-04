@@ -90,7 +90,6 @@ let g:ale_linters = {
 \   'ruby': ['rubocop'],
 \   'scss': ['stylelint'],
 \}
-let g:airline#extensions#ale#enabled=1
 
 " vim-commentary settings
 " ----------------------------------------------------------------------------------------------------

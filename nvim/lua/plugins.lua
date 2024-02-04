@@ -17,11 +17,47 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
   -- color schemes
-  'remiprev/vim-colors-solarized',
-  'craftzdog/solarized-osaka.nvim',
-  'polirritmico/monokai-nightasty.nvim',
-  'folke/tokyonight.nvim',
-  'catppuccin/vim',
+  -- 'remiprev/vim-colors-solarized',
+  -- 'craftzdog/solarized-osaka.nvim',
+  -- 'polirritmico/monokai-nightasty.nvim',
+  -- 'folke/tokyonight.nvim',
+  {
+    'catppuccin/vim',
+    name = 'catppuccin',
+    priority = 1000,
+    config = function()
+      require('catppuccin').setup({
+        flavour = 'mocha', -- latte, frappe, macchiato, mocha
+        background = { -- :h background
+          light = 'latte',
+          dark = 'mocha',
+        },
+        integrations = {
+          cmp = true,
+          gitsigns = true,
+          harpoon = true,
+          illuminate = true,
+          indent_blankline = {
+            enabled = false,
+            scope_color = "sapphire",
+            colored_indent_levels = false,
+          },
+          mason = true,
+          native_lsp = { enabled = true },
+          notify = true,
+          nvimtree = true,
+          neotree = true,
+          symbols_outline = true,
+          telescope = true,
+          treesitter = true,
+          treesitter_context = true,
+        },
+      })
+
+      vim.opt.termguicolors = true
+      vim.cmd.colorscheme 'catppuccin-mocha'
+    end,
+  },
   -- plugins
   'rstacruz/vim-closer',
   'mileszs/ack.vim',
@@ -59,8 +95,6 @@ require("lazy").setup({
   'embear/vim-localvimrc',
   'fvictorio/vim-extract-variable',
   'w0rp/ale',
-  'vim-airline/vim-airline',
-  'vim-airline/vim-airline-themes',
   'edkolev/tmuxline.vim',
   'christoomey/vim-tmux-navigator',
   'scrooloose/nerdtree',
@@ -78,6 +112,77 @@ require("lazy").setup({
   --   'nvim-treesitter/nvim-treesitter',
   --   build = ':TSUpdate'
   -- },
+  --
+  {
+    "ThePrimeagen/harpoon",
+    lazy = true,
+  },
+  {
+    'nvim-lualine/lualine.nvim',
+    event = 'VeryLazy',
+    config = function()
+      local harpoon = require('harpoon.mark')
+
+      local function truncate_branch_name(branch)
+        if not branch or branch == "" then
+          return ''
+        end
+
+        -- Match the branch name to the specified format
+        local _, _, ticket_number = string.find(branch, ".*?/lib%-(%d+)%-")
+
+        -- If the branch name matches the format, display lib-{ticket_number}, otherwise display the full branch name
+        if ticket_number then
+          return 'lib-' .. ticket_number
+        else
+          return branch
+        end
+      end
+
+      local function harpoon_component()
+        local total_marks = harpoon.get_length()
+
+        if total_marks == 0 then
+          return ''
+        end
+
+        local current_mark = "—"
+
+        local mark_idx = harpoon.get_current_index()
+        if mark_idx ~= nil then
+          current_mark = tostring(mark_idx)
+        end
+
+        return string.format("󱡅 %s/%d", current_mark, total_marks)
+      end
+
+      require('lualine').setup({
+        options = {
+          theme = 'catppuccin',
+          globalstatus = true,
+          component_separators = { left = "█", right = "█" },
+          section_separators = { left = "█", right = "█" },
+        },
+        sections = {
+          lualine_b = {
+            { 'branch', icon = "", fmt = truncate_branch_name },
+            harpoon_component,
+            'diff',
+            'diagnostics',
+          },
+          lualine_c = {
+            { 'filename', path = 1 },
+          },
+          lualine_x = {
+            'filetype',
+          },
+        },
+      })
+    end,
+    depencencies = {
+      'catppuccin/vim'
+    }
+  },
   {
     'JoosepAlviste/nvim-ts-context-commentstring',
     config = function()

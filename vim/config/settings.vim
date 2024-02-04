@@ -147,42 +147,43 @@ match Todo /\(\(\t\|\s\)\+$\)/
 " ----------------------------------------------------------------------------------------------------
 let $LC_ALL = "fr_CA.UTF-8"
 
+" Airline customization
 "
 " hide default mode... it's displayed in the status line
-set noshowmode
+" set noshowmode
 
-" fix for tmux glitch: change status on tmux
-if strlen($TMUX) " skip if we're not in a tmux session
-  " https://github.com/edkolev/tmuxline.vim/issues/24
-  function! AddTmuxlineStatus()
-    if exists(':Tmuxline')
-      augroup airline_tmuxline
-        au!
-        au InsertEnter * call SetInsert()
-        autocmd InsertLeave * call SetNormal()
-        vnoremap <silent> <expr> <SID>SetVisual SetVisual()
-        nnoremap <silent> <script> v v<SID>SetVisual
-        nnoremap <silent> <script> V V<SID>SetVisual
-        nnorema <silent> <script> <C-v> <C-v><SID>SetVisual
-        autocmd CursorHold * call SetNormal()
-      augroup END
-    endif
-  endfunction
-  function! SetInsert()
-    if v:insertmode == 'i'
-      Tmuxline airline_insert
-    else
-      Tmuxline airline_replace
-    endif
-  endfunction
-  function! SetVisual()
-    set updatetime=0
-    Tmuxline airline_visual
-    return 'lh'
-  endfunction
-  function! SetNormal()
-    set updatetime=4000
-    Tmuxline airline
-  endfunction
-  au VimEnter * :call AddTmuxlineStatus()
-endif
+" " fix for tmux glitch: change status on tmux
+" if strlen($TMUX) " skip if we're not in a tmux session
+"   " https://github.com/edkolev/tmuxline.vim/issues/24
+"   function! AddTmuxlineStatus()
+"     if exists(':Tmuxline')
+"       augroup airline_tmuxline
+"         au!
+"         au InsertEnter * call SetInsert()
+"         autocmd InsertLeave * call SetNormal()
+"         vnoremap <silent> <expr> <SID>SetVisual SetVisual()
+"         nnoremap <silent> <script> v v<SID>SetVisual
+"         nnoremap <silent> <script> V V<SID>SetVisual
+"         nnorema <silent> <script> <C-v> <C-v><SID>SetVisual
+"         autocmd CursorHold * call SetNormal()
+"       augroup END
+"     endif
+"   endfunction
+"   function! SetInsert()
+"     if v:insertmode == 'i'
+"       Tmuxline airline_insert
+"     else
+"       Tmuxline airline_replace
+"     endif
+"   endfunction
+"   function! SetVisual()
+"     set updatetime=0
+"     Tmuxline airline_visual
+"     return 'lh'
+"   endfunction
+"   function! SetNormal()
+"     set updatetime=4000
+"     Tmuxline airline
+"   endfunction
+"   au VimEnter * :call AddTmuxlineStatus()
+" endif

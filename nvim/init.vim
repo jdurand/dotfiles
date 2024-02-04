@@ -6,8 +6,9 @@ let &packpath=&runtimepath
 let mapleader = ";"
 let g:mapleader = ";"
 
-lua require('plugins')
+lua require('dependencies')
 
 source ~/.vimrc
 
-lua require('config')
+lua require('user.keymaps')
+lua require('user.settings')

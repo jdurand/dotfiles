@@ -1,10 +1,4 @@
 
--- Command-T Config
-vim.keymap.set('n', '<Leader>f', '<Plug>(CommandTRipgrep)')
-vim.keymap.set('n', '<Leader>g', '<Plug>(CommandTGit)')
-vim.keymap.set('n', '<Leader>;', '<Plug>(CommandTBuffer)<ESC>')
-
-
 -- vim.cmd([[
 --   augroup MyColors
 --   autocmd!
@@ -13,7 +7,6 @@ vim.keymap.set('n', '<Leader>;', '<Plug>(CommandTBuffer)<ESC>')
 --   autocmd ColorScheme * highlight BufferLineSeparatorSelected guifg=#191724
 --   augroup END
 -- ]])
-
 
 -- trigger `autoread` when files changes on disk
 vim.o.autoread = true

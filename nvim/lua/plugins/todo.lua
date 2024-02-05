@@ -12,7 +12,6 @@ return {
   'w0rp/ale',
   'christoomey/vim-tmux-navigator',
   'tpope/vim-eunuch',
-  'tpope/vim-fugitive',
   'nvim-lua/plenary.nvim',
   'nvim-tree/nvim-web-devicons', -- not strictly required, but recommended
   'MunifTanjim/nui.nvim',

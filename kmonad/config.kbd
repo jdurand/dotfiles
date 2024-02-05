@@ -1,0 +1,42 @@
+(defcfg
+  input  (device-file "/dev/input/by-id/usb-Keychron_Keychron_K7-event-kbd")
+  output (uinput-sink "KMonad Keychron K7"))
+
+;; Control/Escape alias (for Capslock key)
+(defalias
+  cesc (tap-next esc lctrl))
+
+;; Tilde/Backtick alias (for Escape key)
+(defalias
+  tesc (tap-hold-next 150 ` ~))
+
+;; fn2 key (&464) crashes kmonad
+
+(defsrc
+        brdn brup                     prev pp   next      vold  volu
+  `     f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11   f12
+  esc   1    2    3    4    5    6    7    8    9    0    -     =      bspc              del
+  tab   q    w    e    r    t    y    u    i    o    p    [     ]      \                 home
+  caps  a    s    d    f    g    h    j    k    l    ;    '     ret                      pgup
+  lsft  z    x    c    v    b    n    m    ,    .    /    rsft         up                pgdn
+  lctl  lalt lmet      spc       rmet                           left   down   rght
+  )
+
+
+(deflayer base
+        brdn brup                     prev pp   next      vold  volu
+  `     f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11   f12
+  @tesc 1    2    3    4    5    6    7    8    9    0    -     =      bspc              del
+  tab   q    w    e    r    t    y    u    i    o    p    [     ]      \                 home
+  @cesc a    s    d    f    g    h    j    k    l    ;    '     ret                      pgup
+  lsft  z    x    c    v    b    n    m    ,    .    /    rsft         up                pgdn
+  lctl  lalt lmet      spc       rmet                           left   down   rght
+  )
+
+;; initialize via /etc/systemd/system/keychron_k7_keyboard.service
+
+;; Other Keyboard
+;; (defcfg
+;;   input  (device-file "/dev/input/by-id/usb-Massdrop_Inc._ALT_Keyboard_1551771897-event-kbd")
+;;   output (uinput-sink "KMonad Massdrop ALT"))
+

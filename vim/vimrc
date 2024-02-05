@@ -36,7 +36,8 @@ set nu rnu
 " set nu! rnu!
 
 " No random French UI in nvim!
-language en_US
+language C
+" language en_US.UTF-8
 
 " No automatic line jump at end of file
 " set nofixendofline

@@ -6,12 +6,9 @@
 export PATH="$PATH:$HOME/.bin"
 
 # add homebrew bins to $PATH
-export PATH=$HOME/.bin:/usr/local/bin:/opt/homebrew/bin:$PATH
+export PATH=/usr/local/bin:/opt/homebrew/bin:$PATH
 
 # export MANPATH="/usr/local/man:$MANPATH"
-
-# You may need to manually set your language environment
-export LANG=en_US.UTF-8
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
@@ -42,6 +39,9 @@ eval "$(rbenv init -)"
 # load pyenv
 if command -v pyenv 1>/dev/null 2>&1; then
   eval "$(pyenv init -)"
+
+  # Add python binaries to $PATH
+  export PATH="$PATH:$(pyenv root)/shims"
 fi
 
 # Load nvm
@@ -69,10 +69,6 @@ load-nvmrc() {
 }
 add-zsh-hook chpwd load-nvmrc
 load-nvmrc
-
-# Add python binaries to $PATH
-# export PATH="$PATH:$HOME/Library/Python/2.7/bin"
-export PATH="$PATH:$(pyenv root)/shims"
 
 # Add keyboard things (mdloader_mac & QMK firmare) to $PATH
 export PATH="$PATH:$HOME/Code/keyboards/mdloader/build"

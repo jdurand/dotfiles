@@ -4,7 +4,7 @@ return {
   -- 'polirritmico/monokai-nightasty.nvim',
   -- 'folke/tokyonight.nvim',
   {
-    'catppuccin/vim',
+    'catppuccin/nvim',
     name = 'catppuccin',
     priority = 1000,
     config = function()
@@ -37,7 +37,7 @@ return {
       })
 
       vim.opt.termguicolors = true
-      vim.cmd.colorscheme 'catppuccin-mocha'
+      vim.cmd.colorscheme 'catppuccin-macchiato'
     end,
   },
 }

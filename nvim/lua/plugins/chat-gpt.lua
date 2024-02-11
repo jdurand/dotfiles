@@ -3,7 +3,13 @@ return {
     'jackMort/ChatGPT.nvim',
     event = 'VeryLazy',
     config = function()
-      require('chatgpt').setup()
+      local chatgpt = require('chatgpt')
+
+      chatgpt.setup()
+
+      vim.keymap.set('n', '<leader>gt', chatgpt.openChat, {})
+      vim.keymap.set('n', '<leader>gp', chatgpt.selectAwesomePrompt, {})
+      vim.keymap.set('n', '<leader>ge', chatgpt.edit_with_instructions, {})
     end,
     dependencies = {
       'MunifTanjim/nui.nvim',

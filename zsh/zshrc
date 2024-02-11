@@ -49,7 +49,12 @@ if [[ -z "${ZSH_THEME}" ]]; then
     # eval "$(oh-my-posh init zsh --config $(brew --prefix oh-my-posh)/themes/catppuccin_mocha.omp.json)"
     # eval "$(oh-my-posh init zsh --config $(brew --prefix oh-my-posh)/themes/powerlevel10k_modern.omp.json)"
 
+  if [[ -z "${FLOATERM}" ]]; then
+    # use simpler theme without right prompt when rendered within floaterm
     eval "$(oh-my-posh init zsh --config ~/.zsh/posh-themes/catppuccin.omp.json)"
+  else
+    eval "$(oh-my-posh init zsh --config ~/.zsh/posh-themes/catppuccin_mocha.omp.json)"
+  fi
   fi
 fi
 

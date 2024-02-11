@@ -23,6 +23,13 @@
           "template": "{{.Icon}} "
         },
         {
+          "type": "session",
+          "style": "diamond",
+          "background": "p:blue",
+          "foreground": "p:wight",
+          "template": "{{ .UserName }} "
+        },
+        {
           "type": "path",
           "style": "powerline",
           "background": "p:pink",

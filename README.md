@@ -1,18 +1,18 @@
-# dotfiles
+<!-- # dotfiles -->
 
 ## Installation
 
-### Install Oh My Zsh
+#### Install Oh My Zsh
 ```sh
 ZSH=~/.dotfiles/vendor/oh-my-zsh sh -c "$(curl -fsSL https://install.ohmyz.sh/)"
 ```
 
-### Install Oh My Posh
+#### Install Oh My Posh
 ```sh
 brew install jandedobbeleer/oh-my-posh/oh-my-posh
 ```
 
-### Setup Symlinks
+#### Setup Symlinks
 ```sh
 cd ~
 git@github.com:jdurand/dotfiles.git .dotfiles

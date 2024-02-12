@@ -30,6 +30,10 @@ family = "SauceCodePro Nerd Font"
 family = "SauceCodePro Nerd Font"
 
 
+[window]
+startup_mode = "fullscreen"
+
+
 [[keyboard.bindings]]
 key = "F11"
 action = "ToggleFullscreen"

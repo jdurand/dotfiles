@@ -1,0 +1,42 @@
+return {
+  -- {
+  --   'prettier/vim-prettier',
+  --   build = 'yarn install',
+  -- },
+  -- {
+  --   'stevearc/conform.nvim',
+  --   event = { 'BufWritePre' },
+  --   cmd = { 'ConformInfo' },
+  --   keys = {
+  --     {
+  --       -- Customize or remove this keymap to your liking
+  --       '<leader>f',
+  --       function()
+  --         require('conform').format({ async = true, lsp_fallback = true })
+  --       end,
+  --       mode = "",
+  --       desc = "Format buffer",
+  --     },
+  --   },
+  --   opts = {
+  --     formatters_by_ft = {
+  --       -- Use a sub-list to run only the first available formatter
+  --       javascript = { { "prettierd", "prettier" } },
+  --       ['javascript.glimmer'] = { { "prettierd", "prettier" } },
+  --     },
+  --     format_on_save = {
+  --       timeout_ms = 250,
+  --       lsp_fallback = true,
+  --     },
+  --     notify_on_error = false,
+  --     formatters = {
+  --       prettierd = {
+  --         require_cwd = true
+  --       },
+  --       prettier = {
+  --         require_cwd = true
+  --       }
+  --     }
+  --   },
+  -- }
+}

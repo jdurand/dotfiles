@@ -13,10 +13,6 @@ return {
   'vim-scripts/YankRing.vim',
   'ervandew/supertab',
   'fvictorio/vim-extract-variable',
-  -- {
-  --   'prettier/vim-prettier',
-  --   build = 'yarn install',
-  -- },
   {
     'jalvesaq/Nvim-R',
     branch = 'stable',

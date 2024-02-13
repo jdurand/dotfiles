@@ -10,7 +10,7 @@ local harpoon_mark = require("harpoon.mark")
 -- Command-T Keybinds
 vim.keymap.set('n', '<Leader>f', '<Plug>(CommandTRipgrep)')
 vim.keymap.set('n', '<Leader>g', '<Plug>(CommandTGit)')
-vim.keymap.set('n', '<Leader>;', '<Plug>(CommandTBuffer)<ESC>')
+-- vim.keymap.set('n', '<Leader>;', '<Plug>(CommandTBuffer)<ESC>')
 
 
 -- Harpoon keybinds --

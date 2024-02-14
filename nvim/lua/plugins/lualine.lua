@@ -61,7 +61,7 @@ return {
         },
       })
     end,
-    depencencies = {
+    dependencies = {
       'catppuccin/vim'
     }
   },

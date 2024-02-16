@@ -15,11 +15,8 @@ end
 
 vim.opt.rtp:prepend(lazypath)
 
-local lazy = require("lazy")
-
--- TODO: break down plugins into separate files
--- see: https://github.com/dmmulroy/dotfiles/tree/main/.config/nvim/lua/plugins
-
-lazy.setup({
-  { import = 'plugins' },
+require('lazy').setup('plugins', {
+  change_detection = {
+    notify = false
+  }
 })

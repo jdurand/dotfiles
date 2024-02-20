@@ -52,7 +52,7 @@ windows:
   - console:
       layout: 9483,364x83,0,0[364x17,0,0,0,364x65,0,18,5]
       panes:
-        - vim ~/Notes/0000-general.md +':cd ~/notes'
+        - vim ~/Notes/Work/general-notes.md +':cd ~/Notes/Work'
         - cd core-api && git status
   - core:
       root: ~/Code/libro/core-api

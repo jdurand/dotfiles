@@ -1,0 +1,10 @@
+# /Users/jdurand/.config/tmuxinator/notes.yml
+
+name: notes
+root: ~/Notes/
+
+windows:
+  - editor:
+      layout: main-horizontal
+      panes:
+        - nvim

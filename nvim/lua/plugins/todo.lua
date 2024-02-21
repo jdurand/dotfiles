@@ -13,6 +13,7 @@ return {
   'vim-scripts/YankRing.vim',
   'ervandew/supertab',
   'fvictorio/vim-extract-variable',
+  'folke/which-key.nvim', -- Useful plugin to show you pending keybinds.
   {
     'jalvesaq/Nvim-R',
     branch = 'stable',

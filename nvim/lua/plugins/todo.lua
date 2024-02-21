@@ -9,7 +9,7 @@ return {
   'MunifTanjim/nui.nvim',
   'wincent/terminus',
   'RRethy/vim-illuminate',
-  'w0rp/ale',
+  -- 'w0rp/ale',
   'vim-scripts/YankRing.vim',
   'ervandew/supertab',
   'fvictorio/vim-extract-variable',

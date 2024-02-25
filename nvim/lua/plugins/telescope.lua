@@ -7,11 +7,20 @@ return {
     tag = '0.1.5',
     dependencies = { 'nvim-lua/plenary.nvim' },
     config = function()
+      local telescope = require('telescope')
       local scope = require('telescope.builtin')
+
+      telescope.setup {
+        pickers = {
+          buffers = { theme = 'dropdown' },
+          find_files = { theme = 'dropdown' },
+        },
+      }
 
       nnoremap('<leader>ff', scope.find_files, { desc = "[F]ind [F]iles" })
       nnoremap('<leader>fg', scope.live_grep, { desc = "[F]ind Live [G]rep" })
       nnoremap('<leader>;', scope.buffers, { desc = "Find Buffers" })
+      nnoremap('<leader>fk', scope.keymaps, { desc = "Find Buffers" })
       nnoremap('<leader>fh', scope.help_tags, { desc = "Find [H]elp" })
 
       nnoremap('<leader>gg', function()

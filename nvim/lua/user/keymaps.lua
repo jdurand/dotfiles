@@ -7,13 +7,13 @@ local nnoremap = require("user.keymaps.bind").nnoremap
 local harpoon_ui = require("harpoon.ui")
 local harpoon_mark = require("harpoon.mark")
 
--- Command-T Keybinds
+-- command-t keybinds
 nnoremap('<Leader>f', '<Plug>(CommandTRipgrep)')
 nnoremap('<Leader>g', '<Plug>(CommandTGit)')
 -- vim.keymap.set('n', '<Leader>;', '<Plug>(CommandTBuffer)<ESC>')
 
 
--- Harpoon keybinds --
+-- harpoon keybinds --
 -- Open harpoon ui
 nnoremap("<leader>ho", function()
   harpoon_ui.toggle_quick_menu()

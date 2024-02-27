@@ -2,7 +2,6 @@ return {
   'tpope/vim-abolish',
   'tpope/vim-eunuch',
   'mileszs/ack.vim',
-  'voldikss/vim-floaterm',
   'christoomey/vim-tmux-navigator',
   'nvim-tree/nvim-web-devicons', -- not strictly required, but recommended
   'nvim-lua/plenary.nvim',

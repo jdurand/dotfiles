@@ -110,3 +110,6 @@ map <Leader>tt :FloatermNew<CR>
 " launch lazygit
 map <Leader>tg :FloatermNew lazygit<CR>
 
+" launch gtasks tasks view --tasklist "🗓 Reclaim"
+map <Leader>td :FloatermNew! gtasks tasks view --tasklist "🗓 Reclaim"<CR>
+

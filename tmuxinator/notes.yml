@@ -7,4 +7,4 @@ windows:
   - editor:
       layout: main-horizontal
       panes:
-        - nvim
+        - nvim -p ./Work/general-notes.md

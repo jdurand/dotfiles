@@ -9,6 +9,6 @@ windows:
       # 'before' represents legacy functionality and will be deprecated in a future release, in favour of 'after'
       # synchronize: after
       panes:
-        - nvim ./vim/vimrc ./tmux/tmux.conf
-        - nvim ./nvim/init.vim ./nvim/lua/plugins/todo.lua ./nvim/lua/user/settings.lua
-        - nvim ../.config/tmuxinator/libro.yml ../.config/tmuxinator/notes.yml ../.config/tmuxinator/libro-h.yml ../.config/tmuxinator/keyboards.yml ../.config/tmuxinator/config.yml ../.config/tmuxinator/obb.yml
+        - nvim -p ./vim/vimrc ./tmux/tmux.conf
+        - nvim -p ./nvim/init.vim ./nvim/lua/plugins/todo.lua ./nvim/lua/user/settings.lua
+        - nvim -p ../.config/tmuxinator/libro.yml ../.config/tmuxinator/notes.yml ../.config/tmuxinator/libro-h.yml ../.config/tmuxinator/keyboards.yml ../.config/tmuxinator/config.yml ../.config/tmuxinator/obb.yml

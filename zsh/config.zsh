@@ -5,8 +5,11 @@
 # Add custom (local) bins to $PATH
 export PATH="$PATH:$HOME/.bin"
 
-# add homebrew bins to $PATH
+# Add homebrew bins to $PATH
 export PATH=/usr/local/bin:/opt/homebrew/bin:$PATH
+
+# Add GO bins to $PATH
+export PATH="$PATH:$HOME/go/bin"
 
 # export MANPATH="/usr/local/man:$MANPATH"
 

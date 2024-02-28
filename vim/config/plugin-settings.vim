@@ -77,20 +77,6 @@ hi! def link jsThis Identifier
 " ----------------------------------------------------------------------------------------------------
 let g:jsx_ext_required = 0
 
-" ALE settings
-" ----------------------------------------------------------------------------------------------------
-highlight clear ALEWarning
-highlight ALEErrorSign ctermfg=1
-highlight ALEWarningSign ctermfg=3
-let g:ale_sign_error = '→'
-let g:ale_sign_warning = '→'
-let g:ale_linters = {
-\   'elixir': ['credo'],
-\   'javascript': ['eslint'],
-\   'ruby': ['rubocop'],
-\   'scss': ['stylelint'],
-\}
-
 " vim-commentary settings
 " ----------------------------------------------------------------------------------------------------
 nmap <Leader>cc <Plug>CommentaryLine

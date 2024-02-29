@@ -13,26 +13,16 @@ return {
 
       harpoon:setup({})
 
-      -- use telescope as Harpoon mark picker
-      local conf = require('telescope.config').values
-      local function toggle_telescope(harpoon_files)
-        local file_paths = {}
-        for _, item in ipairs(harpoon_files.items) do
-          table.insert(file_paths, item.value)
-        end
-
-        require('telescope.pickers').new({}, {
-          prompt_title = 'Harpoon',
-          finder = require('telescope.finders').new_table({
-            results = file_paths,
-          }),
-          previewer = conf.file_previewer({}),
-          sorter = conf.generic_sorter({}),
-        }):find()
-      end
+      -- require('telescope').load_extension('harpoon')
 
       -- nnoremap('<leader>hh', function() harpoon.ui:toggle_quick_menu(harpoon:list()) end, { desc = 'List [H]arpoon Marks' })
-      nnoremap('<leader>hh', function() toggle_telescope(harpoon:list()) end, { desc = 'List [H]arpoon Marks' })
+      nnoremap('<leader>hh', function()
+        require('telescope').extensions.harpoon.marks({
+          prompt_title = 'Harpoon Marks'
+        })
+        vim.api.nvim_input('<ESC>')
+      end, { desc = 'List [H]arpoon Marks' })
+
       nnoremap('<leader>ha', function() harpoon:list():append() end, { desc = '[A]dd to Harpoon Marks' })
       -- nnoremap('<leader>hd', function() harpoon:list():remove() end, { desc = '[D]iscard from Harpoon Marks' })
 

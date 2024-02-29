@@ -16,9 +16,7 @@ return {
         pickers = {
           buffers = { theme = 'dropdown' },
           find_files = { theme = 'dropdown' },
-          git_status = {
-            theme = 'dropdown',
-          },
+          git_status = { theme = 'dropdown' },
         },
         extensions = {
           fzf = {

@@ -66,7 +66,8 @@ set mls=10 " Check for modelines in the first and last 10 lines
 set noeol
 set wildmenu
 set wildmode=full
-set switchbuf=usetab,newtab " split|newtab
+" set switchbuf=usetab,newtab " split|newtab
+set switchbuf=split
 set backspace=indent,eol,start
 set tabpagemax=50
 set isk+=- " Treat “-” like a word separator (for auto-completion!)

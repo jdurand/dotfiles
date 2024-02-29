@@ -16,9 +16,8 @@ return {
         pickers = {
           buffers = { theme = 'dropdown' },
           find_files = { theme = 'dropdown' },
-          git_files = {
+          git_status = {
             theme = 'dropdown',
-            git_command = {'git', 'diff', '--name-status', '@'},
           },
         },
         extensions = {
@@ -39,9 +38,9 @@ return {
 
       nnoremap('<leader>gc', function() utils.assert_git_repo(scope.git_commits) end, { desc = "Find Git [C]ommits" })
       nnoremap('<leader>gg', function()
-        utils.assert_git_repo(scope.git_files)
+        utils.assert_git_repo(scope.git_status)
         vim.api.nvim_input('<ESC>')
-      end, { desc = "Find [G]it Files" })
+      end, { desc = "Find [G]it Status" })
 
       nnoremap('<leader>;', function()
         -- scope.buffers()

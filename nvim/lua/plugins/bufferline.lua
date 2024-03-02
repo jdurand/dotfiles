@@ -18,6 +18,9 @@ return {
 
       -- open blank new tab
       nnoremap('<C-t><C-t>', ':tabnew<cr>')
+      -- nnoremap('<C-w><C-w>', ':tabclose<cr>')
+      nnoremap('<C-t>>', ':tabnext<cr>')
+      nnoremap('<C-t><', ':tabprevious<cr>')
     end,
   },
 }

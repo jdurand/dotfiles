@@ -13,10 +13,28 @@ return {
       local scope = require('telescope.builtin')
 
       telescope.setup {
-        pickers = {
-          buffers = { theme = 'dropdown' },
-          find_files = { theme = 'dropdown' },
-          git_status = { theme = 'dropdown' },
+        defaults = vim.tbl_extend(
+          'force',
+          require('telescope.themes').get_dropdown(), -- or get_cursor, get_ivy
+          {
+            --- your own `default` options go here, e.g.:
+            path_display = {
+              truncate = 2
+            },
+            -- mappings = {
+            --   i = {
+            --     ["<esc>"] = actions.close,
+            --   },
+            -- }
+          }
+        ),
+        pickers = { -- dropdown | ivy | cursor | compact
+          -- buffers = { theme = 'dropdown' },
+          -- find_files = { theme = 'dropdown' },
+          -- git_status = { theme = 'dropdown' },
+          git_commits = { theme = 'ivy' },
+          keymaps = { theme = 'ivy' },
+          live_grep = { theme = 'ivy' },
         },
         extensions = {
           fzf = {

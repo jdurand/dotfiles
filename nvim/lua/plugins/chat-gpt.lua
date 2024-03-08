@@ -7,7 +7,7 @@ return {
 
       chatgpt.setup({
         openai_params = {
-          -- model = "gpt-4-turbo-preview",
+          model = "gpt-4-turbo-preview",
         },
       })
 
@@ -29,13 +29,13 @@ return {
 
       require("which-key").register({
         ["<C-g>"] = {
-          c = { ":<C-u>'<,'>GpChatNew<cr>", "Visual Chat New" },
-          p = { ":<C-u>'<,'>GpChatPaste<cr>", "Visual Chat Paste" },
-          t = { ":<C-u>'<,'>GpChatToggle<cr>", "Visual Toggle Chat" },
+          -- c = { ":<C-u>'<,'>GpChatNew<cr>", "Visual Chat New" },
+          p = { ":<C-u>'<,'>GpChatPaste split<cr>", "Visual Chat Paste" },
+          -- t = { ":<C-u>'<,'>GpChatToggle<cr>", "Visual Toggle Chat" },
 
-          ["<C-x>"] = { ":<C-u>'<,'>GpChatNew split<cr>", "Visual Chat New split" },
-          ["<C-v>"] = { ":<C-u>'<,'>GpChatNew vsplit<cr>", "Visual Chat New vsplit" },
-          ["<C-t>"] = { ":<C-u>'<,'>GpChatNew tabnew<cr>", "Visual Chat New tabnew" },
+          -- ["<C-x>"] = { ":<C-u>'<,'>GpChatNew split<cr>", "Visual Chat New split" },
+          -- ["<C-v>"] = { ":<C-u>'<,'>GpChatNew vsplit<cr>", "Visual Chat New vsplit" },
+          -- ["<C-t>"] = { ":<C-u>'<,'>GpChatNew tabnew<cr>", "Visual Chat New tabnew" },
 
           r = { ":<C-u>'<,'>GpRewrite<cr>", "Visual Rewrite" },
           a = { ":<C-u>'<,'>GpAppend<cr>", "Visual Append (after)" },
@@ -82,8 +82,8 @@ return {
       require("which-key").register({
         -- ...
         ["<C-g>"] = {
-          c = { "<cmd>GpChatNew<cr>", "New Chat" },
-          t = { "<cmd>GpChatToggle<cr>", "Toggle Chat" },
+          -- c = { "<cmd>GpChatNew<cr>", "New Chat" },
+          -- t = { "<cmd>GpChatToggle<cr>", "Toggle Chat" },
           f = { "<cmd>GpChatFinder<cr>", "Chat Finder" },
 
           ["<C-x>"] = { "<cmd>GpChatNew split<cr>", "New Chat split" },
@@ -134,8 +134,8 @@ return {
       require("which-key").register({
         -- ...
         ["<C-g>"] = {
-          c = { "<cmd>GpChatNew<cr>", "New Chat" },
-          t = { "<cmd>GpChatToggle<cr>", "Toggle Chat" },
+          -- c = { "<cmd>GpChatNew<cr>", "New Chat" },
+          -- t = { "<cmd>GpChatToggle<cr>", "Toggle Chat" },
           f = { "<cmd>GpChatFinder<cr>", "Chat Finder" },
 
           ["<C-x>"] = { "<cmd>GpChatNew split<cr>", "New Chat split" },

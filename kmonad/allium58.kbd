@@ -1,0 +1,50 @@
+(defcfg
+  input  (device-file "/dev/input/by-id/usb-beekeeb_Allium58_vial:f64c2b3c-event-kbd")
+  output (uinput-sink "KMonad Allium58"))
+
+
+;; Control/Escape alias (for Capslock key)
+(defalias
+  cesc (tap-next esc lctrl))
+
+;; Tilde/Backtick alias (for Escape key)
+(defalias
+  tesc (tap-hold-next 150 ` ~))
+
+
+(defsrc
+        brdn brup                               prev pp   next      vold
+  esc   f1   f2   f3   f4   f5             f6   f7   f8   f9   f10  f11
+  `     1    2    3    4    5              6    7    8    9    0    -
+  tab   q    w    e    r    t              y    u    i    o    p    \
+  caps  a    s    d    f    g    [    ]    h    j    k    l    ;    '
+  lsft  z    x    c    v    b              n    m    ,    .    /    rsft
+                  lalt lmet spc            ret  bspc rmet
+  )
+
+(deflayer base
+        brdn brup                               prev pp   next      vold
+  `     f1   f2   f3   f4   f5             f6   f7   f8   f9   f10  f11
+  @tesc 1    2    3    4    5              6    7    8    9    0    -
+  tab   q    w    e    r    t              y    u    i    o    p    \
+  @cesc a    s    d    f    g    [    ]    h    j    k    l    ;    '
+  lsft  z    x    c    v    b              n    m    ,    .    /    rsft
+                  lalt lmet spc            ret  bspc rmet
+  )
+
+
+;; initialize via /etc/systemd/system/allium58_keyboard.service
+;;
+;; [Unit]
+;; Description=KMonad Allium58
+;; After=network.target
+;; 
+;; [Service]
+;; Type=simple
+;; ExecStart=/usr/local/bin/kmonad -f /home/jdurand/.config/kmonad/allium58.kbd
+;; Restart=always
+;; User=root
+;; Group=root
+;; 
+;; [Install]
+;; WantedBy=multi-user.target

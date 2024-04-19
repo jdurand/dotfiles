@@ -49,6 +49,8 @@ return {
       -- before setting up the servers.
       require('mason').setup()
       require('mason-lspconfig').setup()
+      -- local configs = require('lspconfig.configs')
+      local util = require('lspconfig.util')
 
       -- Enable the following language servers
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
@@ -64,7 +66,36 @@ return {
         cssls = {},
         jsonls = {},
         yamlls = {},
-        ruby_ls = {},
+        ruby_lsp = {
+          -- default_config = {
+          --   cmd = { 'bundle', 'exec', 'ruby-lsp' },
+          --   filetypes = { 'ruby' },
+          --   root_dir = util.root_pattern('Gemfile', '.git'),
+          --   init_options = {
+          --     enabledFeatures = {
+          --       'documentHighlights',
+          --       'documentSymbols',
+          --       'foldingRanges',
+          --       'selectionRanges',
+          --       -- 'semanticHighlighting',
+          --       'formatting',
+          --       'codeActions',
+          --     },
+          --   },
+          --   settings = {},
+          -- },
+          -- commands = {
+          --   FormatRuby = {
+          --     function()
+          --       vim.lsp.buf.format({
+          --         name = 'ruby_lsp',
+          --         async = true,
+          --       })
+          --     end,
+          --     description = 'Format using ruby-lsp',
+          --   },
+          -- },
+        },
         ember = {},
         rubocop = {},
         marksman = {},

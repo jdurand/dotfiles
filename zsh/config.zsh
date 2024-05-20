@@ -76,6 +76,9 @@ load-nvmrc
 # Add keyboard things (mdloader_mac & QMK firmare) to $PATH
 export PATH="$PATH:$HOME/Code/keyboards/mdloader/build"
 
+# Add mongoDB.app binaries to path
+export PATH="/Applications/MongoDB.app/Contents/Resources/Vendor/mongodb/bin:$PATH"
+
 # export QMK_HOME="/Users/jdurand/Code/keyboards/massdrop-alt"
 export QMK_HOME="/Users/jdurand/Code/keyboards/qmk_firmware"
 export QMK_FIRMWARE="/Users/jdurand/Code/keyboards/qmk_firmware"

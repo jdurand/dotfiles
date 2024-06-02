@@ -17,7 +17,7 @@ TOUCHBAR_GIT_ENABLED=false
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 # plugins=(git zsh-iterm-touchbar)
-plugins=(battery gh jira nvm)
+plugins=(battery gh jira nvm direnv)
 
 source $ZSH/oh-my-zsh.sh
 

@@ -7,7 +7,24 @@ return {
       { "<C-f>", "<cmd>Neotree toggle<cr>", desc = "NeoTree" },
     },
     config = function()
-      require('neo-tree').setup()
+      require('neo-tree').setup({
+        window = {
+          mappings = {
+            -- ["P"] = { "toggle_preview", config = { use_float = true, use_image_nvim = false } },
+            -- ["<space>"] = {
+            --   "toggle_node",
+            --   nowait = false, -- disable `nowait` if you have existing combos starting with this char that you want to use
+            -- },
+            ["<space>"] = {
+              "toggle_preview", config = { use_float = true, use_image_nvim = false }
+            },
+            ["<c-f>"] = "close_window",
+            ["<c-l>"] = "focus_preview",
+            ["<C-d>"] = { "scroll_preview", config = {direction = -10} },
+            ["<C-u>"] = { "scroll_preview", config = {direction = 10} },
+          }
+        }
+      })
     end,
     dependencies = {
       'nvim-lua/plenary.nvim',

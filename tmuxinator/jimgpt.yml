@@ -1,0 +1,12 @@
+# /Users/jdurand/.config/tmuxinator/jimgpt.yml
+
+name: JimGPT
+root: ~/Code/oss/LibreChat/
+
+windows:
+  - editor:
+      layout: main-horizontal
+      panes:
+        - git stash && git pull && npm install && npm ci && npm run frontend && npm run backend:dev
+        - git status
+

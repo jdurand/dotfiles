@@ -62,7 +62,7 @@ windows:
       # synchronize: after
       panes:
         - vim
-        - git pull && bin/update && git checkout db/schema.rb && bin/rails server
+        - git pull; bin/update && git checkout db/schema.rb && bin/rails server
         - bin/foreman start -f Procfile.dev -m "worker=1,grunt=1,js=1"
         - bin/guard
         -
@@ -71,14 +71,14 @@ windows:
       layout: main-vertical
       panes:
         - vim
-        - git pull && yarn install && yarn start --ssl
+        - git pull; yarn install && yarn start --ssl
         -
   - widget:
       root: ~/Code/libro/widgets-web
       layout: main-vertical
       panes:
         - vim
-        - git pull && yarn install && yarn start --ssl
+        - git pull; yarn install && yarn start --ssl
         -
   - portal:
       root: ~/Code/libro/portal-web

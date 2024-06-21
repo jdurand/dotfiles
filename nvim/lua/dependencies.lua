@@ -3,7 +3,7 @@
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
 -- fix obsidian issue: https://github.com/epwalsh/obsidian.nvim/issues/286
-vim.opt_local.conceallevel = 1
+vim.opt.conceallevel = 2
 
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({

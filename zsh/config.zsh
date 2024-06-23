@@ -104,8 +104,18 @@ alias ggit=lazygit
 #   'gh pr list --search "status:success" --draft=false'
 # }
 
-# Use meld as git mergetool
-alias meld=/Applications/Meld.app/Contents/MacOS/Meld
+# MacOS executables
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  # Use meld as git mergetool if not already defined
+  if [[ -z "$(command -v meld)" ]]; then
+    alias meld=/Applications/Meld.app/Contents/MacOS/Meld
+  fi
+
+  # Add Alacritty to PATH from the command line if not already defined
+  if [[ -z "$(command -v alacritty)" ]]; then
+    export PATH="/Applications/Alacritty.app/Contents/MacOS:$PATH"
+  fi
+fi
 
 # use Ag instead of Ack
 alias ack=ag

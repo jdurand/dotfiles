@@ -71,9 +71,9 @@ nnoremap  <C-i>
 nnoremap <Tab> mzV>`zl
 nnoremap <S-Tab> mzV<`zh
 
-" Clear search-highlighted terms
+" Clear search-highlighted terms and dismiss Noice messages
 " ----------------------------------------------------------------------------------------------------
-nmap <silent> \ :silent noh<Bar>echo<CR>
+nmap <silent> \ :silent noh<Bar>echo<Bar>NoiceDismiss<CR>
 
 " " Prevent accidental uses of <F1>
 " " ----------------------------------------------------------------------------------------------------

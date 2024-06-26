@@ -26,6 +26,9 @@ ln -s ~/.tmux/tmux.conf .tmux.conf
 ln -s ~/.dotfiles/vim .vim
 ln -s ~/.vim/vimrc .vimrc
 
+ln -s ~/.dotfiles/fzf/fzf.zsh .fzf.zsh
+ln -s ~/.dotfiles/fzf .fzf
+
 cd .config
 ln -s ~/.dotfiles/alacritty
 ln -s ~/.dotfiles/nvim

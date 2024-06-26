@@ -18,7 +18,7 @@ export ZSH=~/.dotfiles/vendor/oh-my-zsh
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 # plugins=(git zsh-iterm-touchbar)
-plugins=(battery gh jira nvm direnv vi-mode zoxide)
+plugins=(battery gh jira nvm direnv vi-mode zoxide fzf fzf-zsh-plugin)
 
 source $ZSH/oh-my-zsh.sh
 

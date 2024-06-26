@@ -17,25 +17,9 @@ TOUCHBAR_GIT_ENABLED=false
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 # plugins=(git zsh-iterm-touchbar)
-plugins=(battery gh jira nvm direnv)
+plugins=(battery gh jira nvm direnv vi-mode fzf zoxide)
 
 source $ZSH/oh-my-zsh.sh
-
-#
-# Load Config
-# -----------------------------------------------------------------------------
-
-# Load Local Config
-test -e "${HOME}/.zshrc.local" && source "${HOME}/.zshrc.local"
-
-# Load catppuccin syntax highlights
-source ~/.zsh/syntax-highlight/catppuccin_mocha-zsh-syntax-highlighting.zsh
-
-# Load User Configuration
-source ~/.zsh/config.zsh
-
-# Load iTerm2 shell integration
-test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
 #
 # Load Oh My Posh Themes
@@ -50,12 +34,12 @@ if [[ -z "${ZSH_THEME}" ]]; then
     # eval "$(oh-my-posh init zsh --config $(brew --prefix oh-my-posh)/themes/catppuccin_mocha.omp.json)"
     # eval "$(oh-my-posh init zsh --config $(brew --prefix oh-my-posh)/themes/powerlevel10k_modern.omp.json)"
 
-  if [[ -z "${FLOATERM}" ]]; then
-    # use simpler theme without right prompt when rendered within floaterm
-    eval "$(oh-my-posh init zsh --config ~/.zsh/posh-themes/catppuccin.omp.json)"
-  else
-    eval "$(oh-my-posh init zsh --config ~/.zsh/posh-themes/catppuccin_mocha.omp.json)"
-  fi
+    if [[ -z "${FLOATERM}" ]]; then
+      # use simpler theme without right prompt when rendered within floaterm
+      eval "$(oh-my-posh init zsh --config ~/.zsh/posh-themes/catppuccin.omp.json)"
+    else
+      eval "$(oh-my-posh init zsh --config ~/.zsh/posh-themes/catppuccin_mocha.omp.json)"
+    fi
   fi
 fi
 
@@ -67,21 +51,18 @@ if [[ -z "${POSH_THEME}" ]]; then
 fi
 
 #
-# Misc
+# Load Config
 # -----------------------------------------------------------------------------
 
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/Users/jdurand/opt/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/Users/jdurand/opt/anaconda3/etc/profile.d/conda.sh" ]; then
-        . "/Users/jdurand/opt/anaconda3/etc/profile.d/conda.sh"
-    else
-        export PATH="/Users/jdurand/opt/anaconda3/bin:$PATH"
-    fi
-fi
-unset __conda_setup
-# <<< conda initialize <<<
+# Load catppuccin syntax highlights
+source ~/.zsh/syntax-highlight/catppuccin_mocha-zsh-syntax-highlighting.zsh
+
+# Load User Configuration
+source ~/.zsh/config.zsh
+
+# Load Local Config
+test -e "${HOME}/.zshrc.local" && source "${HOME}/.zshrc.local"
+
+# Load iTerm2 shell integration
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 

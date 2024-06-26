@@ -24,6 +24,8 @@ else
 
   alias oldvim=$(which vim)
   alias vim=nvim
+  alias vi=nvim
+  alias v=nvim
 fi
 
 # Load zsh completions

@@ -11,5 +11,7 @@ test -e "${HOME}/.zshrc.local" && source "${HOME}/.zshrc.local"
 # Load iTerm2 shell integration
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
-# Load Extensions asynchronously
-(zsh ~/.zsh/extensions.zsh &)
+# Load Extensions
+source ~/.zsh/extensions.zsh
+# # Load Extensions asynchronously
+# (zsh ~/.zsh/extensions.zsh &)

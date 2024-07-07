@@ -21,6 +21,9 @@ return {
       -- nnoremap('<C-w><C-w>', ':tabclose<cr>')
       nnoremap('<C-t>>', ':tabnext<cr>')
       nnoremap('<C-t><', ':tabprevious<cr>')
+
+      -- nnoremap('<C-t><PageUp>', ':tabnext<cr>')
+      -- nnoremap('<C-t><PageDown>', ':tabprevious<cr>')
     end,
   },
 }

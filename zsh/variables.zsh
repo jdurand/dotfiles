@@ -1,5 +1,5 @@
 #
-# Variables and Aliases
+# Variables
 # -----------------------------------------------------------------------------
 
 # Add custom (local) bins to $PATH
@@ -16,18 +16,6 @@ export PATH="$PATH:$HOME/go/bin"
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
 
-# Preferred editor for local and remote sessions
-if [[ -n $SSH_CONNECTION ]]; then
-  export EDITOR='vim'
-else
-  export EDITOR='nvim'
-
-  alias oldvim=$(which vim)
-  alias vim=nvim
-  alias vi=nvim
-  alias v=nvim
-fi
-
 export RUBYOPT="-W0"
 
 # Add keyboard things (mdloader_mac & QMK firmare) to $PATH
@@ -41,32 +29,13 @@ export QMK_HOME="/Users/jdurand/Code/keyboards/qmk_firmware"
 export QMK_FIRMWARE="/Users/jdurand/Code/keyboards/qmk_firmware"
 # export QMK_FIRMWARE="/Users/jdurand/qmk_firmware"
 
-# Simplify tmuxinator invocation
-alias mux=tmuxinator
-
-# Lazy alias for lazygit
-alias ggit=lazygit
-
-# alias func='ghprs'
-# function gitprs() {
-#   'gh pr list --search "status:success" --draft=false'
-# }
-
 # MacOS executables
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  # Use meld as git mergetool if not already defined
-  if [[ -z "$(command -v meld)" ]]; then
-    alias meld=/Applications/Meld.app/Contents/MacOS/Meld
-  fi
-
   # Add Alacritty to PATH from the command line if not already defined
   if [[ -z "$(command -v alacritty)" ]]; then
     export PATH="/Applications/Alacritty.app/Contents/MacOS:$PATH"
   fi
 fi
-
-# use Ag instead of Ack
-alias ack=ag
 
 # add openssl v1.1 to PATH
 export PATH="/opt/homebrew/opt/openssl@1.1/bin:$PATH"

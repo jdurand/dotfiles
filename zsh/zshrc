@@ -1,5 +1,5 @@
 #
-# Load User Variables and Aliases
+# Load User Variables
 source ~/.zsh/variables.zsh
 
 # Load Themes and Plugins
@@ -25,5 +25,6 @@ test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell
 
 # Load Extensions
 source ~/.zsh/extensions.zsh
-# # Load Extensions asynchronously
-# (zsh ~/.zsh/extensions.zsh &)
+
+# Load User Aliases
+source ~/.zsh/aliases.zsh

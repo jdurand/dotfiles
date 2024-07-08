@@ -2,6 +2,12 @@
 # Extensions and Plugins
 # -----------------------------------------------------------------------------
 
+# load zsh-autosuggestions
+source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+
+# load zsh-syntax-highlighting
+source "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+
 # Init rbenv
 eval "$(rbenv init -)"
 

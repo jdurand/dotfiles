@@ -52,7 +52,8 @@ return {
 
       require('lualine').setup({
         options = {
-          theme = 'catppuccin',
+          -- theme = 'catppuccin',
+          theme = 'tokyonight',
           globalstatus = true,
           component_separators = { left = "█", right = "█" },
           section_separators = { left = "█", right = "█" },
@@ -74,7 +75,8 @@ return {
       })
     end,
     dependencies = {
-      'catppuccin/vim'
+      -- 'catppuccin/vim'
+      'folke/tokyonight.nvim'
     }
   },
 }

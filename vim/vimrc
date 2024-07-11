@@ -41,13 +41,3 @@ language C
 
 " No automatic line jump at end of file
 " set nofixendofline
-
-" Theme Customizations
-" ----------------------------------------------------------------------------------------------------
-
-" Vim Color Scheme
-" colorscheme monokai-nightasty
-" colorscheme tokyonight
-" colorscheme solarized-osaka
-" colorscheme solarized
-" colorscheme catppuccin-mocha

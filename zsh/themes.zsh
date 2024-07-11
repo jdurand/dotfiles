@@ -4,7 +4,7 @@
 
 # Set Oh My Zsh Theme
 # ZSH_THEME="agnoster"
-# ZSH_THEME="powerlevel10k/powerlevel10k"
+ZSH_THEME="powerlevel10k/powerlevel10k"
 
 # Use Powerlevel10k theme when using floaterm
 if [[ -z "${ZSH_THEME}" ]]; then

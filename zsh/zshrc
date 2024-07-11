@@ -15,7 +15,7 @@ plugins=(battery gh jira nvm direnv zoxide fzf fzf-zsh-plugin)
 source $ZSH/oh-my-zsh.sh
 
 # Load catppuccin syntax highlights
-source ~/.zsh/syntax-highlight/catppuccin_mocha-zsh-syntax-highlighting.zsh
+# source ~/.zsh/syntax-highlight/catppuccin_mocha-zsh-syntax-highlighting.zsh
 
 # Load Local Config
 test -e "${HOME}/.zshrc.local" && source "${HOME}/.zshrc.local"

@@ -1,0 +1,129 @@
+#!/bin/bash
+
+set -e
+
+# Helper function to echo with information
+info() {
+  echo -e "\033[1;34m[INFO]\033[0m $*"
+}
+
+# Helper function for symlink creation with checks
+create_symlink() {
+  local target=$1
+  local link=$2
+
+  if [ -L "$link" ]; then
+    info "Symlink $link already exists, leaving it in place."
+  elif [ -e "$link" ]; then
+    echo -e "\033[1;31m[ERROR]\033[0m $link already exists and is not a symlink."
+  else
+    ln -s "$target" "$link"
+    info "Created symlink $link -> $target"
+  fi
+}
+
+# Install Oh My Zsh
+if [ -d "$HOME/.dotfiles/vendor/oh-my-zsh" ]; then
+  info "Oh My Zsh already installed, updating..."
+  ZSH=~/.dotfiles/vendor/oh-my-zsh git -C $ZSH pull
+else
+  info "Installing Oh My Zsh..."
+  ZSH=~/.dotfiles/vendor/oh-my-zsh sh -c "$(curl -fsSL https://install.ohmyz.sh/)"
+fi
+
+# Function to check and install package if necessary
+install_package_if_needed() {
+  local package=$1
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    if ! brew list --formula -1 | grep -q "^${package}\$"; then
+      info "Installing ${package} with brew..."
+      brew install "${package}"
+    else
+      info "${package} is already installed."
+    fi
+  elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    if ! dpkg -l | grep -q "^ii  ${package} "; then
+      info "Installing ${package} with apt..."
+      sudo apt-get update
+      sudo apt-get install -y "${package}"
+    else
+      info "${package} is already installed."
+    fi
+  else
+    error "Unsupported OS type: $OSTYPE"
+  fi
+}
+
+# # Install Oh My Posh
+# install_package_if_needed install jandedobbeleer/oh-my-posh/oh-my-posh
+
+# Install Powerlevel10k
+install_package_if_needed powerlevel10k
+
+# Install Kitty terminal emulator with Victor Mono font
+for package in kitty font-victor-mono font-victor-mono-nerd-font; do
+  install_package_if_needed "${package}"
+done
+
+# Install required packages for Zsh plugins and aliases
+for package in direnv fzf zoxide eza gh; do
+  install_package_if_needed "${package}"
+done
+
+# Install required packages for Tmux Tokyo Night Theme
+for package in bc coreutils gawk glab gsed jq nowplaying-cli; do
+  install_package_if_needed "${package}"
+done
+
+cd ~
+echo "Setting up dotfiles locally..."
+
+if [ -d ".dotfiles" ]; then
+  cd .dotfiles
+  if git diff-index --quiet HEAD --; then
+    info "Pulling latest changes..."
+    git pull
+  else
+    info "There are uncommitted changes. Please commit or stash them before pulling new changes."
+  fi
+else
+  info "Cloning dotfiles repository..."
+  git clone https://github.com/jdurand/dotfiles.git .dotfiles
+  # git clone git@github.com:jdurand/dotfiles.git .dotfiles
+fi
+
+# Setup Symlinks
+info "Setting up symlinks..."
+
+# Direct symlink mappings
+declare -A SYMLINKS=(
+  ["$HOME/.dotfiles/zsh"]="$HOME/.zsh"
+  ["$HOME/.dotfiles/zsh/zshrc"]="$HOME/.zshrc"
+  ["$HOME/.dotfiles/tmux"]="$HOME/.tmux"
+  ["$HOME/.dotfiles/tmux/tmux.conf"]="$HOME/.tmux.conf"
+  ["$HOME/.dotfiles/vim"]="$HOME/.vim"
+  ["$HOME/.dotfiles/vim/vimrc"]="$HOME/.vimrc"
+  ["$HOME/.dotfiles/fzf/fzf.zsh"]="$HOME/.fzf.zsh"
+  ["$HOME/.dotfiles/fzf"]="$HOME/.fzf"
+)
+
+# Iterate through and create symlinks
+for target in "${!SYMLINKS[@]}"; do
+  create_symlink "$target" "${SYMLINKS[$target]}"
+done
+
+# Ensure ~/.config directory exists
+info "Ensuring ~/.config directory exists..."
+mkdir -p ~/.config
+
+# Symlink directories inside ~/.dotfiles to ~/.config
+cd ~/.dotfiles
+for dir in alacritty nvim powerline tmuxinator kitty; do
+  if [ -d "$dir" ]; then
+    create_symlink "$HOME/.dotfiles/$dir" "$HOME/.config/$dir"
+  else
+    info "Skipping $dir as it is not a directory in ~/.dotfiles"
+  fi
+done
+
+info "All tasks completed successfully."

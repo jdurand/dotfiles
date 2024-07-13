@@ -1,38 +1,21 @@
 <!-- # dotfiles -->
 
-## Installation
+# .dotfiles
 
-#### Install Oh My Zsh
+## Usage
+
+Review these files and selectively copy relevant parts to get a good understanding of
+how your own CLI behaves. You can use these files as they are, but be aware system
+differences to my own may cause issues. Adapt and fork them to suit your needs.
+
+## Setup
+
+To streamline the installation process, run the `./setup` script. This script will:
+- Install Oh My Zsh
+- Install Powerlevel10k
+- Install necessary dependencies for Tmux Tokyo Night Theme
+- Setup symlinks for all configurations
+
 ```sh
-ZSH=~/.dotfiles/vendor/oh-my-zsh sh -c "$(curl -fsSL https://install.ohmyz.sh/)"
-```
-
-#### Install Oh My Posh
-```sh
-brew install jandedobbeleer/oh-my-posh/oh-my-posh
-```
-
-#### Setup Symlinks
-```sh
-cd ~
-git@github.com:jdurand/dotfiles.git .dotfiles
-
-ln -s ~/.dotfiles/zsh .zsh
-ln -s ~/.zsh/zshrc .zshrc
-
-ln -s ~/.dotfiles/tmux .tmux
-ln -s ~/.tmux/tmux.conf .tmux.conf
-
-ln -s ~/.dotfiles/vim .vim
-ln -s ~/.vim/vimrc .vimrc
-
-ln -s ~/.dotfiles/fzf/fzf.zsh .fzf.zsh
-ln -s ~/.dotfiles/fzf .fzf
-
-cd .config
-ln -s ~/.dotfiles/alacritty
-ln -s ~/.dotfiles/nvim
-ln -s ~/.dotfiles/powerline
-ln -s ~/.dotfiles/tmuxinator
-ln -s ~/.dotfiles/kitty
+if [ ! -d "$HOME/.dotfiles" ]; then; git clone https://github.com/jdurand/dotfiles.git "$HOME/.dotfiles"; fi; bash "$HOME/.dotfiles/setup"
 ```

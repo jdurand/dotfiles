@@ -24,14 +24,20 @@ startup_mode = "fullscreen"
 
 
 [font]
-normal.family = "SauceCodePro Nerd Font"
+# normal.family = "SauceCodePro Nerd Font"
+# bold.family = "SauceCodePro Nerd Font"
+# italic.family = "SauceCodePro Nerd Font"
+
+# normal.family = "Iosevka"
+# normal.family = "ZedMono Nerd Font"
 # normal.family = "MesloLGS Nerd Font Mono"
-bold.family = "SauceCodePro Nerd Font"
-italic.family = "SauceCodePro Nerd Font"
+
+# normal.family = "VictorMono"
+normal.family = "VictorMono Nerd Font"
 
 normal.style = "Regular"
 
-size = 14
+size = 15
 
 
 [[keyboard.bindings]]

@@ -34,4 +34,5 @@ ln -s ~/.dotfiles/alacritty
 ln -s ~/.dotfiles/nvim
 ln -s ~/.dotfiles/powerline
 ln -s ~/.dotfiles/tmuxinator
+ln -s ~/.dotfiles/kitty
 ```

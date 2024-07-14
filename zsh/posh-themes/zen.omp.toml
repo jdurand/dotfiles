@@ -2,6 +2,7 @@
 
 version = 2
 final_space = true
+# auto_upgrade = true
 console_title_template = '{{ .Shell }} in {{ .Folder }}'
 
 [[blocks]]
@@ -24,7 +25,7 @@ console_title_template = '{{ .Shell }} in {{ .Folder }}'
     style = 'plain'
     foreground = 'p:grey'
     background = 'transparent'
-    template = ' {{ .HEAD }}{{ if or (.Working.Changed) (.Staging.Changed) }}*{{ end }} <cyan>{{ if gt .Behind 0 }}?{{ end }}{{ if gt .Ahead 0 }}?{{ end }}</>'
+    template = ' {{ .HEAD }}{{ if or (.Working.Changed) (.Staging.Changed) }}*{{ end }} <cyan>{{ if gt .Behind 0 }}⇣{{ end }}{{ if gt .Ahead 0 }}⇡{{ end }}</>'
 
     [blocks.segments.properties]
       branch_icon = ''
@@ -58,7 +59,7 @@ console_title_template = '{{ .Shell }} in {{ .Folder }}'
       "{{if eq .Code 0}}magenta{{end}}",
     ]
     background = 'transparent'
-    template = '?'
+    template = '❯'
 
 [transient_prompt]
   foreground_templates = [
@@ -66,9 +67,9 @@ console_title_template = '{{ .Shell }} in {{ .Folder }}'
     "{{if eq .Code 0}}magenta{{end}}",
   ]
   background = 'transparent'
-  template = '? '
+  template = '❯ '
 
 [secondary_prompt]
   foreground = 'magenta'
   background = 'transparent'
-  template = '?? '
+  template = '❯❯ '

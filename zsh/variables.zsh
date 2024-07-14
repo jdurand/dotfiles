@@ -62,5 +62,17 @@ export CONDA_AUTO_ACTIVATE_BASE=false
 # Disable Touchbar git buttons
 TOUCHBAR_GIT_ENABLED=false
 
-# Increaase opened file limit
+# Timezone
+export TZ="America/Montreal"
+
+# History limits
+export HISTFILE=$HOME/.zhistory
+export HISTSIZE=1000000
+export SAVEHIST=1000000
+
+# Locales
+export LANG="en_US.UTF-8"
+export LC_ALL=$LANG
+
+# Increase opened file limit
 ulimit -n 2048

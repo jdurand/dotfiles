@@ -18,8 +18,8 @@ fi
 alias ls="eza --icons=always"
 
 # Alias 'cd' to 'z' for efficient directory switching using 'zoxide'
-# eval "$(zoxide init zsh)" # oh-my-zsh takes care of this
-alias cd="z"
+eval "$(zoxide init zsh)"
+# alias cd="z"
 
 # Simplify tmuxinator invocation
 alias mux=tmuxinator

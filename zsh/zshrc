@@ -10,7 +10,7 @@ source ~/.zsh/themes.zsh
 # -----------------------------------------------------------------------------
 export ZSH=~/.dotfiles/vendor/oh-my-zsh
 
-plugins=(battery gh jira nvm direnv zoxide fzf fzf-zsh-plugin)
+plugins=(battery gh jira nvm direnv fzf fzf-zsh-plugin)
 
 source $ZSH/oh-my-zsh.sh
 

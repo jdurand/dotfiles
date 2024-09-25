@@ -63,8 +63,12 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     install_package_if_needed "${package}"
   done
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  sudo apt-get install kitty
-  warn "you must manually install font-victor-mono font-victor-mono-nerd-font!"
+  if command -v xrandr > /dev/null; then
+    sudo apt-get install kitty
+    warn "you must manually install font-victor-mono font-victor-mono-nerd-font!"
+  else
+    warn "Skipping Kitty installation on Synology device or non-GUI system"
+  fi
 # else
 #   "Unsupported OS type: $OSTYPE"
 fi

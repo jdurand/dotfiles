@@ -38,6 +38,11 @@ fi
 # Function to check and install package if necessary
 install_package_if_needed() {
   local package=$1
+  if ! command -v brew &>/dev/null; then
+    info "Homebrew is not installed. Skipping installation of ${package}."
+    return
+  fi
+
   if ! brew list --formula -1 | grep -q "^${package}\$"; then
     info "Installing ${package} with brew..."
     brew install "${package}"

@@ -74,12 +74,17 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
 fi
 
 # Install required packages for Zsh plugins and aliases
-for package in direnv fzf zoxide eza gh; do
+for package in direnv fzf zoxide eza gh jq; do
+  install_package_if_needed "${package}"
+done
+
+# Install required packages for Yazi
+for package in yazi ffmpegthumbnailer sevenzip poppler fd ripgrep imagemagick font-symbols-only-nerd-font; do
   install_package_if_needed "${package}"
 done
 
 # Install required packages for Tmux Tokyo Night Theme
-for package in bc coreutils gawk glab gsed jq; do
+for package in bc coreutils gawk glab gsed; do
   install_package_if_needed "${package}"
 done
 if [[ "$OSTYPE" == "darwin"* ]]; then

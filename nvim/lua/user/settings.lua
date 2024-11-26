@@ -8,6 +8,8 @@
 --   augroup END
 -- ]])
 
+vim.api.nvim_set_hl(0, "WinSeparator", { fg = "#c099ff" })
+
 -- trigger `autoread` when files changes on disk
 vim.o.autoread = true
 vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "CursorHoldI", "FocusGained" }, {

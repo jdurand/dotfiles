@@ -63,7 +63,7 @@ windows:
       panes:
         - vim
         - git pull; update && rails server
-        - foreman start -f Procfile.dev -m "worker=1,grunt=1,js=1,css=1"
+        - foreman start -f Procfile.dev -m "mock=1,worker=1,grunt=1,js=1,css=1"
         - guard
         -
   - dashbaord:

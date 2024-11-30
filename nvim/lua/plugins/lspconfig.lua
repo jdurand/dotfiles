@@ -114,7 +114,7 @@ return {
             }
           }
         },
-        tsserver = {
+        ts_ls = {
           maxTsServerMemory = 8000,
           implicitProjectConfig = {
             experimentalDecorators = true

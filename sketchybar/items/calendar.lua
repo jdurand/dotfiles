@@ -35,7 +35,7 @@ local cal = SketchyBar.add("item", {
 SketchyBar.add("bracket", { cal.name }, {
   background = {
     color = colors.transparent,
-    height = 30,
+    height = 24,
     border_color = colors.grey,
   }
 })

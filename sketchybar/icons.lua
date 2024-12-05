@@ -8,6 +8,7 @@ local icons = {
     gear = "􀍟",
     cpu = "􀫥",
     clipboard = "􀉄",
+    chevron = "❯",
 
     switch = {
       on = "􁏮",
@@ -50,6 +51,7 @@ local icons = {
     gear = "",
     cpu = "",
     clipboard = "Missing Icon",
+    chevron = "❯",
 
     switch = {
       on = "󱨥",

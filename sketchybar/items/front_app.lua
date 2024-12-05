@@ -1,5 +1,12 @@
 local colors = require("colors")
+local icons = require("icons")
 local settings = require("settings")
+
+SketchyBar.add("item", "chevron", {
+  display = "active",
+  icon = { string = icons.chevron },
+  label = { drawing = false }
+})
 
 local front_app = SketchyBar.add("item", "front_app", {
   display = "active",

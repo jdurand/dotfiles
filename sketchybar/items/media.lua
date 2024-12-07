@@ -1,8 +1,11 @@
 local icons = require("icons")
 local colors = require("colors")
 
-local whitelist = { ["Spotify"] = true,
-                    ["Music"] = true    };
+local whitelist = {
+  ["Spotify"] = true,
+  ["Music"] = true,
+  ["YouTube Music"] = true,
+};
 
 local media_cover = SketchyBar.add("item", {
   position = "right",
@@ -84,7 +87,7 @@ local function animate_detail(detail)
 end
 
 media_cover:subscribe("media_change", function(env)
-  if whitelist[env.INFO.app] then
+  -- if whitelist[env.INFO.app] then
     local drawing = (env.INFO.state == "playing")
     media_artist:set({ drawing = drawing, label = env.INFO.artist, })
     media_title:set({ drawing = drawing, label = env.INFO.title, })
@@ -97,7 +100,7 @@ media_cover:subscribe("media_change", function(env)
     else
       media_cover:set({ popup = { drawing = false } })
     end
-  end
+  -- end
 end)
 
 media_cover:subscribe("mouse.entered", function(env)

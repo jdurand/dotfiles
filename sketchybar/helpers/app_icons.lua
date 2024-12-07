@@ -302,6 +302,7 @@ return {
 	["‎WhatsApp"] = ":whats_app:",
 	["Xcode"] = ":xcode:",
 	["Yandex Music"] = ":yandex_music:",
+	["YouTube Music"] = ":music:",
 	["Yuque"] = ":yuque:",
 	["语雀"] = ":yuque:",
 	["Zed"] = ":zed:",

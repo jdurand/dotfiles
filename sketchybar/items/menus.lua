@@ -1,16 +1,16 @@
 local colors = require("colors")
-local icons = require("icons")
 local settings = require("settings")
 
 local menu_watcher = SketchyBar.add("item", {
   drawing = false,
   updates = false,
 })
-local space_menu_swap = SketchyBar.add("item", {
+local menu_placeholder = SketchyBar.add("item", {
   drawing = false,
   updates = true,
 })
-SketchyBar.add("event", "swap_menus_and_spaces")
+
+SketchyBar.add("event", "toggle_menu")
 
 local max_items = 15
 local menu_items = {}
@@ -58,19 +58,15 @@ end
 
 menu_watcher:subscribe("front_app_switched", update_menus)
 
-space_menu_swap:subscribe("swap_menus_and_spaces", function(env)
-  local drawing = menu_items[1]:query().geometry.drawing == "on"
-  if drawing then
-    menu_watcher:set( { updates = false })
-    SketchyBar.set("/menu\\..*/", { drawing = false })
-    SketchyBar.set("/space\\..*/", { drawing = true })
-    SketchyBar.set("front_app", { drawing = true })
-  else
-    menu_watcher:set( { updates = true })
-    SketchyBar.set("/space\\..*/", { drawing = false })
-    SketchyBar.set("front_app", { drawing = false })
-    update_menus()
-  end
+menu_placeholder:subscribe("toggle_menu", function(env)
+  local menu_visible = env.visible == 'on'
+
+  menu_watcher:set( { updates = menu_visible })
+  SketchyBar.set("/menu\\..*/", { drawing = menu_visible })
+  SketchyBar.set("/space\\..*/", { drawing = not menu_visible })
+  SketchyBar.set("front_app", { drawing = not menu_visible })
+
+  if menu_visible then update_menus() end
 end)
 
 return menu_watcher

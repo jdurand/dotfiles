@@ -24,6 +24,6 @@ front_app:subscribe("front_app_switched", function(env)
   front_app:set({ label = { string = env.INFO } })
 end)
 
-front_app:subscribe("mouse.clicked", function(env)
-  SketchyBar.trigger("swap_menus_and_spaces")
+front_app:subscribe("mouse.clicked", function()
+  SketchyBar.trigger("toggle_menu", { visible = true })
 end)

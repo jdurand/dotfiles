@@ -66,15 +66,15 @@ end
 local function refreshWorkspaceWindows(workspace_name)
   local command = string.format("aerospace list-windows --workspace %s --format '%%{app-name}' --json", workspace_name)
   executeCommand(command, function(open_windows)
-    local icons = {}
+    local window_icons = {}
     for _, window in ipairs(open_windows or {}) do
-      table.insert(icons, app_icons[window["app-name"]] or app_icons["default"])
+      table.insert(window_icons, app_icons[window["app-name"]] or app_icons["Default"])
     end
 
-    local has_apps = #icons > 0
+    local has_apps = #open_windows > 0
     Workspaces[workspace_name]:set({
       icon = { drawing = has_apps },
-      label = { drawing = has_apps, string = table.concat(icons, " ") },
+      label = { drawing = has_apps, string = table.concat(window_icons, " ") },
       background = { drawing = has_apps },
       padding_right = has_apps and 1 or 0,
       padding_left = has_apps and 1 or 0,
@@ -98,7 +98,7 @@ local function initializeWorkspaces()
 
   for _, workspace_name in ipairs(workspace_names) do
     if not Workspaces[workspace_name] then
-      local workspace_item = SketchyBar.add("item", {
+      local workspace_item = SketchyBar.add("item", "workspace."..workspace_name, {
         icon = {
           color = colors.white,
           highlight_color = colors.red,
@@ -127,6 +127,15 @@ local function initializeWorkspaces()
       Workspaces[workspace_name] = workspace_item
 
       -- Subscribe to AeroSpace events
+      workspace_item:subscribe("display_change", function()
+        refreshWorkspaceWindows(workspace_name)
+        reassignWorkspaces()
+      end)
+
+      workspace_item:subscribe("aerospace_focus_change", function()
+        refreshWorkspaceWindows(workspace_name)
+      end)
+
       workspace_item:subscribe("aerospace_workspace_change", function(env)
         local is_focused = env.FOCUSED_WORKSPACE == workspace_name
 
@@ -135,14 +144,6 @@ local function initializeWorkspaces()
           label = { highlight = is_focused },
           background = { border_width = is_focused and 2 or 0 },
         })
-      end)
-
-      workspace_item:subscribe("aerospace_focus_change", function()
-        refreshWorkspaceWindows(workspace_name)
-        reassignWorkspaces()
-      end)
-
-      workspace_item:subscribe("display_change", function()
         refreshWorkspaceWindows(workspace_name)
         reassignWorkspaces()
       end)
@@ -157,31 +158,10 @@ end
 -------------------------
 -- Workspace/Menu Change
 -------------------------
+
+MenuVisible = false
+
 local function initializeMenuToggle()
-  local space_window_observer = SketchyBar.add("item", {
-    drawing = false,
-    updates = true,
-  })
-
-  space_window_observer:subscribe("space_windows_change", function(env)
-    local icon_line = ""
-    local no_app = true
-
-    for app, count in pairs(env.INFO.apps) do
-      no_app = false
-      local lookup = app_icons[app]
-      local icon = ((lookup == nil) and app_icons["Default"] or lookup)
-      icon_line = icon_line .. icon
-    end
-
-    if (no_app) then
-      icon_line = " —"
-    end
-    -- SketchyBar.animate("tanh", 10, function()
-    --   spaces[env.INFO.space]:set({ label = icon_line })
-    -- end)
-  end)
-
   local spaces_indicator = SketchyBar.add("item", {
     padding_left = 5,
     padding_right = 0,
@@ -204,14 +184,13 @@ local function initializeMenuToggle()
     }
   })
 
-  spaces_indicator:subscribe("swap_menus_and_spaces", function(env)
-    local currently_on = spaces_indicator:query().icon.value == icons.switch.off
+  spaces_indicator:subscribe("toggle_menu", function(env)
     spaces_indicator:set({
-      icon = currently_on and icons.switch.on or icons.switch.off
+      icon = env.visible == 'on' and icons.switch.on or icons.switch.off
     })
   end)
 
-  spaces_indicator:subscribe("mouse.entered", function(env)
+  spaces_indicator:subscribe("mouse.entered", function()
     SketchyBar.animate("tanh", 30, function()
       spaces_indicator:set({
         background = {
@@ -224,7 +203,7 @@ local function initializeMenuToggle()
     end)
   end)
 
-  spaces_indicator:subscribe("mouse.exited", function(env)
+  spaces_indicator:subscribe("mouse.exited", function()
     SketchyBar.animate("tanh", 30, function()
       spaces_indicator:set({
         background = {
@@ -237,11 +216,11 @@ local function initializeMenuToggle()
     end)
   end)
 
-  spaces_indicator:subscribe("mouse.clicked", function(env)
-    SketchyBar.trigger("swap_menus_and_spaces")
+  spaces_indicator:subscribe("mouse.clicked", function()
+    MenuVisible = not MenuVisible
+    SketchyBar.trigger("toggle_menu", { visible = MenuVisible })
   end)
 end
-
 
 -----------------------
 -- Main Initialization

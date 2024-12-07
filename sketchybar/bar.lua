@@ -6,5 +6,5 @@ SketchyBar.bar({
   notch_display_height = 32,
   color = colors.bar.bg,
   padding_right = 2,
-  padding_left = 2,
+  padding_left = 2
 })

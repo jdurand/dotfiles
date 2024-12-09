@@ -246,6 +246,10 @@ if.app-id = 'com.apple.weather'
 run = 'layout floating'
 
 [[on-window-detected]]
+if.app-id = 'com.apple.Preview'
+run = 'layout floating'
+
+[[on-window-detected]]
 if.workspace = 'T'
 run = 'layout floating'
 

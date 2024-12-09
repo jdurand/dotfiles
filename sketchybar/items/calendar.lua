@@ -1,9 +1,6 @@
 local settings = require("settings")
 local colors = require("colors")
 
--- Padding item required because of bracket
-SketchyBar.add("item", { position = "right", width = settings.group_paddings })
-
 local cal = SketchyBar.add("item", {
   icon = {
     color = colors.white,
@@ -23,26 +20,9 @@ local cal = SketchyBar.add("item", {
   position = "right",
   update_freq = 30,
   padding_left = 1,
-  padding_right = 1,
-  background = {
-    color = colors.bg2,
-    border_color = colors.black,
-    border_width = 1
-  },
+  padding_right = 5,
 })
-
--- Double border for calendar using a single item bracket
-SketchyBar.add("bracket", { cal.name }, {
-  background = {
-    color = colors.transparent,
-    height = 24,
-    border_color = colors.grey,
-  }
-})
-
--- Padding item required because of bracket
-SketchyBar.add("item", { position = "right", width = settings.group_paddings })
 
 cal:subscribe({ "forced", "routine", "system_woke" }, function(env)
-  cal:set({ icon = os.date("%a. %d %b."), label = os.date("%H:%M") })
+  cal:set({ icon = os.date("%a %d %b"), label = os.date("%H:%M") })
 end)

@@ -103,6 +103,7 @@ return {
 	["GitHub Desktop"] = ":git_hub:",
 	["Godot"] = ":godot:",
 	["GoLand"] = ":goland:",
+	["Google Chat"] = ":wechat:",
 	["Chromium"] = ":google_chrome:",
 	["Google Chrome"] = ":google_chrome:",
 	["Google Chrome Canary"] = ":google_chrome:",

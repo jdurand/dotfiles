@@ -250,6 +250,11 @@ if.app-id = 'com.apple.Preview'
 run = 'layout floating'
 
 [[on-window-detected]]
+if.app-id = 'company.thebrowser.Browser'
+run = 'layout floating'
+
+# Any window opened from the 'T' workspace should have floating behavior
+[[on-window-detected]]
 if.workspace = 'T'
 run = 'layout floating'
 
@@ -271,8 +276,9 @@ if.app-id = 'net.kovidgoyal.kitty'
 run = 'move-node-to-workspace T'
 
 [[on-window-detected]]
+if.during-aerospace-startup = true
 if.app-id = 'company.thebrowser.Browser'
-run = 'move-node-to-workspace W'
+run = ['layout tiling', 'move-node-to-workspace W']
 
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome'
@@ -280,12 +286,19 @@ run = 'move-node-to-workspace Q'
 
 [[on-window-detected]]
 if.app-id = 'com.openai.chat'
-run = 'move-node-to-workspace G'
+run = 'move-node-to-workspace S'
+
+[[on-window-detected]]
+if.app-id = 'md.obsidian'
+run = 'move-node-to-workspace S'
 
 [[on-window-detected]]
 if.app-id = 'io.readwise.read'
 run = 'move-node-to-workspace R'
 
+[[on-window-detected]]
+if.app-id = 'com.apple.mail'
+run = 'move-node-to-workspace E'
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome.app.fmgjjmmmlfnkbppncabfkddbjimcfncm'
 run = 'move-node-to-workspace E'

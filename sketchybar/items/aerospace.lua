@@ -1,5 +1,4 @@
 local colors = require("colors")
-local icons = require("icons")
 local settings = require("settings")
 local app_icons = require("helpers.app_icons")
 
@@ -84,11 +83,12 @@ local function refreshWorkspaceWindows(workspace_name)
   end)
 end
 
--- Initialize workspaces and setup SketchyBar placeholders
-local function initializeWorkspaces()
-  local workspace_names = {}
-  local handle = io.popen("aerospace list-workspaces --all")
+-- Retrieve AeroSpace spaces in a specific sequence
+local function getOrderedWorkspaceNames(specified_order)
+  specified_order = specified_order or {}
 
+  local handle = io.popen("aerospace list-workspaces --all")
+  local workspace_names = {}
   if handle then
     for line in handle:lines() do
       table.insert(workspace_names, line)
@@ -96,9 +96,37 @@ local function initializeWorkspaces()
     handle:close()
   end
 
+  local specified_set = {}
+  for _, name in ipairs(specified_order) do
+    specified_set[name] = true
+  end
+
+  local specified_names, other_names = {}, {}
   for _, workspace_name in ipairs(workspace_names) do
+    table.insert(specified_set[workspace_name] and specified_names or other_names, workspace_name)
+  end
+
+  table.sort(other_names)
+
+  local ordered_workspaces = {}
+  for _, name in ipairs(specified_order) do
+    if specified_set[name] then
+      table.insert(ordered_workspaces, name)
+    end
+  end
+
+  for _, name in ipairs(other_names) do
+    table.insert(ordered_workspaces, name)
+  end
+
+  return ordered_workspaces
+end
+
+-- Initialize workspaces and setup SketchyBar placeholders
+local function initializeWorkspaces(specified_order)
+  for _, workspace_name in ipairs(getOrderedWorkspaceNames(specified_order)) do
     if not Workspaces[workspace_name] then
-      local workspace_item = SketchyBar.add("item", "workspace."..workspace_name, {
+      local workspace_item = SketchyBar.add("item", "workspace." .. workspace_name, {
         icon = {
           color = colors.white,
           highlight_color = colors.red,
@@ -158,7 +186,6 @@ end
 -----------------------
 -- Main Initialization
 -----------------------
-initializeWorkspaces()
+initializeWorkspaces({ "T", "W", "E", "D", "M", "Q", "S" })
 reassignWorkspaces()
 highlightFocusedWorkspace()
-

@@ -1,8 +1,5 @@
-# Place a copy of this config to ~/.aerospace.toml
-# After that, you can edit ~/.aerospace.toml to your liking
-
-# It's not necessary to copy all keys to your config.
-# If the key is missing in your config, "default-config.toml" will serve as a fallback
+# Start AeroSpace at login
+start-at-login = true
 
 # You can use it to add commands that run after login to macOS user session.
 # 'start-at-login' needs to be 'true' for 'after-login-command' to work
@@ -13,9 +10,6 @@ after-login-command = []
 # 'after-startup-command' is run after 'after-login-command'
 # Available commands : https://nikitabobko.github.io/AeroSpace/commands
 after-startup-command = ['exec-and-forget sketchybar']
-
-# Start AeroSpace at login
-start-at-login = true
 
 # Normalizations. See: https://nikitabobko.github.io/AeroSpace/guide#normalization
 enable-normalization-flatten-containers = true
@@ -41,9 +35,7 @@ key-mapping.preset = 'qwerty'
 
 # Mouse follows focus when focused monitor changes
 # Drop it from your config, if you don't like this behavior
-# See https://nikitabobko.github.io/AeroSpace/guide#on-focus-changed-callbacks
-# See https://nikitabobko.github.io/AeroSpace/commands#move-mouse
-on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
+# on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 
 #
 # SketchyBar plugin
@@ -65,16 +57,15 @@ exec-on-workspace-change = ['/bin/bash', '-c',
 # 2 | Built-in Retina Display
 
 [gaps]
-inner.horizontal = 3
-inner.vertical =   3
-outer.left =       3
-outer.bottom =     3
-# outer.top =        3
-outer.top = [{ monitor.'built-in' = 3 }, 26]
-outer.right =      3
+inner.horizontal = 5
+inner.vertical =   5
+outer.left =       5
+outer.bottom =     5
+# outer.top =        5
+outer.top = [{ monitor.'built-in' = 5 }, 28]
+outer.right =      5
 
 # 'main' binding mode declaration
-# See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
 # 'main' binding mode must be always presented
 [mode.main.binding]
 
@@ -102,107 +93,68 @@ outer.right =      3
 # end tell'
 # '''
 
-alt-backtick = 'exec-and-forget open -a kitty'
-
 # Disable hide application shortcuts
 cmd-h = [] # Disable "hide application"
 cmd-alt-h = [] # Disable "hide others"
 
-# See: https://nikitabobko.github.io/AeroSpace/commands#layout
+# Keybindings for layout management
 alt-slash = 'layout tiles horizontal vertical'
 alt-comma = 'layout accordion horizontal vertical'
 
-# See: https://nikitabobko.github.io/AeroSpace/commands#focus
 alt-h = 'focus left'
 alt-j = 'focus down'
 alt-k = 'focus up'
 alt-l = 'focus right'
 
-# See: https://nikitabobko.github.io/AeroSpace/commands#move
 alt-shift-h = 'move left'
 alt-shift-j = 'move down'
 alt-shift-k = 'move up'
 alt-shift-l = 'move right'
 
-# See: https://nikitabobko.github.io/AeroSpace/commands#resize
 alt-shift-minus = 'resize smart -50'
 alt-shift-equal = 'resize smart +50'
 
-# See: https://nikitabobko.github.io/AeroSpace/commands#workspace
+# Keybindings for workspace navigation
 alt-1 = 'workspace 1'
 alt-2 = 'workspace 2'
 alt-3 = 'workspace 3'
-# alt-4 = 'workspace 4'
-# alt-5 = 'workspace 5'
-# alt-6 = 'workspace 6'
-# alt-7 = 'workspace 7'
-# alt-8 = 'workspace 8'
-# alt-9 = 'workspace 9'
 alt-a = 'workspace A' # In your config, you can drop workspace bindings that you don't need
-# alt-b = 'workspace B'
-# alt-c = 'workspace C'
+alt-c = 'workspace C'
 alt-d = 'workspace D'
 alt-e = 'workspace E'
-alt-f = 'workspace F'
-# alt-g = 'workspace G'
-# alt-i = 'workspace I'
 alt-m = 'workspace M'
-# alt-n = 'workspace N'
-# alt-o = 'workspace O'
-# alt-p = 'workspace P'
 alt-q = 'workspace Q'
 alt-r = 'workspace R'
 alt-s = 'workspace S'
 alt-t = 'workspace T'
-# alt-u = 'workspace U'
-# alt-v = 'workspace V'
 alt-w = 'workspace W'
-# alt-x = 'workspace X'
-# alt-y = 'workspace Y'
-# alt-z = 'workspace Z'
+alt-x = 'workspace X'
+alt-z = 'workspace Z'
 
-# See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
 alt-shift-1 = 'move-node-to-workspace --focus-follows-window 1'
 alt-shift-2 = 'move-node-to-workspace --focus-follows-window 2'
 alt-shift-3 = 'move-node-to-workspace --focus-follows-window 3'
-# alt-shift-4 = 'move-node-to-workspace --focus-follows-window 4'
-# alt-shift-5 = 'move-node-to-workspace --focus-follows-window 5'
-# alt-shift-6 = 'move-node-to-workspace --focus-follows-window 6'
-# alt-shift-7 = 'move-node-to-workspace --focus-follows-window 7'
-# alt-shift-8 = 'move-node-to-workspace --focus-follows-window 8'
-# alt-shift-9 = 'move-node-to-workspace --focus-follows-window 9'
 alt-shift-a = 'move-node-to-workspace --focus-follows-window A'
-# alt-shift-b = 'move-node-to-workspace --focus-follows-window B'
-# alt-shift-c = 'move-node-to-workspace --focus-follows-window C'
+alt-shift-c = 'move-node-to-workspace --focus-follows-window C'
 alt-shift-d = 'move-node-to-workspace --focus-follows-window D'
 alt-shift-e = 'move-node-to-workspace --focus-follows-window E'
-alt-shift-f = 'move-node-to-workspace --focus-follows-window F'
-# alt-shift-g = 'move-node-to-workspace --focus-follows-window G'
-# alt-shift-i = 'move-node-to-workspace --focus-follows-window I'
 alt-shift-m = 'move-node-to-workspace --focus-follows-window M'
-# alt-shift-n = 'move-node-to-workspace --focus-follows-window N'
-# alt-shift-o = 'move-node-to-workspace --focus-follows-window O'
-# alt-shift-p = 'move-node-to-workspace --focus-follows-window P'
 alt-shift-q = 'move-node-to-workspace --focus-follows-window Q'
 alt-shift-r = 'move-node-to-workspace --focus-follows-window R'
 alt-shift-s = 'move-node-to-workspace --focus-follows-window S'
 alt-shift-t = 'move-node-to-workspace --focus-follows-window T'
-# alt-shift-u = 'move-node-to-workspace --focus-follows-window U'
-# alt-shift-v = 'move-node-to-workspace --focus-follows-window V'
 alt-shift-w = 'move-node-to-workspace --focus-follows-window W'
-# alt-shift-x = 'move-node-to-workspace --focus-follows-window X'
-# alt-shift-y = 'move-node-to-workspace --focus-follows-window Y'
-# alt-shift-z = 'move-node-to-workspace --focus-follows-window Z'
+alt-shift-x = 'move-node-to-workspace --focus-follows-window X'
+alt-shift-z = 'move-node-to-workspace --focus-follows-window Z'
 
-# See: https://nikitabobko.github.io/AeroSpace/commands#workspace-back-and-forth
+# Other Keybindings
 alt-tab = 'workspace-back-and-forth'
-# See: https://nikitabobko.github.io/AeroSpace/commands#move-workspace-to-monitor
 alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
-
 alt-shift-space = 'layout floating tiling'
-
-# See: https://nikitabobko.github.io/AeroSpace/commands#mode
+alt-shift-f = 'fullscreen'
 alt-shift-semicolon = 'mode service'
+
+alt-backtick = 'exec-and-forget open -a kitty'
 
 # Aerospace application configuration settings
 # run `aerospace list-apps` to get a list of running apps
@@ -216,14 +168,15 @@ alt-shift-semicolon = 'mode service'
 # check-further-callbacks = true
 # run = ['layout floating', 'move-node-to-workspace S']  # The callback itself
 
+#
+# Floating Apps
+#
+
 # # Make all windows float by default
 # [[on-window-detected]]
 # check-further-callbacks = true
 # run = 'layout floating'
 
-#
-# Floating Apps
-#
 # Set iTerm2 to open as a floating Quake-style terminal
 [[on-window-detected]]
 if.app-id = 'com.googlecode.iterm2'
@@ -253,10 +206,14 @@ run = 'layout floating'
 if.app-id = 'company.thebrowser.Browser'
 run = 'layout floating'
 
-# Any window opened from the 'T' workspace should have floating behavior
 [[on-window-detected]]
-if.workspace = 'T'
+if.app-id = 'com.google.Chrome.app.cinhimbnkkaeohfgghhklpknlkffjgod'
 run = 'layout floating'
+
+# # Any window opened from the 'T' workspace should have floating behavior
+# [[on-window-detected]]
+# if.workspace = 'T'
+# run = 'layout floating'
 
 [workspace-to-monitor-force-assignment]
 # 1 = 1                            # Monitor sequence number from left to right. 1-based indexing
@@ -269,11 +226,8 @@ T = ['secondary', '^VP27', '^LC27']
 Q = 'built-in'
 
 #
-# Workspace Specific Apps
+# Workspace-App assignment
 #
-[[on-window-detected]]
-if.app-id = 'net.kovidgoyal.kitty'
-run = 'move-node-to-workspace T'
 
 [[on-window-detected]]
 if.during-aerospace-startup = true
@@ -281,56 +235,63 @@ if.app-id = 'company.thebrowser.Browser'
 run = ['layout tiling', 'move-node-to-workspace W']
 
 [[on-window-detected]]
+if.app-id = 'net.kovidgoyal.kitty'
+run = ['layout tiling', 'move-node-to-workspace T']
+
+[[on-window-detected]]
 if.app-id = 'com.google.Chrome'
-run = 'move-node-to-workspace Q'
+run = ['layout tiling', 'move-node-to-workspace Q']
 
 [[on-window-detected]]
 if.app-id = 'com.openai.chat'
-run = 'move-node-to-workspace S'
+run = ['layout tiling', 'move-node-to-workspace S']
 
 [[on-window-detected]]
 if.app-id = 'md.obsidian'
-run = 'move-node-to-workspace S'
+run = ['layout tiling', 'move-node-to-workspace S']
 
 [[on-window-detected]]
 if.app-id = 'io.readwise.read'
-run = 'move-node-to-workspace R'
+run = ['layout tiling', 'move-node-to-workspace R']
 
 [[on-window-detected]]
 if.app-id = 'com.apple.mail'
-run = 'move-node-to-workspace E'
+run = ['layout tiling', 'move-node-to-workspace E']
+
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome.app.fmgjjmmmlfnkbppncabfkddbjimcfncm'
-run = 'move-node-to-workspace E'
+run = ['layout tiling', 'move-node-to-workspace E']
+
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome.app.kjbdgfilnfhdoflbpgamdcdgpehopbep'
-run = 'move-node-to-workspace E'
+run = ['layout tiling', 'move-node-to-workspace E']
 
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome.app.mdpkiolbdkhdjpekfbkbmhigcaggjagi'
-run = 'move-node-to-workspace C'
+run = ['layout tiling', 'move-node-to-workspace C']
 
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome.app.cinhimbnkkaeohfgghhklpknlkffjgod'
-run = 'move-node-to-workspace M'
+run = ['layout tiling', 'move-node-to-workspace M']
 
 [[on-window-detected]]
 if.app-id = 'com.apple.MobileSMS'
-run = 'move-node-to-workspace F'
+run = ['layout tiling', 'move-node-to-workspace F']
 [[on-window-detected]]
 if.app-id = 'net.whatsapp.WhatsApp'
-run = 'move-node-to-workspace F'
+run = ['layout tiling', 'move-node-to-workspace F']
+
 
 # 'service' binding mode declaration.
-# See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
 [mode.service.binding]
 esc = ['reload-config', 'mode main']
 r = ['flatten-workspace-tree', 'mode main'] # reset layout
 f = ['layout floating tiling', 'mode main'] # Toggle between floating and tiling layout
+alt-shift-f = ['mode main', 'macos-native-fullscreen']
 backspace = ['close-all-windows-but-current', 'mode main']
 
 # sticky is not yet supported https://github.com/nikitabobko/AeroSpace/issues/2
-#s = ['layout sticky tiling', 'mode main']
+# s = ['layout sticky tiling', 'mode main']
 
 alt-shift-h = ['join-with left', 'mode main']
 alt-shift-j = ['join-with down', 'mode main']

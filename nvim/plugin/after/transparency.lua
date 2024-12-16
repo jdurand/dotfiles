@@ -11,7 +11,8 @@ vim.api.nvim_set_hl(0, 'Folded', { bg = 'none' })
 vim.api.nvim_set_hl(0, 'SignColumn', { bg = 'none' })
 
 -- terminal background color for floaterm
-vim.api.nvim_set_hl(0, 'FloaTerm', { bg = vim.g.terminal_color_0 })
+-- vim.api.nvim_set_hl(0, 'FloaTerm', { bg = vim.g.terminal_color_0 })
+vim.api.nvim_set_hl(0, 'FloaTerm', { bg = 'black' })
 
 -- transparent background for neotree
 vim.api.nvim_set_hl(0, 'NeoTreeNormal', { bg = 'none' })

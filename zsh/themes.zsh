@@ -41,6 +41,7 @@ if [[ -z "${ZSH_THEME}" ]]; then
 
     # eval "$(oh-my-posh init zsh --config ~/.zsh/posh-themes/catppuccin.omp.json)"
     # eval "$(oh-my-posh init zsh --config ~/.zsh/posh-themes/catppuccin_mocha.omp.json)"
-    eval "$(oh-my-posh init zsh --config ~/.zsh/posh-themes/zen.omp.toml)"
+    # eval "$(oh-my-posh init zsh --config ~/.zsh/posh-themes/zen.omp.toml)"
+    eval "$(oh-my-posh init zsh --config ~/.zsh/posh-themes/electric-neon.omp.toml)"
   fi
 fi

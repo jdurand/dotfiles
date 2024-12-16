@@ -10,15 +10,17 @@ config.hide_tab_bar_if_only_one_tab = true
 config.window_decorations = 'RESIZE'
 config.window_close_confirmation = 'NeverPrompt'
 
--- config.color_scheme = 'Catppuccin Mocha'
--- config.window_background_opacity = 0.9
--- config.macos_window_background_blur = 10
+local hour = os.date("*t").hour
 
-config.color_scheme = 'Synth Midnight'
--- config.color_scheme = 'Cai (Gogh)'
-config.window_background_opacity = 0.85
+if hour >= 6 and hour < 18 then
+  config.color_scheme = 'Catppuccin Mocha'
+  config.window_background_opacity = 0.9
+else
+  config.color_scheme = 'Synth Midnight'
+  config.window_background_opacity = 0.85
+end
+
 config.macos_window_background_blur = 10
-
 config.font = wezterm.font 'VictorMono Nerd Font Mono'
 config.font_size = 14.0
 

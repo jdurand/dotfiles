@@ -7,13 +7,14 @@ local colors = {
   red    = '#ff3399',  -- Bright Neon Pink
   violet = '#ff3399',  -- Neon Pink (Active highlight)
   grey   = '#302136',  -- Subtle Dark Grey Accent
+  grey2   = '#32344D',  -- Subtle Grey Accent
 }
 
 return {
   normal = {
     a = { fg = colors.black, bg = colors.violet }, -- Neon Pink highlight
     b = { fg = colors.white, bg = colors.grey },   -- White text on subtle grey
-    c = { fg = colors.white },                    -- Soft White Glow
+    c = { fg = colors.white, bg = colors.grey2 },  -- Soft White Glow
   },
 
   insert = { a = { fg = colors.black, bg = colors.blue } },   -- Electric Blue
@@ -23,6 +24,6 @@ return {
   inactive = {
     a = { fg = colors.white, bg = colors.black },  -- White on Dark Purple
     b = { fg = colors.white, bg = colors.black },
-    c = { fg = colors.white },
+    c = { fg = colors.white, bg = colors.grey2 },
   },
 }

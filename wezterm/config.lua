@@ -7,17 +7,18 @@ local config = wezterm.config_builder()
 -- This is where you actually apply your config choices
 
 config.hide_tab_bar_if_only_one_tab = true
+config.disable_default_key_bindings = true
 config.window_decorations = 'RESIZE'
 config.window_close_confirmation = 'NeverPrompt'
 
 local hour = os.date("*t").hour
 
 if hour >= 6 and hour < 18 then
-  config.color_scheme = 'Catppuccin Mocha'
-  config.window_background_opacity = 0.9
+  config.color_scheme = 'Tokyo Night Moon'
+  config.window_background_opacity = 0.8
 else
-  config.color_scheme = 'Synth Midnight'
-  config.window_background_opacity = 0.85
+  config.color_scheme = 'Tokyo Night'
+  config.window_background_opacity = 0.8
 end
 
 config.macos_window_background_blur = 10
@@ -39,6 +40,14 @@ config.colors = {
   -- or the color of the vertical or horizontal bar when the cursor style is set to
   -- Bar or Underline.
   cursor_border = 'white',
+}
+
+config.keys = {
+  -- paste from the clipboard
+  { key = 'v', mods = 'SUPER', action = wezterm.action.PasteFrom 'Clipboard' },
+
+  -- paste from the primary selection
+  { key = 'V', mods = 'SUPER', action = wezterm.action.PasteFrom 'PrimarySelection' },
 }
 
 -- config.inactive_pane_hsb = {

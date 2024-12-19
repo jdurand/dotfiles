@@ -13,14 +13,9 @@ config.window_close_confirmation = 'NeverPrompt'
 
 local hour = os.date("*t").hour
 
-if hour >= 6 and hour < 18 then
-  config.color_scheme = 'Tokyo Night Moon'
-  config.window_background_opacity = 0.8
-else
-  config.color_scheme = 'Tokyo Night'
-  config.window_background_opacity = 0.8
-end
+config.color_scheme = (hour >= 6 and hour < 18) and 'Tokyo Night Moon' or 'Tokyo Night'
 
+config.window_background_opacity = 0.8
 config.macos_window_background_blur = 10
 config.font = wezterm.font 'VictorMono Nerd Font Mono'
 config.font_size = 14.0

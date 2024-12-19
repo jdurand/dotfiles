@@ -43,6 +43,12 @@ config.keys = {
 
   -- paste from the primary selection
   { key = 'V', mods = 'SUPER', action = wezterm.action.PasteFrom 'PrimarySelection' },
+
+  -- close tab with
+  { key = 'w', mods = 'CMD', action = wezterm.action.CloseCurrentTab { confirm = false } },
+
+  -- close pane
+  { key = 'W', mods = 'CMD', action = wezterm.action.CloseCurrentPane { confirm = false } },
 }
 
 -- config.inactive_pane_hsb = {

@@ -74,5 +74,8 @@ export SAVEHIST=1000000
 export LANG="en_US.UTF-8"
 export LC_ALL=$LANG
 
+# bat theme
+export BAT_THEME=electric_neon
+
 # Increase opened file limit
 ulimit -n 2048

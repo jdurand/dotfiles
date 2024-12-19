@@ -1,0 +1,151 @@
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>author</key>
+  <string>Electric Neon Subtle</string>
+  <key>colorSpaceName</key>
+  <string>sRGB</string>
+  <key>name</key>
+  <string>ElectricNeonSubtle</string>
+  <key>settings</key>
+  <array>
+    <dict>
+      <key>settings</key>
+      <dict>
+        <key>background</key>
+        <string>#0D0D0D</string> <!-- Very dark gray background -->
+        <key>foreground</key>
+        <string>#C5C8C6</string> <!-- Subtle gray for text -->
+        <key>caret</key>
+        <string>#FF007F</string> <!-- Electric pink caret -->
+        <key>activeGuide</key>
+        <string>#5EBFCF</string> <!-- Muted cyan for guides -->
+        <key>findHighlight</key>
+        <string>#007F7F</string> <!-- Subtle teal highlight -->
+        <key>findHighlightForeground</key>
+        <string>#0D0D0D</string> <!-- Dark foreground for highlighted text -->
+        <key>selection</key>
+        <string>#1F1F2E</string> <!-- Subtle dark blue for selection -->
+        <key>selectionBorder</key>
+        <string>#5EBFCF</string> <!-- Muted cyan border for selection -->
+        <key>lineHighlight</key>
+        <string>#161616</string> <!-- Slightly darker background for line highlight -->
+        <key>shadow</key>
+        <string>#101010</string> <!-- Subtle shadow -->
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Comments</string>
+      <key>scope</key>
+      <string>comment, punctuation.definition.comment</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#646464</string> <!-- Muted gray for comments -->
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Strings</string>
+      <key>scope</key>
+      <string>string</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#A2BF8A</string> <!-- Muted green for strings -->
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Keywords</string>
+      <key>scope</key>
+      <string>keyword</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#FF007F</string> <!-- Electric pink for keywords -->
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Variables</string>
+      <key>scope</key>
+      <string>variable</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#8F8F9A</string> <!-- Subtle muted gray for variables -->
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Numbers</string>
+      <key>scope</key>
+      <string>constant.numeric</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#5EBFCF</string> <!-- Muted cyan for numbers -->
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Functions</string>
+      <key>scope</key>
+      <string>entity.name.function</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#7F7FFF</string> <!-- Subtle blue for functions -->
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Classes</string>
+      <key>scope</key>
+      <string>entity.name.class</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#00FFFF</string> <!-- Electric cyan for classes -->
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Operators</string>
+      <key>scope</key>
+      <string>keyword.operator</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#5EBFCF</string> <!-- Muted cyan for operators -->
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Attributes</string>
+      <key>scope</key>
+      <string>entity.other.attribute-name</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#5EBFCF</string> <!-- Muted cyan for attributes -->
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Error</string>
+      <key>scope</key>
+      <string>invalid</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#FF4F4F</string> <!-- Bright red for errors -->
+        <key>background</key>
+        <string>#2E0000</string> <!-- Dark red background for errors -->
+      </dict>
+    </dict>
+  </array>
+</dict>
+</plist>

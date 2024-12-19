@@ -16,10 +16,11 @@ fi
 
 # Use 'eza' as the default command for 'ls' with icons always enabled
 alias ls="eza --icons=always"
+# alias ls="eza --icons=always --long --git"
 
 # Alias 'cd' to 'z' for efficient directory switching using 'zoxide'
 eval "$(zoxide init zsh)"
-# alias cd="z"
+alias cd="z"
 
 # Simplify tmuxinator invocation
 alias mux=tmuxinator

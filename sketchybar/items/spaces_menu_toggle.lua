@@ -27,6 +27,7 @@ local function initializeMenuToggle()
     background = {
       color = colors.with_alpha(colors.grey, 0.0),
       border_color = colors.with_alpha(colors.bg1, 0.0),
+      corner_radius = 9
     }
   })
 

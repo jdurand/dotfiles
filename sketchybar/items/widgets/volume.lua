@@ -112,7 +112,6 @@ local function volume_toggle_details(env)
       current_audio_device = result:sub(1, -2)
       SketchyBar.exec("SwitchAudioSource -a -t output", function(available)
         current = current_audio_device
-        local color = colors.grey
         local counter = 0
 
         for device in string.gmatch(available, '[^\r\n]+') do

@@ -39,7 +39,7 @@ local function initializeMenu()
   end
 
   SketchyBar.add("bracket", { '/menu\\..*/' }, {
-    background = { color = colors.bg1 }
+    background = { color = colors.bg1, corner_radius = 9 }
   })
 
   local menu_padding = SketchyBar.add("item", "menu.padding", {

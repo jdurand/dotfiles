@@ -13,7 +13,11 @@ SketchyBar.default({
     color = colors.white,
     padding_left = settings.paddings,
     padding_right = settings.paddings,
-    background = { image = { corner_radius = 9 } },
+    background = {
+      image = {
+        corner_radius = 5
+      }
+    },
   },
   label = {
     font = {
@@ -27,19 +31,14 @@ SketchyBar.default({
   },
   background = {
     height = 22,
-    corner_radius = 9,
-    border_width = 2,
-    border_color = colors.bg2,
-    image = {
-      corner_radius = 9,
-      border_color = colors.grey,
-      border_width = 1
-    }
+    corner_radius = 5,
+    border_width = 1,
+    border_color = colors.bg2
   },
   popup = {
     background = {
-      border_width = 2,
-      corner_radius = 9,
+      border_width = 1,
+      corner_radius = 5,
       border_color = colors.popup.border,
       color = colors.popup.bg,
       shadow = { drawing = true },

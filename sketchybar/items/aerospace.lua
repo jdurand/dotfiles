@@ -129,7 +129,7 @@ local function initializeWorkspaces(specified_order)
       local workspace_item = SketchyBar.add("item", "workspace." .. workspace_name, {
         icon = {
           color = colors.white,
-          highlight_color = colors.red,
+          highlight_color = colors.magenta,
           drawing = false,
           font = { family = settings.font.numbers },
           string = workspace_name,

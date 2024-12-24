@@ -20,6 +20,7 @@ return {
   insert = { a = { fg = colors.black, bg = colors.blue } },   -- Electric Blue
   visual = { a = { fg = colors.black, bg = colors.cyan } },   -- Violet Accent
   replace = { a = { fg = colors.black, bg = colors.red } },   -- Bright Neon Pink
+  terminal = { a = { fg = colors.black, bg = colors.white } },   -- Electric Blue
 
   inactive = {
     a = { fg = colors.white, bg = colors.black },  -- White on Dark Purple

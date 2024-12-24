@@ -54,8 +54,8 @@ vmap <silent> ˚ dkPV`]
 
 " Easy buffer navigation
 " ----------------------------------------------------------------------------------------------------
-nmap > :bnext<CR>
-nmap < :bprevious<CR>
+" nmap > :bnext<CR>
+" nmap < :bprevious<CR>
 
 " Select only the text caracters in the current line
 " ----------------------------------------------------------------------------------------------------

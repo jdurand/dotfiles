@@ -20,8 +20,12 @@ return {
       nnoremap('<leader>tn', ':FloatermNew<CR>', { desc = '[N]ew Terminal' })
       tnoremap('<leader>tn', '<C-\\><C-n>:FloatermNew<CR>', { desc = '[N]ew Terminal' })
 
-      tnoremap('<C-PageUp>', '<C-\\><C-n>:FloatermPrev<CR>')
-      tnoremap('<C-PageDown>', '<C-\\><C-n>:FloatermNext<CR>')
+      tnoremap('<C-PageDown>', '<C-\\><C-n>:FloatermNext<CR>', { desc = 'Next Terminal' })
+      tnoremap('<C-PageUp>', '<C-\\><C-n>:FloatermPrev<CR>', { desc = 'Previous Terminal' })
+      tnoremap('<leader>ty', '<C-\\><C-n>:FloatermNext<CR>', { desc = 'Next Terminal' })
+      tnoremap('<leader>tr', '<C-\\><C-n>:FloatermPrev<CR>', { desc = 'Previous Terminal' })
+      tnoremap('>>', '<C-\\><C-n>:FloatermNext<CR>', { desc = 'Next Terminal' })
+      tnoremap('<<', '<C-\\><C-n>:FloatermPrev<CR>', { desc = 'Previous Terminal' })
 
       tnoremap('<escape><escape>', '<C-\\><C-n>')
     end,

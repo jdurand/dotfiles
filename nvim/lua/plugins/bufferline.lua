@@ -16,13 +16,24 @@ return {
       })
 
       -- open blank new tab
-      nnoremap('<C-t><C-t>', ':tabnew<cr>')
-      -- nnoremap('<C-w><C-w>', ':tabclose<cr>')
-      nnoremap('<C-t>>', ':tabnext<cr>')
-      nnoremap('<C-t><', ':tabprevious<cr>')
+      nnoremap('<C-t><C-n>', ':tabnew<cr>')
+      -- move current buffer to new tab
+      nnoremap('<C-t><C-t>', '<C-w>T')
+      -- close current tab
+      nnoremap('<C-t><C-q>', ':tabclose<cr>')
 
-      -- nnoremap('<C-t><PageUp>', ':tabnext<cr>')
-      -- nnoremap('<C-t><PageDown>', ':tabprevious<cr>')
+      nnoremap('<C-t>>', ':tabnext<cr>', { desc = 'Next Tab' })
+      nnoremap('<C-t><', ':tabprevious<cr>', { desc = 'Previous Tab' })
+      nnoremap('<C-t><C-y>', ':tabnext<cr>', { desc = 'Next Tab' })
+      nnoremap('<C-t><C-r>', ':tabprevious<cr>', { desc = 'Previous Tab' })
+      nnoremap('>>', ':tabnext<cr>', { desc = 'Next Tab' })
+      nnoremap('<<', ':tabprevious<cr>', { desc = 'Previous Tab' })
+
+      nnoremap('<C-S-PageUp>', ':-tabmove<cr>')
+      nnoremap('<C-S-PageDown>', ':+tabmove<cr>')
+
+      nnoremap('<C-t><C->>', ':-tabmove<cr>')
+      nnoremap('<C-t><C-<>', ':+tabmove<cr>')
     end,
   },
 }

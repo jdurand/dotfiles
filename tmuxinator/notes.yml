@@ -4,7 +4,7 @@ name: notes
 root: ~/Notes/
 
 windows:
-  - editor:
+  - notes:
       layout: main-horizontal
       panes:
         - nvim -p ./Work/local-notes.md

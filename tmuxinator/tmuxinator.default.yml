@@ -4,7 +4,7 @@ name: Default
 root: ~/
 
 windows:
-  - editor:
+  - default:
       layout: main-horizontal
       panes:
         - gtop

@@ -95,16 +95,21 @@ outer.right =      5
 
 # Disable hide application shortcuts
 cmd-h = [] # Disable "hide application"
-cmd-alt-h = [] # Disable "hide others"
+# cmd-alt-h = [] # Disable "hide others"
 
 # Keybindings for layout management
 alt-slash = 'layout tiles horizontal vertical'
 alt-comma = 'layout accordion horizontal vertical'
 
-alt-h = 'focus left'
-alt-j = 'focus down'
-alt-k = 'focus up'
-alt-l = 'focus right'
+# alt-h = 'focus left'
+# alt-j = 'focus down'
+# alt-k = 'focus up'
+# alt-l = 'focus right'
+
+cmd-alt-h = 'focus left'
+cmd-alt-j = 'focus down'
+cmd-alt-k = 'focus up'
+cmd-alt-l = 'focus right'
 
 alt-shift-h = 'move left'
 alt-shift-j = 'move down'
@@ -154,8 +159,8 @@ alt-shift-space = 'layout floating tiling'
 alt-shift-f = 'fullscreen'
 alt-shift-semicolon = 'mode service'
 
-# alt-backtick = 'exec-and-forget open -a kitty'
-alt-backtick = 'exec-and-forget open -a WezTerm'
+alt-backtick = 'exec-and-forget open -a kitty'
+# alt-backtick = 'exec-and-forget open -a WezTerm'
 
 # Aerospace application configuration settings
 # run `aerospace list-apps` to get a list of running apps

@@ -1,3 +1,5 @@
+local vim = vim ---@diagnostic disable-line: undefined-global
+
 local keymaps = require('user.keymaps.bind')
 local nnoremap = keymaps.nnoremap
 local tnoremap = keymaps.tnoremap
@@ -11,8 +13,8 @@ return {
       vim.g.floaterm_width = 0.9
       vim.g.floaterm_height = 0.8
 
-      nnoremap('<leader>tt', ':FloatermToggle<CR>', { desc = '[T]erminal' })
-      tnoremap('<leader>tt', '<C-\\><C-n>:FloatermToggle<CR>', { desc = '[T]erminal' })
+      nnoremap('<leader>tt', ':FloatermToggle<CR>', { desc = 'Show [T]erminal' })
+      tnoremap('<leader>tt', '<C-\\><C-n>:FloatermToggle<CR>', { desc = 'Hide [T]erminal' })
 
       nnoremap('<leader>tg', ':FloatermNew lazygit<CR>', { desc = 'Lazy[G]it' })
       nnoremap('<leader>td', ':FloatermNew! --height=0.9 --width=0.95 --wintype=float --name=gtasks --position=bottom gtasks tasks view --tasklist "Reclaim.ai"<CR>', { desc = 'Google Tasks (TO[D]O)' })
@@ -27,7 +29,26 @@ return {
       tnoremap('>>', '<C-\\><C-n>:FloatermNext<CR>', { desc = 'Next Terminal' })
       tnoremap('<<', '<C-\\><C-n>:FloatermPrev<CR>', { desc = 'Previous Terminal' })
 
-      tnoremap('<escape><escape>', '<C-\\><C-n>')
+      -- Check if any floating terminal is open
+      local function is_floaterm_open()
+        for _, wid in ipairs(vim.api.nvim_list_wins()) do
+          local window = vim.api.nvim_win_get_config(wid)
+          local name = vim.api.nvim_buf_get_name(vim.api.nvim_win_get_buf(wid))
+
+          if name:find("term://.*") and window.zindex ~= nil then
+            return true
+          end
+        end
+        return false
+      end
+
+      -- Export functions globally
+      _G.FloatermIsOpen = is_floaterm_open
+
+      -- Double-Esc to exit insert mode
+      tnoremap('<escape><escape>', '<escape><escape><C-\\><C-n>')
+      -- CTRL-WQ to hide terminal
+      tnoremap('<C-w><C-q>', '<C-\\><C-n><C-w><C-q>')
     end,
   }
 }

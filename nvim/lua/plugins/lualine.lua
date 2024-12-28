@@ -1,5 +1,3 @@
-local neon_theme = require('user/themes/lualine/electric-neon')
-
 local function truncate_branch_name(branch)
   if not branch or branch == "" then
     return ''
@@ -47,10 +45,53 @@ local function harpoon_component()
   return string.format("󱡅 %s/%d", current_mark, mark_count)
 end
 
-local function macro_recording ()
+local function macro_recording()
   local reg = vim.fn.reg_recording()
   if reg == "" then return "" end -- not recording
   return " @" .. reg
+end
+
+local function neotest_status()
+  local neotest = require("neotest")
+  local file_path = vim.fn.expand("%:p") -- Current file path
+  local buf = vim.api.nvim_get_current_buf()
+
+  -- Retrieve adapter IDs
+  local adapters = neotest.state.adapter_ids()
+  if not adapters or #adapters == 0 then
+    return "" -- No adapters available
+  end
+
+  -- Assume the first adapter (for simplicity)
+  local adapter_id = adapters[1]
+
+  -- Check test status counts for the current buffer
+  local status_counts = neotest.state.status_counts(adapter_id, { buffer = buf })
+  if status_counts then
+    if status_counts.failed and status_counts.failed > 0 then
+      return "%#NeotestFailed# Failed"
+    end
+    if status_counts.running and status_counts.running > 0 then
+      return "%#NeotestRunning# Running"
+    end
+  end
+
+  -- Check if the whole file is being watched
+  if neotest.watch.is_watching(file_path) then
+    return "%#NeotestWatching# Watching"
+  end
+
+  -- Check for line-level test watching
+  local cursor_line = vim.fn.line(".") - 1 -- Adjust for zero-indexed line numbers
+  local positions = neotest.state.positions(adapter_id, { buffer = buf })
+  if positions then
+    local nearest_test = neotest.lib.positions.nearest(positions, cursor_line)
+    if nearest_test and neotest.watch.is_watching(nearest_test.id) then
+      return "%#NeotestWatching# Watching (L" .. cursor_line + 1 .. ")"
+    end
+  end
+
+  return "" -- Default when no special state
 end
 
 return {
@@ -62,6 +103,12 @@ return {
     },
     config = function()
       local overseer = require('overseer')
+      local neon_theme = require('user/themes/lualine/electric-neon')
+
+      vim.api.nvim_set_hl(0, "NeotestWatching", { fg = "#CC8400", bg = neon_theme.normal.b.bg }) -- Orange for watching
+      vim.api.nvim_set_hl(0, "NeotestFailed", { fg = "#B22222", bg = neon_theme.normal.b.bg })   -- Red for failed
+      vim.api.nvim_set_hl(0, "NeotestRunning", { fg = "#7A8C9A", bg = neon_theme.normal.b.bg })  -- Gray for running
+
       require('lualine').setup({
         options = {
           -- theme = 'auto',
@@ -81,13 +128,11 @@ return {
             { 'branch', icon = "", fmt = truncate_branch_name },
             'diff',
             harpoon_component,
-            macro_recording,
-            'diagnostics',
           },
           lualine_c = {
+            'diagnostics',
             { 'filename', path = 1 },
           },
-          lualine_y = { 'filetype', 'progress' },
           -- lualine_x = { 'overseer' },
           lualine_x = {
             {
@@ -106,6 +151,12 @@ return {
               status = nil, -- List of task statuses to display
               status_not = false, -- When true, invert the status search
             },
+          },
+          lualine_y = {
+            macro_recording,
+            neotest_status,
+            'filetype',
+            'progress'
           },
           -- lualine_z = { { 'location', separator = { right = '' }, left_padding = 2 } },
         },

@@ -5,14 +5,14 @@ local colors = {
   black  = '#1b0b23',  -- Dark Purple Background
   white  = '#f0e6f6',  -- Soft White/Pink Glow
   red    = '#ff3399',  -- Bright Neon Pink
-  violet = '#ff3399',  -- Neon Pink (Active highlight)
+  pink = '#ff3399',  -- Neon Pink (Active highlight)
   grey   = '#302136',  -- Subtle Dark Grey Accent
   grey2   = '#32344D',  -- Subtle Grey Accent
 }
 
 return {
   normal = {
-    a = { fg = colors.black, bg = colors.violet }, -- Neon Pink highlight
+    a = { fg = colors.black, bg = colors.pink }, -- Neon Pink highlight
     b = { fg = colors.white, bg = colors.grey },   -- White text on subtle grey
     c = { fg = colors.white, bg = colors.grey2 },  -- Soft White Glow
   },

@@ -1,12 +1,12 @@
 
 " YankRing
 " ----------------------------------------------------------------------------------------------------
-let g:yankring_history_dir = expand('$HOME').'/.vim-local'
-let g:yankring_history_file = '.vim-yankring'
-map <Leader>y :YRShow<CR>
-autocmd BufEnter \[YankRing\] set scrolloff=0 cursorline
-autocmd BufLeave \[YankRing\] set scrolloff=4 nocursorline
-let g:yankring_clipboard_monitor=0
+" let g:yankring_history_dir = expand('$HOME').'/.vim-local'
+" let g:yankring_history_file = '.vim-yankring'
+" map <Leader>y :YRShow<CR>
+" autocmd BufEnter \[YankRing\] set scrolloff=0 cursorline
+" autocmd BufLeave \[YankRing\] set scrolloff=4 nocursorline
+" let g:yankring_clipboard_monitor=0
 
 " Rails.vim settings
 " ----------------------------------------------------------------------------------------------------

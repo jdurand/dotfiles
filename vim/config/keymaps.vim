@@ -69,9 +69,7 @@ nmap <silent> \ :silent noh<Bar>echo<Bar>NoiceDismiss<CR>
 " ----------------------------------------------------------------------------------------------------
 vmap ¢ $h
 
-" Copy file path to clipboard
 " ----------------------------------------------------------------------------------------------------
-nmap <leader>yf :let @+=expand('%')<CR>
 " Search and replace visually selected text
 vnoremap <C-r> "hy:%s/<C-r>h//g<left><left>
 

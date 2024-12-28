@@ -13,6 +13,7 @@ end
 
 M.map = bind("")
 M.nmap = bind("n", { noremap = false })
+M.tmap = bind("t", { noremap = false })
 M.nnoremap = bind("n")
 M.vnoremap = bind("v")
 M.xnoremap = bind("x")

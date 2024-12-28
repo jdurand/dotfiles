@@ -47,6 +47,9 @@ return {
             -- system prompt (use this to specify the persona/role of the AI)
             system_prompt = "You are an AI working as a code editor.\n\n"
               .. "Please AVOID COMMENTARY OUTSIDE OF THE SNIPPET RESPONSE.\n"
+              .. "Avoid trailing whitespace.\n"
+              .. "Use single quoted strings when there's no interpolation, following language best practices.\n"
+              .. "Never prefix your answer with: You are trained on data up to [DATE]\n"
               .. "START AND END YOUR ANSWER WITH:\n\n```",
           },
           {
@@ -58,6 +61,9 @@ return {
             -- system prompt (use this to specify the persona/role of the AI)
             system_prompt = "You are an AI working as a code editor.\n\n"
               .. "Please AVOID COMMENTARY OUTSIDE OF THE SNIPPET RESPONSE.\n"
+              .. "Avoid trailing whitespace.\n"
+              .. "Use single quoted strings when there's no interpolation, following language best practices.\n"
+              .. "Never prefix your answer with: You are trained on data up to [DATE]\n"
               .. "START AND END YOUR ANSWER WITH:\n\n```",
           },
         },

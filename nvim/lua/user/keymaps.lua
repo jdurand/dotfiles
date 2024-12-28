@@ -1,11 +1,7 @@
-local nnoremap = require("user.keymaps.bind").nnoremap
+local keymaps = require('user.keymaps.bind')
+local nnoremap, nmap = keymaps.nnoremap, keymaps.nmap
 
--- local vnoremap = require("user.keymap_utils").vnoremap
--- local inoremap = require("user.keymap_utils").inoremap
--- local tnoremap = require("user.keymap_utils").tnoremap
--- local xnoremap = require("user.keymap_utils").xnoremap
-
--- Define the ZenMode keybind here to prevent conflicts 
+-- Define the ZenMode keybind here to prevent conflicts
 -- with `config` block options in the plugin file
 nnoremap('<leader>z', function()
   require('zen-mode').toggle({
@@ -14,3 +10,8 @@ nnoremap('<leader>z', function()
     }
   })
 end, { desc = 'Open in [Z]en Mode' })
+
+-- Other custom keymaps
+nmap('<leader>yf', function()
+  vim.fn.setreg('*', vim.fn.expand('%'))
+end, { desc = 'Copy [f]ile path to clipboard' })

@@ -7,9 +7,12 @@ return {
     'numToStr/Comment.nvim',
     lazy = false,
     opts = {
-        -- add any options here
+      -- add any options here
     },
     config = function()
+      vim.api.nvim_del_keymap('n', 'gc')
+      -- require('Comment').setup()
+
       local api = require('Comment.api')
       local esc = vim.api.nvim_replace_termcodes(
         '<escape>', true, false, true
@@ -24,8 +27,8 @@ return {
         end
       end
 
-      nnoremap('<Leader>cc', function() toggle_comment('n', 'linewise') end)
-      nnoremap('<Leader>bc', function() toggle_comment('n', 'blockwise') end)
+      nnoremap('<leader>cc', function() toggle_comment('n', 'linewise') end)
+      nnoremap('<leader>bc', function() toggle_comment('n', 'blockwise') end)
       xnoremap('<leader>cc', function() toggle_comment('x', 'linewise') end)
       xnoremap('<leader>bc', function() toggle_comment('x', 'blockwise') end)
     end,

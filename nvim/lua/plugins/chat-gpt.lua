@@ -69,118 +69,132 @@ return {
         },
       })
 
-      require('which-key').add {
-        {
-          -- VISUAL mode mappings
-          mode = { "v" },
+      local mappings = {
+        -- VISUAL mode mappings
+        v = {
+          { "<C-g>r", ":<C-u>'<,'>GpRewrite", "Visual Rewrite" },
+          { "<C-g>a", ":<C-u>'<,'>GpAppend", "Visual Append (after)" },
+          { "<C-g>b", ":<C-u>'<,'>GpPrepend", "Visual Prepend (before)" },
+          { "<C-g>i", ":<C-u>'<,'>GpImplement", "Implement selection" },
 
-          { "<C-g>r", ":<C-u>'<,'>GpRewrite<cr>", desc = "Visual Rewrite", nowait = true, remap = false },
-          { "<C-g>a", ":<C-u>'<,'>GpAppend<cr>", desc = "Visual Append (after)", nowait = true, remap = false },
-          { "<C-g>b", ":<C-u>'<,'>GpPrepend<cr>", desc = "Visual Prepend (before)", nowait = true, remap = false },
-          { "<C-g>i", ":<C-u>'<,'>GpImplement<cr>", desc = "Implement selection", nowait = true, remap = false },
+          { "<C-g>c", ":<C-u>'<,'>GpChatNew", "Visual Chat New" },
+          { "<C-g>p", ":<C-u>'<,'>GpChatPaste split", "Visual Chat Paste" },
+          { "<C-g>t", ":<C-u>'<,'>GpChatToggle", "Visual Toggle Chat" },
 
-          { "<C-g>c", ":<C-u>'<,'>GpChatNew<cr>", desc = "Visual Chat New", nowait = true, remap = false },
-          { "<C-g>p", ":<C-u>'<,'>GpChatPaste split<cr>", desc = "Visual Chat Paste", nowait = true, remap = false },
-          { "<C-g>t", ":<C-u>'<,'>GpChatToggle<cr>", desc = "Visual Toggle Chat", nowait = true, remap = false },
+          { "<C-g>s", "<cmd>GpStop", "GpStop" },
+          { "<C-g>x", ":<C-u>'<,'>GpContext", "Visual GpContext" },
+          { "<C-g>n", "<cmd>GpNextAgent", "Next Agent" },
 
-          { "<C-g>s", "<cmd>GpStop<cr>", desc = "GpStop", nowait = true, remap = false },
-          { "<C-g>x", ":<C-u>'<,'>GpContext<cr>", desc = "Visual GpContext", nowait = true, remap = false },
-          { "<C-g>n", "<cmd>GpNextAgent<cr>", desc = "Next Agent", nowait = true, remap = false },
+          { "<C-g><C-x>", ":<C-u>'<,'>GpChatNew split", "Visual Chat New split" },
+          { "<C-g><C-v>", ":<C-u>'<,'>GpChatNew vsplit", "Visual Chat New vsplit" },
+          { "<C-g><C-t>", ":<C-u>'<,'>GpChatNew tabnew", "Visual Chat New tabnew" },
 
-          { "<C-g><C-x>", ":<C-u>'<,'>GpChatNew split<cr>", desc = "Visual Chat New split", nowait = true, remap = false },
-          { "<C-g><C-v>", ":<C-u>'<,'>GpChatNew vsplit<cr>", desc = "Visual Chat New vsplit", nowait = true, remap = false },
-          { "<C-g><C-t>", ":<C-u>'<,'>GpChatNew tabnew<cr>", desc = "Visual Chat New tabnew", nowait = true, remap = false },
+          { "<C-g>g", group = "Generate into new..." },
+          { "<C-g>ge", ":<C-u>'<,'>GpEnew", "Visual GpEnew" },
+          { "<C-g>gn", ":<C-u>'<,'>GpNew", "Visual GpNew" },
+          { "<C-g>gp", ":<C-u>'<,'>GpPopup", "Visual Popup" },
+          { "<C-g>gt", ":<C-u>'<,'>GpTabnew", "Visual GpTabnew" },
+          { "<C-g>gv", ":<C-u>'<,'>GpVnew", "Visual GpVnew" },
 
-          { "<C-g>g", group = "generate into new ..", nowait = true, remap = false },
-          { "<C-g>ge", ":<C-u>'<,'>GpEnew<cr>", desc = "Visual GpEnew", nowait = true, remap = false },
-          { "<C-g>gn", ":<C-u>'<,'>GpNew<cr>", desc = "Visual GpNew", nowait = true, remap = false },
-          { "<C-g>gp", ":<C-u>'<,'>GpPopup<cr>", desc = "Visual Popup", nowait = true, remap = false },
-          { "<C-g>gt", ":<C-u>'<,'>GpTabnew<cr>", desc = "Visual GpTabnew", nowait = true, remap = false },
-          { "<C-g>gv", ":<C-u>'<,'>GpVnew<cr>", desc = "Visual GpVnew", nowait = true, remap = false },
-
-          { "<C-g>w", group = "Whisper", nowait = true, remap = false },
-          { "<C-g>wa", ":<C-u>'<,'>GpWhisperAppend<cr>", desc = "Whisper Append (after)", nowait = true, remap = false },
-          { "<C-g>wb", ":<C-u>'<,'>GpWhisperPrepend<cr>", desc = "Whisper Prepend (before)", nowait = true, remap = false },
-          { "<C-g>we", ":<C-u>'<,'>GpWhisperEnew<cr>", desc = "Whisper Enew", nowait = true, remap = false },
-          { "<C-g>wn", ":<C-u>'<,'>GpWhisperNew<cr>", desc = "Whisper New", nowait = true, remap = false },
-          { "<C-g>wp", ":<C-u>'<,'>GpWhisperPopup<cr>", desc = "Whisper Popup", nowait = true, remap = false },
-          { "<C-g>wr", ":<C-u>'<,'>GpWhisperRewrite<cr>", desc = "Whisper Rewrite", nowait = true, remap = false },
-          { "<C-g>wt", ":<C-u>'<,'>GpWhisperTabnew<cr>", desc = "Whisper Tabnew", nowait = true, remap = false },
-          { "<C-g>wv", ":<C-u>'<,'>GpWhisperVnew<cr>", desc = "Whisper Vnew", nowait = true, remap = false },
-          { "<C-g>ww", ":<C-u>'<,'>GpWhisper<cr>", desc = "Whisper", nowait = true, remap = false },
+          { "<C-g>w", group = "Whisper" },
+          { "<C-g>wa", ":<C-u>'<,'>GpWhisperAppend", "Whisper Append (after)" },
+          { "<C-g>wb", ":<C-u>'<,'>GpWhisperPrepend", "Whisper Prepend (before)" },
+          { "<C-g>we", ":<C-u>'<,'>GpWhisperEnew", "Whisper Enew" },
+          { "<C-g>wn", ":<C-u>'<,'>GpWhisperNew", "Whisper New" },
+          { "<C-g>wp", ":<C-u>'<,'>GpWhisperPopup", "Whisper Popup" },
+          { "<C-g>wr", ":<C-u>'<,'>GpWhisperRewrite", "Whisper Rewrite" },
+          { "<C-g>wt", ":<C-u>'<,'>GpWhisperTabnew", "Whisper Tabnew" },
+          { "<C-g>wv", ":<C-u>'<,'>GpWhisperVnew", "Whisper Vnew" },
+          { "<C-g>ww", ":<C-u>'<,'>GpWhisper", "Whisper" },
         },
-        {
-          -- NORMAL mode mappings
-          mode = { 'n' },
-          { '<C-g>r', '<cmd>GpRewrite<cr>', desc = 'Inline Rewrite', nowait = true, remap = false },
-          { '<C-g>a', '<cmd>GpAppend<cr>', desc = 'Append (after)', nowait = true, remap = false },
-          { '<C-g>b', '<cmd>GpPrepend<cr>', desc = 'Prepend (before)', nowait = true, remap = false },
+        -- NORMAL mode mappings
+        n = {
+          { '<C-g>r', '<cmd>GpRewrite', 'Inline Rewrite' },
+          { '<C-g>a', '<cmd>GpAppend', 'Append (after)' },
+          { '<C-g>b', '<cmd>GpPrepend', 'Prepend (before)' },
 
-          { '<C-g>c', '<cmd>GpChatNew<cr>', desc = 'New Chat', nowait = true, remap = false },
-          { '<C-g>t', '<cmd>GpChatToggle<cr>', desc = 'Toggle Chat', nowait = true, remap = false },
+          { '<C-g>c', '<cmd>GpChatNew', 'New Chat' },
+          { '<C-g>t', '<cmd>GpChatToggle', 'Toggle Chat' },
 
-          { '<C-g>s', '<cmd>GpStop<cr>', desc = 'GpStop', nowait = true, remap = false },
-          { '<C-g>x', '<cmd>GpContext<cr>', desc = 'Toggle GpContext', nowait = true, remap = false },
-          { '<C-g>n', '<cmd>GpNextAgent<cr>', desc = 'Next Agent', nowait = true, remap = false },
-          { '<C-g>f', '<cmd>GpChatFinder<cr>', desc = 'Chat Finder', nowait = true, remap = false },
+          { '<C-g>s', '<cmd>GpStop', 'GpStop' },
+          { '<C-g>x', '<cmd>GpContext', 'Toggle GpContext' },
+          { '<C-g>n', '<cmd>GpNextAgent', 'Next Agent' },
+          { '<C-g>f', '<cmd>GpChatFinder', 'Chat Finder' },
 
-          { '<C-g><C-x>', '<cmd>GpChatNew split<cr>', desc = 'New Chat split', nowait = true, remap = false },
-          { '<C-g><C-v>', '<cmd>GpChatNew vsplit<cr>', desc = 'New Chat vsplit', nowait = true, remap = false },
-          { '<C-g><C-t>', '<cmd>GpChatNew tabnew<cr>', desc = 'New Chat tabnew', nowait = true, remap = false },
+          { '<C-g><C-x>', '<cmd>GpChatNew split', 'New Chat split' },
+          { '<C-g><C-v>', '<cmd>GpChatNew vsplit', 'New Chat vsplit' },
+          { '<C-g><C-t>', '<cmd>GpChatNew tabnew', 'New Chat tabnew' },
 
-          { '<C-g>g', group = 'generate into new ..', nowait = true, remap = false },
-          { '<C-g>ge', '<cmd>GpEnew<cr>', desc = 'GpEnew', nowait = true, remap = false },
-          { '<C-g>gn', '<cmd>GpNew<cr>', desc = 'GpNew', nowait = true, remap = false },
-          { '<C-g>gp', '<cmd>GpPopup<cr>', desc = 'Popup', nowait = true, remap = false },
-          { '<C-g>gt', '<cmd>GpTabnew<cr>', desc = 'GpTabnew', nowait = true, remap = false },
-          { '<C-g>gv', '<cmd>GpVnew<cr>', desc = 'GpVnew', nowait = true, remap = false },
+          { "<C-g>g", group = "Generate into new..." },
+          { '<C-g>ge', '<cmd>GpEnew', 'GpEnew' },
+          { '<C-g>gn', '<cmd>GpNew', 'GpNew' },
+          { '<C-g>gp', '<cmd>GpPopup', 'Popup' },
+          { '<C-g>gt', '<cmd>GpTabnew', 'GpTabnew' },
+          { '<C-g>gv', '<cmd>GpVnew', 'GpVnew' },
 
-          { '<C-g>w', group = 'Whisper', nowait = true, remap = false },
-          { '<C-g>wa', '<cmd>GpWhisperAppend<cr>', desc = 'Whisper Append (after)', nowait = true, remap = false },
-          { '<C-g>wb', '<cmd>GpWhisperPrepend<cr>', desc = 'Whisper Prepend (before)', nowait = true, remap = false },
-          { '<C-g>we', '<cmd>GpWhisperEnew<cr>', desc = 'Whisper Enew', nowait = true, remap = false },
-          { '<C-g>wn', '<cmd>GpWhisperNew<cr>', desc = 'Whisper New', nowait = true, remap = false },
-          { '<C-g>wp', '<cmd>GpWhisperPopup<cr>', desc = 'Whisper Popup', nowait = true, remap = false },
-          { '<C-g>wr', '<cmd>GpWhisperRewrite<cr>', desc = 'Whisper Inline Rewrite', nowait = true, remap = false },
-          { '<C-g>wt', '<cmd>GpWhisperTabnew<cr>', desc = 'Whisper Tabnew', nowait = true, remap = false },
-          { '<C-g>wv', '<cmd>GpWhisperVnew<cr>', desc = 'Whisper Vnew', nowait = true, remap = false },
-          { '<C-g>ww', '<cmd>GpWhisper<cr>', desc = 'Whisper', nowait = true, remap = false },
+          { "<C-g>w", group = "Whisper" },
+          { '<C-g>wa', '<cmd>GpWhisperAppend', 'Whisper Append (after)' },
+          { '<C-g>wb', '<cmd>GpWhisperPrepend', 'Whisper Prepend (before)' },
+          { '<C-g>we', '<cmd>GpWhisperEnew', 'Whisper Enew' },
+          { '<C-g>wn', '<cmd>GpWhisperNew', 'Whisper New' },
+          { '<C-g>wp', '<cmd>GpWhisperPopup', 'Whisper Popup' },
+          { '<C-g>wr', '<cmd>GpWhisperRewrite', 'Whisper Inline Rewrite' },
+          { '<C-g>wt', '<cmd>GpWhisperTabnew', 'Whisper Tabnew' },
+          { '<C-g>wv', '<cmd>GpWhisperVnew', 'Whisper Vnew' },
+          { '<C-g>ww', '<cmd>GpWhisper', 'Whisper' },
         },
-        {
-          -- INSERT mode mappings
-          mode = { 'i' },
-          { '<C-g>r', '<cmd>GpRewrite<cr>', desc = 'Inline Rewrite', nowait = true, remap = false },
-          { '<C-g>a', '<cmd>GpAppend<cr>', desc = 'Append (after)', nowait = true, remap = false },
-          { '<C-g>b', '<cmd>GpPrepend<cr>', desc = 'Prepend (before)', nowait = true, remap = false },
+        -- INSERT mode mappings
+        i = {
+          { '<C-g>r', '<cmd>GpRewrite', 'Inline Rewrite' },
+          { '<C-g>a', '<cmd>GpAppend', 'Append (after)' },
+          { '<C-g>b', '<cmd>GpPrepend', 'Prepend (before)' },
 
-          { '<C-g>s', '<cmd>GpStop<cr>', desc = 'GpStop', nowait = true, remap = false },
-          { '<C-g>x', '<cmd>GpContext<cr>', desc = 'Toggle GpContext', nowait = true, remap = false },
-          { '<C-g>n', '<cmd>GpNextAgent<cr>', desc = 'Next Agent', nowait = true, remap = false },
-          { '<C-g>f', '<cmd>GpChatFinder<cr>', desc = 'Chat Finder', nowait = true, remap = false },
+          { '<C-g>s', '<cmd>GpStop', 'GpStop' },
+          { '<C-g>x', '<cmd>GpContext', 'Toggle GpContext' },
+          { '<C-g>n', '<cmd>GpNextAgent', 'Next Agent' },
+          { '<C-g>f', '<cmd>GpChatFinder', 'Chat Finder' },
 
-          { '<C-g><C-x>', '<cmd>GpChatNew split<cr>', desc = 'New Chat split', nowait = true, remap = false },
-          { '<C-g><C-v>', '<cmd>GpChatNew vsplit<cr>', desc = 'New Chat vsplit', nowait = true, remap = false },
-          { '<C-g><C-t>', '<cmd>GpChatNew tabnew<cr>', desc = 'New Chat tabnew', nowait = true, remap = false },
+          { '<C-g><C-x>', '<cmd>GpChatNew split', 'New Chat split' },
+          { '<C-g><C-v>', '<cmd>GpChatNew vsplit', 'New Chat vsplit' },
+          { '<C-g><C-t>', '<cmd>GpChatNew tabnew', 'New Chat tabnew' },
 
-          { '<C-g>g', group = 'generate into new ..', nowait = true, remap = false },
-          { '<C-g>ge', '<cmd>GpEnew<cr>', desc = 'GpEnew', nowait = true, remap = false },
-          { '<C-g>gn', '<cmd>GpNew<cr>', desc = 'GpNew', nowait = true, remap = false },
-          { '<C-g>gp', '<cmd>GpPopup<cr>', desc = 'Popup', nowait = true, remap = false },
-          { '<C-g>gt', '<cmd>GpTabnew<cr>', desc = 'GpTabnew', nowait = true, remap = false },
-          { '<C-g>gv', '<cmd>GpVnew<cr>', desc = 'GpVnew', nowait = true, remap = false },
+          { "<C-g>g", group = "Generate into new..." },
+          { '<C-g>ge', '<cmd>GpEnew', 'GpEnew' },
+          { '<C-g>gn', '<cmd>GpNew', 'GpNew' },
+          { '<C-g>gp', '<cmd>GpPopup', 'Popup' },
+          { '<C-g>gt', '<cmd>GpTabnew', 'GpTabnew' },
+          { '<C-g>gv', '<cmd>GpVnew', 'GpVnew' },
 
-          { '<C-g>w', group = 'Whisper', nowait = true, remap = false },
-          { '<C-g>wa', '<cmd>GpWhisperAppend<cr>', desc = 'Whisper Append (after)', nowait = true, remap = false },
-          { '<C-g>wb', '<cmd>GpWhisperPrepend<cr>', desc = 'Whisper Prepend (before)', nowait = true, remap = false },
-          { '<C-g>we', '<cmd>GpWhisperEnew<cr>', desc = 'Whisper Enew', nowait = true, remap = false },
-          { '<C-g>wn', '<cmd>GpWhisperNew<cr>', desc = 'Whisper New', nowait = true, remap = false },
-          { '<C-g>wp', '<cmd>GpWhisperPopup<cr>', desc = 'Whisper Popup', nowait = true, remap = false },
-          { '<C-g>wr', '<cmd>GpWhisperRewrite<cr>', desc = 'Whisper Inline Rewrite', nowait = true, remap = false },
-          { '<C-g>wt', '<cmd>GpWhisperTabnew<cr>', desc = 'Whisper Tabnew', nowait = true, remap = false },
-          { '<C-g>wv', '<cmd>GpWhisperVnew<cr>', desc = 'Whisper Vnew', nowait = true, remap = false },
-          { '<C-g>ww', '<cmd>GpWhisper<cr>', desc = 'Whisper', nowait = true, remap = false },
-        }
+          { "<C-g>w", group = "Whisper" },
+          { '<C-g>wa', '<cmd>GpWhisperAppend', 'Whisper Append (after)' },
+          { '<C-g>wb', '<cmd>GpWhisperPrepend', 'Whisper Prepend (before)' },
+          { '<C-g>we', '<cmd>GpWhisperEnew', 'Whisper Enew' },
+          { '<C-g>wn', '<cmd>GpWhisperNew', 'Whisper New' },
+          { '<C-g>wp', '<cmd>GpWhisperPopup', 'Whisper Popup' },
+          { '<C-g>wr', '<cmd>GpWhisperRewrite', 'Whisper Inline Rewrite' },
+          { '<C-g>wt', '<cmd>GpWhisperTabnew', 'Whisper Tabnew' },
+          { '<C-g>wv', '<cmd>GpWhisperVnew', 'Whisper Vnew' },
+          { '<C-g>ww', '<cmd>GpWhisper', 'Whisper' },
+        },
       }
+
+      for mode, map in pairs(mappings) do
+        local output_map = { mode = { mode } }
+
+        for _, keymap in ipairs(map) do
+          local entry = { keymap[1], nowait = true, remap = false }
+          if keymap.group then
+            entry.group = keymap.group
+          else
+            entry[2] = keymap[2] .. '<cr>'
+            entry.desc = keymap[3]
+          end
+
+          table.insert(output_map, entry)
+        end
+
+        require('which-key').add(output_map)
+      end
     end,
   },
   --

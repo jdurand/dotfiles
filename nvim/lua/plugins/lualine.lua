@@ -47,6 +47,12 @@ local function harpoon_component()
   return string.format("󱡅 %s/%d", current_mark, mark_count)
 end
 
+local function macro_recording ()
+  local reg = vim.fn.reg_recording()
+  if reg == "" then return "" end -- not recording
+  return " @" .. reg
+end
+
 return {
   {
     'nvim-lualine/lualine.nvim',
@@ -69,8 +75,9 @@ return {
           -- lualine_a = { { 'mode', separator = { left = '' }, right_padding = 2 } },
           lualine_b = {
             { 'branch', icon = "", fmt = truncate_branch_name },
-            harpoon_component,
             'diff',
+            harpoon_component,
+            macro_recording,
             'diagnostics',
           },
           lualine_c = {

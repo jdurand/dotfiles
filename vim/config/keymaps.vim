@@ -11,11 +11,6 @@ noremap <silent> <C-S> :update<CR>
 vnoremap <silent> <C-S> <C-C>:update<CR>
 inoremap <silent> <C-S> <C-O>:update<CR>
 
-" Custom comment maps
-" ----------------------------------------------------------------------------------------------------
-nmap <Leader>cc <Plug>CommentaryLine
-xmap <Leader>bc <Plug>Commentary
-
 " Always go to the mark’s line and column
 " ----------------------------------------------------------------------------------------------------
 nmap ' `
@@ -52,11 +47,6 @@ nmap <silent> ˚ ddkkp
 vmap <silent> ∆ djPV`]
 vmap <silent> ˚ dkPV`]
 
-" Easy buffer navigation
-" ----------------------------------------------------------------------------------------------------
-" nmap > :bnext<CR>
-" nmap < :bprevious<CR>
-
 " Select only the text caracters in the current line
 " ----------------------------------------------------------------------------------------------------
 nmap √ ^v$h
@@ -75,17 +65,9 @@ nnoremap <S-Tab> mzV<`zh
 " ----------------------------------------------------------------------------------------------------
 nmap <silent> \ :silent noh<Bar>echo<Bar>NoiceDismiss<CR>
 
-" " Prevent accidental uses of <F1>
-" " ----------------------------------------------------------------------------------------------------
-" map <F1> <ESC>
-
 " Use Alt-4 to go to the end of the line, but not totally.
 " ----------------------------------------------------------------------------------------------------
 vmap ¢ $h
-
-" Disable ex mode, damnit
-" ----------------------------------------------------------------------------------------------------
-nmap Q :echo "BOOYA! Ex mode is disabled."<cr>
 
 " Copy file path to clipboard
 " ----------------------------------------------------------------------------------------------------
@@ -100,4 +82,3 @@ nnoremap <Leader>- :split<CR><C-w>j
 nnoremap <Leader>j :split<CR><C-w>j
 
 nnoremap <C-]> :tag <c-r><c-w><cr>
-

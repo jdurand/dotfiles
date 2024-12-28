@@ -1,34 +1,4 @@
 
-" Plugged settings
-" ----------------------------------------------------------------------------------------------------
-let g:plug_window = 'topleft new'
-
-" " ctrlp.vim settings
-" " ----------------------------------------------------------------------------------------------------
-" map <Leader>t :CtrlP $(pwd)<CR>
-" map <Leader>o :CtrlP %:p:h<CR>
-" map <Leader>, :CtrlPBuffer<CR>
-" map <Leader>m :CtrlPMRU<CR>
-" map <Leader>T :CtrlPClearCache<CR>:CtrlP $(pwd)<CR>
-" let g:ctrlp_match_window = 'bottom,order:btt,min:1,max:10,results:10'
-" let g:ctrlp_status_func = { 'main': '', 'prog': '' }
-" let g:ctrlp_open_new_file = 'r'
-" let g:ctrlp_show_hidden = 1
-" let g:ctrlp_custom_ignore = {
-" \ 'dir':  '\v(^|\/)(deps|doc|log|vendor|tmp|_build|node_modules|\.git|bower_components|\.bower-cache|dist)$',
-" \ 'file':  '\v(^|\/)(\.DS_Store|.*\.js\.map)$',
-" \}
-
-" Legacy Command-T settings
-" " ----------------------------------------------------------------------------------------------------
-" map <Leader>t :KommandT<CR>
-" map <Leader>, :CommandTBuffer<CR>
-" let g:CommandTMaxFiles=200000
-" let g:CommandTSuppressMaxFilesWarning=1
-let g:CommandTFileScanner='git'
-" let g:CommandTPreferredImplementation='ruby'
-" let g:CommandTPreferredImplementation='lua'
-
 " YankRing
 " ----------------------------------------------------------------------------------------------------
 let g:yankring_history_dir = expand('$HOME').'/.vim-local'
@@ -76,8 +46,3 @@ hi! def link jsThis Identifier
 " vim-jsx settings
 " ----------------------------------------------------------------------------------------------------
 let g:jsx_ext_required = 0
-
-" vim-commentary settings
-" ----------------------------------------------------------------------------------------------------
-nmap <Leader>cc <Plug>CommentaryLine
-xmap <Leader>cc <Plug>Commentary

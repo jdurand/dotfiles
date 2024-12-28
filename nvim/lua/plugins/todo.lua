@@ -3,7 +3,6 @@ return {
   'tpope/vim-eunuch',
   'mileszs/ack.vim',
   'christoomey/vim-tmux-navigator',
-  'nvim-tree/nvim-web-devicons', -- not strictly required, but recommended
   'nvim-lua/plenary.nvim',
   'MunifTanjim/nui.nvim',
   'wincent/terminus',

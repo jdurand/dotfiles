@@ -1,3 +1,7 @@
+local keymap = require('user.keymaps.bind')
+local nnoremap = keymap.nnoremap
+local xnoremap = keymap.xnoremap
+
 return {
   {
     'numToStr/Comment.nvim',
@@ -6,23 +10,26 @@ return {
         -- add any options here
     },
     config = function()
-      require('Comment').setup({
-        -- ignore = '^$',
-        -- toggler = {
-        --   line = '<leader>cc',
-        --   block = '<leader>bc',
-        -- },
-        -- opleader = {
-        --   line = '<leader>c',
-        --   block = '<leader>b',
-        -- },
-      })
+      local api = require('Comment.api')
+      local esc = vim.api.nvim_replace_termcodes(
+        '<escape>', true, false, true
+      )
 
-      -- vim.keymap.set("n", "<Leader>cc", function() require('Comment.api').toggle.linewise.current() end, { noremap = true, silent = true })
-      -- vim.keymap.set("n", "<Leader>bc", function() require('Comment.api').toggle.blockwise.current() end, { noremap = true, silent = true })
+      local function toggle_comment(mode, type)
+        vim.api.nvim_feedkeys(esc, 'nx', false)
+        if mode == 'n' then
+          api.toggle[type].current()
+        else
+          api.toggle[type](vim.fn.visualmode())
+        end
+      end
+
+      nnoremap('<Leader>cc', function() toggle_comment('n', 'linewise') end)
+      nnoremap('<Leader>bc', function() toggle_comment('n', 'blockwise') end)
+      xnoremap('<leader>cc', function() toggle_comment('x', 'linewise') end)
+      xnoremap('<leader>bc', function() toggle_comment('x', 'blockwise') end)
     end,
   },
-  'tpope/vim-commentary', -- couldn’t figure out how to map <leader>cc using Comment.nvim
   {
     'JoosepAlviste/nvim-ts-context-commentstring',
     config = function()

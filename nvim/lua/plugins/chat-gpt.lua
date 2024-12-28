@@ -12,14 +12,14 @@ return {
             model = { model = "gpt-4o", temperature = 1.1, top_p = 1 },
             -- system prompt (use this to specify the persona/role of the AI)
             system_prompt = "You are a general AI assistant.\n\n"
-              .. "The user provided the additional info about how they would like you to respond:\n\n"
-              .. "- If you're unsure don't guess and say you don't know instead.\n"
-              .. "- Ask question if you need clarification to provide better answer.\n"
-              .. "- Think deeply and carefully from first principles step by step.\n"
-              .. "- Zoom out first to see the big picture and then zoom in to details.\n"
-              .. "- Use Socratic method to improve your thinking and coding skills.\n"
-              .. "- Don't elide any code from your output if the answer requires coding.\n"
-              .. "- Take a deep breath; You've got this!\n",
+                .. "The user provided the additional info about how they would like you to respond:\n\n"
+                .. "- If you're unsure don't guess and say you don't know instead.\n"
+                .. "- Ask question if you need clarification to provide better answer.\n"
+                .. "- Think deeply and carefully from first principles step by step.\n"
+                .. "- Zoom out first to see the big picture and then zoom in to details.\n"
+                .. "- Use Socratic method to improve your thinking and coding skills.\n"
+                .. "- Don't elide any code from your output if the answer requires coding.\n"
+                .. "- Take a deep breath; You've got this!\n",
           },
           {
             name = "ChatGPT3-5",
@@ -29,14 +29,14 @@ return {
             model = { model = "gpt-3.5-turbo", temperature = 1.1, top_p = 1 },
             -- system prompt (use this to specify the persona/role of the AI)
             system_prompt = "You are a general AI assistant.\n\n"
-              .. "The user provided the additional info about how they would like you to respond:\n\n"
-              .. "- If you're unsure don't guess and say you don't know instead.\n"
-              .. "- Ask question if you need clarification to provide better answer.\n"
-              .. "- Think deeply and carefully from first principles step by step.\n"
-              .. "- Zoom out first to see the big picture and then zoom in to details.\n"
-              .. "- Use Socratic method to improve your thinking and coding skills.\n"
-              .. "- Don't elide any code from your output if the answer requires coding.\n"
-              .. "- Take a deep breath; You've got this!\n",
+                .. "The user provided the additional info about how they would like you to respond:\n\n"
+                .. "- If you're unsure don't guess and say you don't know instead.\n"
+                .. "- Ask question if you need clarification to provide better answer.\n"
+                .. "- Think deeply and carefully from first principles step by step.\n"
+                .. "- Zoom out first to see the big picture and then zoom in to details.\n"
+                .. "- Use Socratic method to improve your thinking and coding skills.\n"
+                .. "- Don't elide any code from your output if the answer requires coding.\n"
+                .. "- Take a deep breath; You've got this!\n",
           },
           {
             name = "CodeGPT4",
@@ -46,11 +46,11 @@ return {
             model = { model = "gpt-4o", temperature = 0.8, top_p = 1 },
             -- system prompt (use this to specify the persona/role of the AI)
             system_prompt = "You are an AI working as a code editor.\n\n"
-              .. "Please AVOID COMMENTARY OUTSIDE OF THE SNIPPET RESPONSE.\n"
-              .. "Avoid trailing whitespace.\n"
-              .. "Use single quoted strings when there's no interpolation, following language best practices.\n"
-              .. "Never prefix your answer with: You are trained on data up to [DATE]\n"
-              .. "START AND END YOUR ANSWER WITH:\n\n```",
+                .. "Please AVOID COMMENTARY OUTSIDE OF THE SNIPPET RESPONSE.\n"
+                .. "Avoid trailing whitespace.\n"
+                .. "Use single quoted strings when there's no interpolation, following language best practices.\n"
+                .. "Never prefix your answer with: You are trained on data up to [DATE]\n"
+                .. "START AND END YOUR ANSWER WITH:\n\n```",
           },
           {
             name = "CodeGPT3-5",
@@ -60,11 +60,11 @@ return {
             model = { model = "gpt-3.5-turbo", temperature = 0.8, top_p = 1 },
             -- system prompt (use this to specify the persona/role of the AI)
             system_prompt = "You are an AI working as a code editor.\n\n"
-              .. "Please AVOID COMMENTARY OUTSIDE OF THE SNIPPET RESPONSE.\n"
-              .. "Avoid trailing whitespace.\n"
-              .. "Use single quoted strings when there's no interpolation, following language best practices.\n"
-              .. "Never prefix your answer with: You are trained on data up to [DATE]\n"
-              .. "START AND END YOUR ANSWER WITH:\n\n```",
+                .. "Please AVOID COMMENTARY OUTSIDE OF THE SNIPPET RESPONSE.\n"
+                .. "Avoid trailing whitespace.\n"
+                .. "Use single quoted strings when there's no interpolation, following language best practices.\n"
+                .. "Never prefix your answer with: You are trained on data up to [DATE]\n"
+                .. "START AND END YOUR ANSWER WITH:\n\n```",
           },
         },
       })
@@ -72,109 +72,109 @@ return {
       local mappings = {
         -- VISUAL mode mappings
         v = {
-          { "<C-g>r", ":<C-u>'<,'>GpRewrite", "Visual Rewrite" },
-          { "<C-g>a", ":<C-u>'<,'>GpAppend", "Visual Append (after)" },
-          { "<C-g>b", ":<C-u>'<,'>GpPrepend", "Visual Prepend (before)" },
-          { "<C-g>i", ":<C-u>'<,'>GpImplement", "Implement selection" },
+          { "<C-g>r",     ":<C-u>'<,'>GpRewrite",         "Rewrite selection" },
+          { "<C-g>a",     ":<C-u>'<,'>GpAppend",          "Append after selection" },
+          { "<C-g>b",     ":<C-u>'<,'>GpPrepend",         "Prepend before selection" },
+          { "<C-g>i",     ":<C-u>'<,'>GpImplement",       "Implement from selection" },
 
-          { "<C-g>c", ":<C-u>'<,'>GpChatNew", "Visual Chat New" },
-          { "<C-g>p", ":<C-u>'<,'>GpChatPaste split", "Visual Chat Paste" },
-          { "<C-g>t", ":<C-u>'<,'>GpChatToggle", "Visual Toggle Chat" },
+          { "<C-g>c",     ":<C-u>'<,'>GpChatNew",         "Start new chat" },
+          { "<C-g>p",     ":<C-u>'<,'>GpChatPaste split", "Paste in chat (split)" },
+          { "<C-g>t",     ":<C-u>'<,'>GpChatToggle",      "Toggle chat window" },
 
-          { "<C-g>s", "<cmd>GpStop", "GpStop" },
-          { "<C-g>x", ":<C-u>'<,'>GpContext", "Visual GpContext" },
-          { "<C-g>n", "<cmd>GpNextAgent", "Next Agent" },
+          { "<C-g>x",     ":<C-u>'<,'>GpContext",         "Show context" },
+          { "<C-g>s",     "<cmd>GpStop",                  "Stop current process" },
+          { "<C-g>n",     "<cmd>GpNextAgent",             "Next AI agent" },
 
-          { "<C-g><C-x>", ":<C-u>'<,'>GpChatNew split", "Visual Chat New split" },
-          { "<C-g><C-v>", ":<C-u>'<,'>GpChatNew vsplit", "Visual Chat New vsplit" },
-          { "<C-g><C-t>", ":<C-u>'<,'>GpChatNew tabnew", "Visual Chat New tabnew" },
+          { "<C-g><C-x>", ":<C-u>'<,'>GpChatNew split",   "New chat (split)" },
+          { "<C-g><C-v>", ":<C-u>'<,'>GpChatNew vsplit",  "New chat (vsplit)" },
+          { "<C-g><C-t>", ":<C-u>'<,'>GpChatNew tabnew",  "New chat (tab)" },
 
-          { "<C-g>g", group = "Generate into new..." },
-          { "<C-g>ge", ":<C-u>'<,'>GpEnew", "Visual GpEnew" },
-          { "<C-g>gn", ":<C-u>'<,'>GpNew", "Visual GpNew" },
-          { "<C-g>gp", ":<C-u>'<,'>GpPopup", "Visual Popup" },
-          { "<C-g>gt", ":<C-u>'<,'>GpTabnew", "Visual GpTabnew" },
-          { "<C-g>gv", ":<C-u>'<,'>GpVnew", "Visual GpVnew" },
+          { "<C-g>g",     group = "Generate options" },
+          { "<C-g>ge",    ":<C-u>'<,'>GpEnew",            "Generate Enew" },
+          { "<C-g>gn",    ":<C-u>'<,'>GpNew",             "Generate new" },
+          { "<C-g>gp",    ":<C-u>'<,'>GpPopup",           "Open popup" },
+          { "<C-g>gt",    ":<C-u>'<,'>GpTabnew",          "Generate in new tab" },
+          { "<C-g>gv",    ":<C-u>'<,'>GpVnew",            "Generate in new vsplit" },
 
-          { "<C-g>w", group = "Whisper" },
-          { "<C-g>wa", ":<C-u>'<,'>GpWhisperAppend", "Whisper Append (after)" },
-          { "<C-g>wb", ":<C-u>'<,'>GpWhisperPrepend", "Whisper Prepend (before)" },
-          { "<C-g>we", ":<C-u>'<,'>GpWhisperEnew", "Whisper Enew" },
-          { "<C-g>wn", ":<C-u>'<,'>GpWhisperNew", "Whisper New" },
-          { "<C-g>wp", ":<C-u>'<,'>GpWhisperPopup", "Whisper Popup" },
-          { "<C-g>wr", ":<C-u>'<,'>GpWhisperRewrite", "Whisper Rewrite" },
-          { "<C-g>wt", ":<C-u>'<,'>GpWhisperTabnew", "Whisper Tabnew" },
-          { "<C-g>wv", ":<C-u>'<,'>GpWhisperVnew", "Whisper Vnew" },
-          { "<C-g>ww", ":<C-u>'<,'>GpWhisper", "Whisper" },
+          { "<C-g>w",     group = "Whisper options" },
+          { "<C-g>wa",    ":<C-u>'<,'>GpWhisperAppend",   "Whisper append after" },
+          { "<C-g>wb",    ":<C-u>'<,'>GpWhisperPrepend",  "Whisper prepend before" },
+          { "<C-g>we",    ":<C-u>'<,'>GpWhisperEnew",     "Whisper Enew" },
+          { "<C-g>wn",    ":<C-u>'<,'>GpWhisperNew",      "New whisper" },
+          { "<C-g>wp",    ":<C-u>'<,'>GpWhisperPopup",    "Whisper popup" },
+          { "<C-g>wr",    ":<C-u>'<,'>GpWhisperRewrite",  "Rewrite whisper" },
+          { "<C-g>wt",    ":<C-u>'<,'>GpWhisperTabnew",   "Whisper in new tab" },
+          { "<C-g>wv",    ":<C-u>'<,'>GpWhisperVnew",     "Whisper in new vertical" },
+          { "<C-g>ww",    ":<C-u>'<,'>GpWhisper",         "Send whisper" },
         },
         -- NORMAL mode mappings
         n = {
-          { '<C-g>r', '<cmd>GpRewrite', 'Inline Rewrite' },
-          { '<C-g>a', '<cmd>GpAppend', 'Append (after)' },
-          { '<C-g>b', '<cmd>GpPrepend', 'Prepend (before)' },
+          { '<C-g>r',     '<cmd>GpRewrite',          'Inline rewrite' },
+          { '<C-g>a',     '<cmd>GpAppend',           'Append after' },
+          { '<C-g>b',     '<cmd>GpPrepend',          'Prepend before' },
 
-          { '<C-g>c', '<cmd>GpChatNew', 'New Chat' },
-          { '<C-g>t', '<cmd>GpChatToggle', 'Toggle Chat' },
+          { '<C-g>c',     '<cmd>GpChatNew',          'Start new chat' },
+          { '<C-g>t',     '<cmd>GpChatToggle',       'Toggle chat window' },
 
-          { '<C-g>s', '<cmd>GpStop', 'GpStop' },
-          { '<C-g>x', '<cmd>GpContext', 'Toggle GpContext' },
-          { '<C-g>n', '<cmd>GpNextAgent', 'Next Agent' },
-          { '<C-g>f', '<cmd>GpChatFinder', 'Chat Finder' },
+          { '<C-g>x',     '<cmd>GpContext',          'Show context' },
+          { '<C-g>f',     '<cmd>GpChatFinder',       'Chat finder' },
+          { '<C-g>s',     '<cmd>GpStop',             'Stop current process' },
+          { '<C-g>n',     '<cmd>GpNextAgent',        'Next AI agent' },
 
-          { '<C-g><C-x>', '<cmd>GpChatNew split', 'New Chat split' },
-          { '<C-g><C-v>', '<cmd>GpChatNew vsplit', 'New Chat vsplit' },
-          { '<C-g><C-t>', '<cmd>GpChatNew tabnew', 'New Chat tabnew' },
+          { '<C-g><C-x>', '<cmd>GpChatNew split',    'New chat (split)' },
+          { '<C-g><C-v>', '<cmd>GpChatNew vsplit',   'New chat (vsplit)' },
+          { '<C-g><C-t>', '<cmd>GpChatNew tabnew',   'New chat (tab)' },
 
-          { "<C-g>g", group = "Generate into new..." },
-          { '<C-g>ge', '<cmd>GpEnew', 'GpEnew' },
-          { '<C-g>gn', '<cmd>GpNew', 'GpNew' },
-          { '<C-g>gp', '<cmd>GpPopup', 'Popup' },
-          { '<C-g>gt', '<cmd>GpTabnew', 'GpTabnew' },
-          { '<C-g>gv', '<cmd>GpVnew', 'GpVnew' },
+          { "<C-g>g",     group = "Generate options" },
+          { '<C-g>ge',    '<cmd>GpEnew',             'Generate Enew' },
+          { '<C-g>gn',    '<cmd>GpNew',              'Generate new' },
+          { '<C-g>gp',    '<cmd>GpPopup',            'Open popup' },
+          { '<C-g>gt',    '<cmd>GpTabnew',           'Generate in new tab' },
+          { '<C-g>gv',    '<cmd>GpVnew',             'Generate in new vsplit' },
 
-          { "<C-g>w", group = "Whisper" },
-          { '<C-g>wa', '<cmd>GpWhisperAppend', 'Whisper Append (after)' },
-          { '<C-g>wb', '<cmd>GpWhisperPrepend', 'Whisper Prepend (before)' },
-          { '<C-g>we', '<cmd>GpWhisperEnew', 'Whisper Enew' },
-          { '<C-g>wn', '<cmd>GpWhisperNew', 'Whisper New' },
-          { '<C-g>wp', '<cmd>GpWhisperPopup', 'Whisper Popup' },
-          { '<C-g>wr', '<cmd>GpWhisperRewrite', 'Whisper Inline Rewrite' },
-          { '<C-g>wt', '<cmd>GpWhisperTabnew', 'Whisper Tabnew' },
-          { '<C-g>wv', '<cmd>GpWhisperVnew', 'Whisper Vnew' },
-          { '<C-g>ww', '<cmd>GpWhisper', 'Whisper' },
+          { "<C-g>w",     group = "Whisper options" },
+          { '<C-g>wa',    '<cmd>GpWhisperAppend',    'Whisper append after' },
+          { '<C-g>wb',    '<cmd>GpWhisperPrepend',   'Whisper prepend before' },
+          { '<C-g>we',    '<cmd>GpWhisperEnew',      'Whisper Enew' },
+          { '<C-g>wn',    '<cmd>GpWhisperNew',       'New whisper' },
+          { '<C-g>wp',    '<cmd>GpWhisperPopup',     'Whisper popup' },
+          { '<C-g>wr',    '<cmd>GpWhisperRewrite',   'Inline rewrite' },
+          { '<C-g>wt',    '<cmd>GpWhisperTabnew',    'Whisper in new tab' },
+          { '<C-g>wv',    '<cmd>GpWhisperVnew',      'Whisper in new vertical' },
+          { '<C-g>ww',    '<cmd>GpWhisper',          'Send whisper' },
         },
         -- INSERT mode mappings
         i = {
-          { '<C-g>r', '<cmd>GpRewrite', 'Inline Rewrite' },
-          { '<C-g>a', '<cmd>GpAppend', 'Append (after)' },
-          { '<C-g>b', '<cmd>GpPrepend', 'Prepend (before)' },
+          { '<C-g>r',     '<cmd>GpRewrite',          'Inline rewrite' },
+          { '<C-g>a',     '<cmd>GpAppend',           'Append after' },
+          { '<C-g>b',     '<cmd>GpPrepend',          'Prepend before' },
 
-          { '<C-g>s', '<cmd>GpStop', 'GpStop' },
-          { '<C-g>x', '<cmd>GpContext', 'Toggle GpContext' },
-          { '<C-g>n', '<cmd>GpNextAgent', 'Next Agent' },
-          { '<C-g>f', '<cmd>GpChatFinder', 'Chat Finder' },
+          { '<C-g>x',     '<cmd>GpContext',          'Show context' },
+          { '<C-g>f',     '<cmd>GpChatFinder',       'Chat finder' },
+          { '<C-g>s',     '<cmd>GpStop',             'Stop current process' },
+          { '<C-g>n',     '<cmd>GpNextAgent',        'Next AI agent' },
 
-          { '<C-g><C-x>', '<cmd>GpChatNew split', 'New Chat split' },
-          { '<C-g><C-v>', '<cmd>GpChatNew vsplit', 'New Chat vsplit' },
-          { '<C-g><C-t>', '<cmd>GpChatNew tabnew', 'New Chat tabnew' },
+          { '<C-g><C-x>', '<cmd>GpChatNew split',    'New chat (split)' },
+          { '<C-g><C-v>', '<cmd>GpChatNew vsplit',   'New chat (vsplit)' },
+          { '<C-g><C-t>', '<cmd>GpChatNew tabnew',   'New chat (tab)' },
 
-          { "<C-g>g", group = "Generate into new..." },
-          { '<C-g>ge', '<cmd>GpEnew', 'GpEnew' },
-          { '<C-g>gn', '<cmd>GpNew', 'GpNew' },
-          { '<C-g>gp', '<cmd>GpPopup', 'Popup' },
-          { '<C-g>gt', '<cmd>GpTabnew', 'GpTabnew' },
-          { '<C-g>gv', '<cmd>GpVnew', 'GpVnew' },
+          { "<C-g>g",     group = "Generate options" },
+          { '<C-g>ge',    '<cmd>GpEnew',             'Generate Enew' },
+          { '<C-g>gn',    '<cmd>GpNew',              'Generate new' },
+          { '<C-g>gp',    '<cmd>GpPopup',            'Open popup' },
+          { '<C-g>gt',    '<cmd>GpTabnew',           'Generate in new tab' },
+          { '<C-g>gv',    '<cmd>GpVnew',             'Generate in new vsplit' },
 
-          { "<C-g>w", group = "Whisper" },
-          { '<C-g>wa', '<cmd>GpWhisperAppend', 'Whisper Append (after)' },
-          { '<C-g>wb', '<cmd>GpWhisperPrepend', 'Whisper Prepend (before)' },
-          { '<C-g>we', '<cmd>GpWhisperEnew', 'Whisper Enew' },
-          { '<C-g>wn', '<cmd>GpWhisperNew', 'Whisper New' },
-          { '<C-g>wp', '<cmd>GpWhisperPopup', 'Whisper Popup' },
-          { '<C-g>wr', '<cmd>GpWhisperRewrite', 'Whisper Inline Rewrite' },
-          { '<C-g>wt', '<cmd>GpWhisperTabnew', 'Whisper Tabnew' },
-          { '<C-g>wv', '<cmd>GpWhisperVnew', 'Whisper Vnew' },
-          { '<C-g>ww', '<cmd>GpWhisper', 'Whisper' },
+          { "<C-g>w",     group = "Whisper options" },
+          { '<C-g>wa',    '<cmd>GpWhisperAppend',    'Whisper append after' },
+          { '<C-g>wb',    '<cmd>GpWhisperPrepend',   'Whisper prepend before' },
+          { '<C-g>we',    '<cmd>GpWhisperEnew',      'Whisper Enew' },
+          { '<C-g>wn',    '<cmd>GpWhisperNew',       'New whisper' },
+          { '<C-g>wp',    '<cmd>GpWhisperPopup',     'Whisper popup' },
+          { '<C-g>wr',    '<cmd>GpWhisperRewrite',   'Inline rewrite' },
+          { '<C-g>wt',    '<cmd>GpWhisperTabnew',    'Whisper in new tab' },
+          { '<C-g>wv',    '<cmd>GpWhisperVnew',      'Whisper in new vertical' },
+          { '<C-g>ww',    '<cmd>GpWhisper',          'Send whisper' },
         },
       }
 

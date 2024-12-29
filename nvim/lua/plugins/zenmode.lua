@@ -65,24 +65,30 @@ return {
       on_open = function(--[[ win ]])
         -- vim.o.cmdheight = 1
         require('lualine').hide({ place = {}, unhide = false })
+
+        require('tokyonight').setup({ transparent = true })
+        vim.cmd.colorscheme(vim.g.colors_name)
       end,
       -- callback where you can add custom code when the Zen window closes
       on_close = function()
         -- vim.o.cmdheight = 0
         require('lualine').hide({ place = {}, unhide = true })
+
+        require('tokyonight').setup({ transparent = false })
+        vim.cmd.colorscheme(vim.g.colors_name)
       end,
     }
   },
   {
     'folke/twilight.nvim',
     opts = {
-      -- dimming = {
-      --   alpha = 0.25, -- amount of dimming
-      --   -- we try to get the foreground from the highlight groups or fallback color
-      --   color = { "Normal", "#ffffff" },
-      --   term_bg = "#000000", -- if guibg=NONE, this will be used to calculate text color
-      --   inactive = false, -- when true, other windows will be fully dimmed (unless they contain the same buffer)
-      -- },
+      dimming = {
+        alpha = 0.35, -- amount of dimming
+        -- we try to get the foreground from the highlight groups or fallback color
+        color = { "Normal", "#ffffff" },
+        term_bg = "#000000", -- if guibg=NONE, this will be used to calculate text color
+        inactive = false, -- when true, other windows will be fully dimmed (unless they contain the same buffer)
+      },
       -- context = 10, -- amount of lines we will try to show around the current line
       -- treesitter = true, -- use treesitter when available for the filetype
       -- -- treesitter is used to automatically expand the visible text,

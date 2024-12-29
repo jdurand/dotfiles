@@ -1,3 +1,4 @@
+[general]
 import = [
   # themes:
   # "~/.config/alacritty/themes/catppuccin-latte.toml"
@@ -15,32 +16,24 @@ import = [
 [env]
 TERM = "xterm-256color"
 
-
 [window]
 startup_mode = "fullscreen"
-# padding.x = 10
-# padding.y = 10
-# decorations = "Buttonless"
-
+decorations = "Buttonless"
+padding.x = 5
+padding.y = 5
+dynamic_padding = true
+opacity = 0.85
+# blur = true
 
 [font]
+size = 13
+normal.style = "Regular"
+normal.family = "VictorMono Nerd Font"
 # normal.family = "SauceCodePro Nerd Font"
-# bold.family = "SauceCodePro Nerd Font"
-# italic.family = "SauceCodePro Nerd Font"
-
 # normal.family = "Iosevka"
 # normal.family = "ZedMono Nerd Font"
 # normal.family = "MesloLGS Nerd Font Mono"
 
-# normal.family = "VictorMono"
-normal.family = "VictorMono Nerd Font"
-
-normal.style = "Regular"
-
-size = 15
-
-
 [[keyboard.bindings]]
 key = "F11"
 action = "ToggleFullscreen"
-

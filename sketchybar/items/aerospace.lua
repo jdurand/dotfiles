@@ -146,7 +146,7 @@ local function initializeWorkspaces(specified_order)
         background = {
           color = colors.bg1,
           border_width = 1,
-          height = 28,
+          height = 24,
           border_color = colors.bg2,
         },
         click_script = "aerospace workspace " .. workspace_name,

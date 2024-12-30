@@ -147,6 +147,6 @@ for dir in alacritty kitty tmuxinator nvim bat; do
 done
 
 # Create symlink for the default .tmuxinator.yml
-create_symlink "$HOME/.dotfiles/tmuxinator/tmuxinator.default.yml" "$HOME/.tmuxinator.yml"
+create_symlink "$HOME/.dotfiles/tmuxinator/tmuxinator.yml" "$HOME/.tmuxinator.yml"
 
 info "All tasks completed successfully."

@@ -74,5 +74,11 @@ export SAVEHIST=1000000
 export LANG="en_US.UTF-8"
 export LC_ALL=$LANG
 
+# Replace cat with bat
+alias cat='bat --paging=never'
+
+# Use bat as a colorizing pager for man
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+
 # Increase opened file limit
 ulimit -n 2048

@@ -8,8 +8,12 @@ local config = wezterm.config_builder()
 
 config.hide_tab_bar_if_only_one_tab = true
 config.disable_default_key_bindings = true
-config.window_decorations = 'RESIZE'
 config.window_close_confirmation = 'NeverPrompt'
+
+-- config.window_decorations = 'RESIZE'
+-- config.window_decorations = 'NONE'
+-- config.window_decorations = 'TITLE'
+config.window_decorations = 'TITLE | RESIZE'
 
 local hour = os.date("*t").hour
 
@@ -40,9 +44,11 @@ config.colors = {
 config.keys = {
   -- paste from the clipboard
   { key = 'v', mods = 'SUPER', action = wezterm.action.PasteFrom 'Clipboard' },
+  { key = 'v', mods = 'CTRL|SHIFT', action = wezterm.action.PasteFrom 'Clipboard' },
 
   -- paste from the primary selection
   { key = 'V', mods = 'SUPER', action = wezterm.action.PasteFrom 'PrimarySelection' },
+  { key = 'V', mods = 'CTRL|SHIFT', action = wezterm.action.PasteFrom 'PrimarySelection' },
 
   -- close tab with
   { key = 'w', mods = 'CMD', action = wezterm.action.CloseCurrentTab { confirm = false } },

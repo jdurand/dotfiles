@@ -79,9 +79,12 @@ for package in direnv fzf zoxide eza gh jq; do
 done
 
 # Install required packages for Yazi
-for package in yazi ffmpegthumbnailer sevenzip poppler fd ripgrep imagemagick font-symbols-only-nerd-font; do
+for package in yazi ffmpegthumbnailer sevenzip poppler fd ripgrep imagemagick; do
   install_package_if_needed "${package}"
 done
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  install_package_if_needed "font-symbols-only-nerd-font"
+fi
 
 # Install required packages for Tmux Tokyo Night Theme
 for package in bc coreutils gawk glab gsed; do
@@ -121,6 +124,7 @@ declare -A SYMLINKS=(
   ["$HOME/.dotfiles/vim/vimrc"]="$HOME/.vimrc"
   ["$HOME/.dotfiles/fzf/fzf.zsh"]="$HOME/.fzf.zsh"
   ["$HOME/.dotfiles/fzf"]="$HOME/.fzf"
+  ["$HOME/.dotfiles/wezterm/config.lua"]="$HOME/.wezterm.lua"
 )
 
 # Iterate through and create symlinks
@@ -134,7 +138,7 @@ mkdir -p ~/.config
 
 # Symlink directories inside ~/.dotfiles to ~/.config
 cd ~/.dotfiles
-for dir in alacritty nvim powerline tmuxinator kitty; do
+for dir in alacritty kitty tmuxinator nvim bat; do
   if [ -d "$dir" ]; then
     create_symlink "$HOME/.dotfiles/$dir" "$HOME/.config/$dir"
   else

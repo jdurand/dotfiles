@@ -55,6 +55,9 @@ config.keys = {
 
   -- close pane
   { key = 'W', mods = 'CMD', action = wezterm.action.CloseCurrentPane { confirm = false } },
+
+  -- toggle fullscreen
+  { key = 'F11', action = wezterm.action.ToggleFullScreen },
 }
 
 -- config.inactive_pane_hsb = {

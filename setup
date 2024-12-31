@@ -149,4 +149,9 @@ done
 # Create symlink for the default .tmuxinator.yml
 create_symlink "$HOME/.dotfiles/tmuxinator/tmuxinator.yml" "$HOME/.tmuxinator.yml"
 
+# Create a symbolic links for Linux
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  create_symlink "$HOME/.dotfiles/imwheel/imwheelrc" "$HOME/.imwheelrc"
+fi
+
 info "All tasks completed successfully."

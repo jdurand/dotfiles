@@ -115,12 +115,20 @@ return {
           -- theme = 'molokai',
           -- theme = 'onedark',
           theme = neon_theme,
+
           -- component_separators = { left = "█", right = "█" },
           -- component_separators = { left = "", right = "" },
           component_separators = '',
           -- section_separators = { left = "█", right = "█" },
           section_separators = { left = "", right = "" },
+
           -- section_separators = { left = '', right = '' },
+          -- disabled_filetypes = {
+          -- },
+          ignore_focus = {
+            'dapui_watches', 'dapui_breakpoints', 'dapui_scopes',
+            'dapui_console', 'dapui_stacks', 'dap-repl'
+          },
         },
         sections = {
           -- lualine_a = { { 'mode', separator = { left = '' }, right_padding = 2 } },

@@ -10,18 +10,24 @@ return {
       'antoinemadec/FixCursorHold.nvim',
       'nvim-treesitter/nvim-treesitter',
       'olimorris/neotest-rspec',
+      'mfussenegger/nvim-dap',
     },
     config = function()
       local api = require('neotest')
       local rspec = require('neotest-rspec')
 
+      ---@diagnostic disable: missing-fields
       api.setup({
+        log_level = vim.log.levels.INFO,
+        consumers = {},
+        icons = {},
+        highlights = {},
+        projects = {},
         adapters = {
           rspec({
             rspec_cmd = function(type) -- file, test, dir
-              if type == "test" then
+              if type == 'test' then
                 return {
-                  -- 'RSPEC_OPTS="--format doc"',
                   'bundle', 'exec', 'rspec',
                   '--fail-fast',
                   '--color',
@@ -29,14 +35,14 @@ return {
               else
                 return {
                   'bundle', 'exec', 'rspec',
-                  -- 'RSPEC_OPTS="--format Fuubar"',
                   '--color',
                 }
               end
-           end
-          })
+            end,
+          }),
         },
       })
+      ---@diagnostic enable: missing-fields
 
       nnoremap('[t', function() api.jump.prev({ status = 'failed' }) end, { desc = 'Previous failed test' })
       nnoremap(']t', function() api.jump.next({ status = 'failed' }) end, { desc = 'Next failed test' })
@@ -60,10 +66,123 @@ return {
   {
     'mfussenegger/nvim-dap',
     dependencies = {
-      'suketa/nvim-dap-ruby'
+      'rcarriga/nvim-dap-ui',
+      'theHamsta/nvim-dap-virtual-text',
+      'nvim-telescope/telescope-dap.nvim',
     },
     config = function()
-      require('dap-ruby').setup()
+      local dap = require('dap')
+      local dapui = require('dapui')
+
+      ---@diagnostic disable: missing-fields
+      dapui.setup({
+        layouts = {
+          {
+          --   elements = {
+          --     {
+          --       id = "scopes",
+          --       size = 0.25
+          --     }, {
+          --       id = "breakpoints",
+          --       size = 0.25
+          --     }, {
+          --       id = "stacks",
+          --       size = 0.25
+          --     }, {
+          --       id = "watches",
+          --       size = 0.25
+          --     }
+          --   },
+          --   position = "left",
+          --   size = 40
+          -- }, {
+            elements = {
+              {
+                id = 'watches',
+                size = 0.25
+              }, {
+                id = 'repl',
+                size = 0.75
+              -- }, {
+              --   id = 'console',
+              --   size = 0.5
+              }
+            },
+            position = 'bottom',
+            size = 10
+          }
+        },
+      })
+      require('nvim-dap-virtual-text').setup({
+        commented = true
+      })
+      require('user.extensions.nvim-dap-ruby').setup()
+      ---@diagnostic enable: missing-fields
+
+      local function float_debug_console()
+        dapui.float_element('repl', {
+          title = 'Debuging Console',
+          width = 100,
+          height = 20,
+          enter = true,
+          position = 'center'
+        })
+      end
+
+      local function float_debug_watches()
+        dapui.float_element('watches', {
+          title = 'Watches',
+          width = 100,
+          height = 20,
+          enter = true,
+          position = 'center'
+        })
+      end
+
+      -- Configure DAP UI to open and close with debug events
+      dap.listeners.before.attach.dapui_config = function() dapui.open() end
+      dap.listeners.before.launch.dapui_config = function() dapui.open() end
+      dap.listeners.before.event_terminated.dapui_config = function() dapui.close() end
+      dap.listeners.before.event_exited.dapui_config = function() dapui.close() end
+
+      local whichkey = require('which-key')
+
+      whichkey.add({
+        { 'td', group = 'Debug', nowait = false, remap = false },
+
+        { 'tdC', function() dap.set_breakpoint(vim.fn.input("[Condition] > ")) end, desc = 'Conditional Breakpoint', nowait = false, remap = false },
+
+        { 'tdt', function() dap.toggle_breakpoint() end, desc = 'Toggle Breakpoint', nowait = false, remap = false },
+        { 'tdX', function() dap.clear_breakpoints() end, desc = 'Clear breakpoints', nowait = false, remap = false },
+
+        { 'tds', function() dap.continue() end, desc = 'Start', nowait = false, remap = false },
+        { 'tdc', function() dap.continue() end, desc = 'Continue', nowait = false, remap = false },
+        { 'tda', function() dap.restart() end, desc = 'Restart', nowait = false, remap = false },
+        { 'tdx', function() dap.terminate() end, desc = 'Terminate', nowait = false, remap = false },
+
+        { 'tdj', function() dap.up() end, desc = 'Go up the stack frame', nowait = false, remap = false },
+        { 'tdk', function() dap.down() end, desc = 'Go down the stack frame', nowait = false, remap = false },
+        { 'tdi', function() dap.step_into() end, desc = 'Step Into', nowait = false, remap = false },
+        { 'tdu', function() dap.step_out() end, desc = 'Step Out', nowait = false, remap = false },
+        { 'tdo', function() dap.step_over() end, desc = 'Step Over', nowait = false, remap = false },
+        { 'tdd', function() dap.focus_frame() end, desc = 'Focus current frame', nowait = false, remap = false },
+
+        { 'tde', function() dapui.eval(); dapui.eval() end, desc = 'Evaluate', nowait = false, remap = false },
+
+        { 'tdh', function() require("dap.ui.widgets").hover() end, desc = 'Hover Variables', nowait = false, remap = false },
+        { 'tdr', function() float_debug_console() end, desc = 'Toggle Repl', nowait = false, remap = false },
+        { 'tdw', function() float_debug_watches() end, desc = 'Toggle Watch', nowait = false, remap = false },
+        { 'tdU', function() dapui.toggle() end, desc = 'Toggle UI', nowait = false, remap = false },
+
+        { 'tdb', "<cmd>Telescope dap list_breakpoints<cr>", desc = 'Telescope list breakpoints', nowait = false, remap = false },
+        { 'tdf', "<cmd>Telescope dap frames<cr>", desc = 'Telescope frames', nowait = false, remap = false },
+        { 'tdv', '<cmd>Telescope dap variables<cr>', desc = 'Telescope list variables', nowait = false, remap = false },
+      })
+
+      whichkey.add({
+        { 'td', group = 'Debug', mode = 'v', nowait = false, remap = false },
+        { 'tde', function() require('dapui').eval(); require('dapui').eval() end, desc = 'Evaluate', mode = 'v', nowait = false, remap = false },
+      })
     end
-  }
+  },
 }

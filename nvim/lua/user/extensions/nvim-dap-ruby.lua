@@ -81,42 +81,60 @@ end
 
 local function setup_ruby_adapter(dap)
   dap.adapters.ruby = function(callback, config)
-    local waiting = config.waiting or 500
-    local server = config.server or vim.env.RUBY_DEBUG_HOST or '127.0.0.1'
+    if config.request == 'attach' then
+      local waiting = config.waiting or 500
+      local server = config.server or vim.env.RUBY_DEBUG_HOST or '127.0.0.1'
 
-    local function run_on_port(port)
-      if config.command then
-        vim.env.RUBY_DEBUG_OPEN = true
-        vim.env.RUBY_DEBUG_HOST = server
-        vim.env.RUBY_DEBUG_PORT = port
-        run_cmd(
-          config.command, config.args, config.current_line, config.current_file,
-          config.error_on_failure
-        )
+      local function run_on_port(port)
+        if config.command then
+          vim.env.RUBY_DEBUG_OPEN = true
+          vim.env.RUBY_DEBUG_HOST = server
+          vim.env.RUBY_DEBUG_PORT = port
+          run_cmd(
+            config.command, config.args, config.current_line, config.current_file,
+            config.error_on_failure
+          )
+        end
+
+        -- Wait for rdbg to start
+        vim.defer_fn(function()
+          callback({ type = "server", host = server, port = port })
+        end, waiting)
       end
 
-      -- Wait for rdbg to start
-      vim.defer_fn(function()
-        callback({ type = "server", host = server, port = port })
-      end, waiting)
-    end
+      -- Take the port from the config if the user has set this
+      -- If not, pick a random ephemeral port so we (probably) wont collide with other debuggers or anything else
+      -- If not, have the user pick a port
+      config.port = config.port or (config.random_port and math.random(49152, 65535))
 
-    -- Take the port from the config if the user has set this
-    -- If not, pick a random ephemeral port so we (probably) wont collide with other debuggers or anything else
-    -- If not, have the user pick a port
-    config.port = config.port or (config.random_port and math.random(49152, 65535))
-
-    if config.port then
-      run_on_port(config.port)
+      if config.port then
+        run_on_port(config.port)
+      else
+        prompt_for_port(run_on_port)
+      end
     else
-      prompt_for_port(run_on_port)
+      callback({
+        type = "executable",
+        command = config.command,
+        args = { config.program };
+        options = { source_filetype = "ruby" }
+      })
     end
   end
 end
 
 local function setup_ruby_configuration(dap)
-  local base_config = { type = "ruby", request = "attach", options = { source_filetype = "ruby" }, error_on_failure = true, localfs = true }
-  local run_config = vim.tbl_extend("force", base_config, { waiting = 1000, random_port = true })
+  local base_config = {
+    type = "ruby",
+    request = "attach",
+    options = { source_filetype = "ruby" },
+    error_on_failure = true,
+    localfs = true
+  }
+  local run_config = vim.tbl_extend("force", base_config, {
+    waiting = 1000,
+    random_port = true
+  })
 
   local function extend_base_config(config)
     return vim.tbl_extend("force", base_config, config)
@@ -126,24 +144,34 @@ local function setup_ruby_configuration(dap)
     return vim.tbl_extend("force", run_config, config)
   end
 
-  dap.configurations.ruby = {
-    --
-    -- TDOO: find a way to filter these options based on the filename
-    --
-    extend_run_config({ name = "run rspec current_file:current_line", command = "bundle", args = { "exec", "rspec" }, current_line = true, error_on_failure = false }),
-    extend_run_config({ name = "run rspec current file", command = "bundle", args = { "exec", "rspec" }, current_file = true, error_on_failure = false }),
-    extend_run_config({ name = "run rspec", command = "bundle", args = { "exec", "rspec" }, error_on_failure = false }),
+  local function add_rspec_configs()
+    local rspec_config = { command = "bundle", args = { "exec", "rspec" }, error_on_failure = false }
 
-    extend_run_config({ name = "debug current file", command = "ruby", args = { "-rdebug" }, current_file = true }),
+    dap.configurations.ruby = vim.list_extend(dap.configurations.ruby or {}, {
+      extend_run_config(vim.tbl_extend('force', { name = "RSpec: run nearest test (line)", current_line = true }, rspec_config)),
+      extend_run_config(vim.tbl_extend('force', { name = "RSpec: run current spec (file)", current_file = true }, rspec_config)),
+      extend_run_config(vim.tbl_extend('force', { name = "RSpec: run entire suite" }, rspec_config)),
+    })
+  end
 
-    extend_run_config({ name = "run rails", command = "bundle", args = { "exec", "rails", "server" }, error_on_failure = false }),
-    extend_run_config({ name = "bin/dev", command = "bin/dev", error_on_failure = false }),
+  local function add_rails_configs()
+    dap.configurations.ruby = vim.list_extend(dap.configurations.ruby or {}, {
+      extend_run_config({ name = "Rails: execute `rails server`", command = "bundle", args = { "exec", "rails", "server" }, error_on_failure = false }),
+      extend_run_config({ name = "Rails: execute `bin/dev`", command = "bin/dev", error_on_failure = false }),
+    })
+  end
 
-    -- extend_base_config({ name = "attach existing (port 38698)", port = 38698, waiting = 0 }),
-    extend_base_config({ name = "attach existing (pick port)", waiting = 0 }),
+  local function add_ruby_configs()
+    dap.configurations.ruby = vim.list_extend(dap.configurations.ruby or {}, {
+      -- { type = 'ruby', name = "Ruby: Run Current File", command = "ruby", program = '${file}', request = 'launch' },
+      extend_run_config({ name = "Ruby: debug current file (rdbg)", command = "rdbg", current_file = true }),
+      extend_base_config({ name = "Ruby: attach to existing session (port)", waiting = 0 }),
+    })
+  end
 
-    -- extend_run_config({ name = "dap", command = "bundle", args = { "exec", "rspec" }, current_line = true }),
-  }
+  add_rspec_configs()
+  add_rails_configs()
+  add_ruby_configs()
 end
 
 function M.setup()

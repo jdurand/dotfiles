@@ -185,4 +185,17 @@ return {
       })
     end
   },
+  {
+    'm00qek/baleia.nvim',
+    config = function()
+      local baleia = require('baleia').setup({})
+
+      vim.api.nvim_create_autocmd({ 'FileType' }, {
+        pattern = 'dap-repl',
+        callback = function()
+          baleia.automatically(vim.api.nvim_get_current_buf())
+        end,
+      })
+    end
+  }
 }

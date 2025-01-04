@@ -8,15 +8,18 @@ local function load_module(module_name)
   return module
 end
 
-local function pick_port()
-  local port
-
+local function prompt_for_port(callback)
   vim.ui.input(
-    { prompt = "Select port to connect to: " },
-    function(input) port = input end
+    { prompt = "Input port to connect to: " },
+    function(input)
+      if input and input:match("^%d+$") then
+        callback(tonumber(input))
+      else
+        print("Invalid port selected.")
+        callback(nil)
+      end
+    end
   )
-
-  return port
 end
 
 -- Command may not be in path, so travel up the directory tree to find it
@@ -80,28 +83,34 @@ local function setup_ruby_adapter(dap)
   dap.adapters.ruby = function(callback, config)
     local waiting = config.waiting or 500
     local server = config.server or vim.env.RUBY_DEBUG_HOST or '127.0.0.1'
+
+    local function run_on_port(port)
+      if config.command then
+        vim.env.RUBY_DEBUG_OPEN = true
+        vim.env.RUBY_DEBUG_HOST = server
+        vim.env.RUBY_DEBUG_PORT = port
+        run_cmd(
+          config.command, config.args, config.current_line, config.current_file,
+          config.error_on_failure
+        )
+      end
+
+      -- Wait for rdbg to start
+      vim.defer_fn(function()
+        callback({ type = "server", host = server, port = port })
+      end, waiting)
+    end
+
     -- Take the port from the config if the user has set this
     -- If not, pick a random ephemeral port so we (probably) wont collide with other debuggers or anything else
     -- If not, have the user pick a port
-    local port = config.port
+    config.port = config.port or (config.random_port and math.random(49152, 65535))
 
-    port = port or config.random_port and math.random(49152, 65535)
-    port = port or pick_port()
-
-    if config.command then
-      vim.env.RUBY_DEBUG_OPEN = true
-      vim.env.RUBY_DEBUG_HOST = server
-      vim.env.RUBY_DEBUG_PORT = port
-      run_cmd(
-        config.command, config.args, config.current_line, config.current_file,
-        config.error_on_failure
-      )
+    if config.port then
+      run_on_port(config.port)
+    else
+      prompt_for_port(run_on_port)
     end
-
-    -- Wait for rdbg to start
-    vim.defer_fn(function()
-      callback({ type = "server", host = server, port = port })
-    end, waiting)
   end
 end
 
@@ -127,10 +136,10 @@ local function setup_ruby_configuration(dap)
 
     extend_run_config({ name = "debug current file", command = "ruby", args = { "-rdebug" }, current_file = true }),
 
-    extend_run_config({ name = "run rails", command = "bundle", args = { "exec", "rails", "s" } }),
-    extend_run_config({ name = "bin/dev", command = "bin/dev" }),
+    extend_run_config({ name = "run rails", command = "bundle", args = { "exec", "rails", "server" }, error_on_failure = false }),
+    extend_run_config({ name = "bin/dev", command = "bin/dev", error_on_failure = false }),
 
-    extend_base_config({ name = "attach existing (port 38698)", port = 38698, waiting = 0 }),
+    -- extend_base_config({ name = "attach existing (port 38698)", port = 38698, waiting = 0 }),
     extend_base_config({ name = "attach existing (pick port)", waiting = 0 }),
 
     -- extend_run_config({ name = "dap", command = "bundle", args = { "exec", "rspec" }, current_line = true }),

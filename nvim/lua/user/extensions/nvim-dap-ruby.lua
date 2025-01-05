@@ -8,20 +8,6 @@ local function load_module(module_name)
   return module
 end
 
-local function prompt_for_port(callback)
-  vim.ui.input(
-    { prompt = "Input port to connect to: " },
-    function(input)
-      if input and input:match("^%d+$") then
-        callback(tonumber(input))
-      else
-        print("Invalid port selected.")
-        callback(nil)
-      end
-    end
-  )
-end
-
 -- Command may not be in path, so travel up the directory tree to find it
 local function find_cmd_dir(cmd)
   local filepath = vim.fn.getcwd()
@@ -79,6 +65,51 @@ local function run_cmd(cmd, args, for_current_line, for_current_file, error_on_f
   end)
 end
 
+
+local base_config = {
+  type = "ruby",
+  request = "attach",
+  options = { source_filetype = "ruby" },
+  error_on_failure = true,
+  localfs = true
+}
+
+local run_config = vim.tbl_extend("force", base_config, {
+  waiting = 1000,
+  random_port = true
+})
+
+local rspec_config = {
+  command = "bundle",
+  args = { "exec", "rspec" },
+  error_on_failure = false
+}
+
+
+local function extend_base_config(config)
+  return vim.tbl_extend("force", base_config, config)
+end
+
+local function extend_run_config(config)
+  return vim.tbl_extend("force", run_config, config)
+end
+
+
+local function prompt_for_port(callback)
+  vim.ui.input(
+    { prompt = "Input port to connect to: " },
+    function(input)
+      if input and input:match("^%d+$") then
+        callback(tonumber(input))
+      else
+        print("Invalid port selected.")
+        callback(nil)
+      end
+    end
+  )
+end
+
+
 local function setup_ruby_adapter(dap)
   dap.adapters.ruby = function(callback, config)
     if config.request == 'attach' then
@@ -124,29 +155,7 @@ local function setup_ruby_adapter(dap)
 end
 
 local function setup_ruby_configuration(dap)
-  local base_config = {
-    type = "ruby",
-    request = "attach",
-    options = { source_filetype = "ruby" },
-    error_on_failure = true,
-    localfs = true
-  }
-  local run_config = vim.tbl_extend("force", base_config, {
-    waiting = 1000,
-    random_port = true
-  })
-
-  local function extend_base_config(config)
-    return vim.tbl_extend("force", base_config, config)
-  end
-
-  local function extend_run_config(config)
-    return vim.tbl_extend("force", run_config, config)
-  end
-
   local function add_rspec_configs()
-    local rspec_config = { command = "bundle", args = { "exec", "rspec" }, error_on_failure = false }
-
     dap.configurations.ruby = vim.list_extend(dap.configurations.ruby or {}, {
       extend_run_config(vim.tbl_extend('force', { name = "RSpec: run nearest test (line)", current_line = true }, rspec_config)),
       extend_run_config(vim.tbl_extend('force', { name = "RSpec: run current spec (file)", current_file = true }, rspec_config)),
@@ -180,5 +189,42 @@ function M.setup()
   setup_ruby_adapter(dap)
   setup_ruby_configuration(dap)
 end
+
+
+local function run_test(config)
+  local dap = load_module("dap")
+
+  config = vim.tbl_extend("force", {
+    type = "ruby",
+    request = "launch",
+  }, config or {})
+
+  dap.run(config)
+end
+
+function M.debug_nearest_test()
+  local config = extend_run_config(
+    vim.tbl_extend("force", {
+      name = "RSpec: run nearest test (line)",
+      current_line = true
+    }, rspec_config)
+  )
+
+  vim.notify(
+    string.format("Starting debug session '%s'...", config.name)
+  )
+
+  return run_test(config)
+end
+
+function M.debug_test()
+  M.debug_nearest_test()
+
+  -- TODO: Implement logic to dynamically select the appropriate debugging configuration
+  --       based on the type of file being edited (e.g., Ruby script, Rails application).
+  --       Additionally, develop a method to accurately locate the corresponding test
+  --       or spec file when working within a Rails project context.
+end
+
 
 return M

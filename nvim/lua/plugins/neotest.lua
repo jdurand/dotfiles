@@ -51,7 +51,9 @@ return {
       nnoremap('trt', function() api.run.run() end, { desc = 'Run nearest test' })
       nnoremap('trl', function() api.run.run_last() end, { desc = 'Re-run last test' })
       nnoremap('trf', function() api.run.run(vim.fn.expand('%')) end, { desc = 'Run current file' })
-      nnoremap('trd', function() api.run.run({ strategy = 'dap' }) end, { desc = 'Debug nearest test' })
+      nnoremap('trD', function() api.run.run({ suite = false, strategy = 'dap' }) end, { desc = 'Debug nearest test' })
+      -- Workaround for the lack of a DAP strategy in nvim-dap-ruby
+      nnoremap('trd', function() require('user.extensions.nvim-dap-ruby').debug_test() end, { desc = "Debug test (ruby)" })
       nnoremap('trA', function() api.run.run(vim.fn.getcwd()) end, { desc = 'Run all files' })
       nnoremap('trq', function() api.run.stop() end, { desc = 'Stop test run' })
 

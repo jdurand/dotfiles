@@ -181,6 +181,7 @@ return {
         { 'tdc', function() dap.continue() end, desc = 'Continue', nowait = false, remap = false },
         { 'tda', function() dap.restart() end, desc = 'Restart', nowait = false, remap = false },
         { 'tdx', function() dap.terminate() end, desc = 'Terminate', nowait = false, remap = false },
+        { 'tdl', function() dap.run_last() end, desc = 'Run Last' },
 
         { 'tdk', function() dap.up() end, desc = 'Go up the stack frame', nowait = false, remap = false },
         { 'tdj', function() dap.down() end, desc = 'Go down the stack frame', nowait = false, remap = false },
@@ -191,7 +192,7 @@ return {
 
         { 'tde', function() dapui.eval(); dapui.eval() end, desc = 'Evaluate', nowait = false, remap = false },
 
-        { 'tdh', function() require("dap.ui.widgets").hover() end, desc = 'Hover Variables', nowait = false, remap = false },
+        { 'tdh', function() require('dap.ui.widgets').hover() end, desc = 'Hover Variables', nowait = false, remap = false },
         { 'tdr', function() float_debug_console() end, desc = 'Toggle Repl', nowait = false, remap = false },
         { 'tdw', function() float_debug_watches() end, desc = 'Toggle Watch', nowait = false, remap = false },
         { 'tdU', function() dapui.toggle() end, desc = 'Toggle UI', nowait = false, remap = false },
@@ -199,6 +200,12 @@ return {
         { 'tdb', "<cmd>Telescope dap list_breakpoints<cr>", desc = 'Telescope list breakpoints', nowait = false, remap = false },
         { 'tdf', "<cmd>Telescope dap frames<cr>", desc = 'Telescope frames', nowait = false, remap = false },
         { 'tdv', '<cmd>Telescope dap variables<cr>', desc = 'Telescope list variables', nowait = false, remap = false },
+
+        -- { 'tdC', function() dap.run_to_cursor() end, desc = 'Run to Cursor' },
+        -- { 'tdg', function() dap.goto_() end, desc = 'Go to Line (No Execute)' },
+        -- { 'tdP', function() dap.pause() end, desc = 'Pause' },
+        -- { 'tdr', function() dap.repl.toggle() end, desc = 'Toggle REPL' },
+        -- { 'tds', function() dap.session() end, desc = 'Session' },
       })
 
       whichkey.add({

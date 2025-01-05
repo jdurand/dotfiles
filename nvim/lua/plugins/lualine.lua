@@ -164,6 +164,8 @@ return {
             macro_recording,
             neotest_status,
             'filetype',
+            'encoding',
+            -- 'fileformat',
             'progress'
           },
           -- lualine_z = { { 'location', separator = { right = '' }, left_padding = 2 } },

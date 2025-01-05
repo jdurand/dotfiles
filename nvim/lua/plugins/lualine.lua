@@ -141,7 +141,6 @@ return {
             'diagnostics',
             { 'filename', path = 1 },
           },
-          -- lualine_x = { 'overseer' },
           lualine_x = {
             {
               'overseer',

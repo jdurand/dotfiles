@@ -175,13 +175,40 @@ function M.debug_nearest_test()
   return dap.run(config)
 end
 
-function M.debug_test()
-  M.debug_nearest_test()
+function M.debug_current_file()
+  local dap = load_module('dap')
 
-  -- TODO: Implement logic to dynamically select the appropriate debugging configuration
-  --       based on the type of file being edited (e.g., Ruby script, Rails application).
-  --       Additionally, develop a method to accurately locate the corresponding test
-  --       or spec file when working within a Rails project context.
+  local config = run_config({
+    name = 'Ruby: debug current file',
+    command = 'rdbg',
+    file_context = true,
+    fail_on_error = true
+  })
+
+  vim.notify(string.format('Starting debug session "%s"...', config.name))
+  return dap.run(config)
+end
+
+function M.debug_test()
+  local file_name = vim.fn.expand('%:t')
+  local file_type = vim.fn.expand('%:e')
+
+  -- Implement logic to dynamically select the appropriate debugging configuration
+  -- based on the type of file being edited (e.g., Ruby script, Rails application).
+  if file_type == 'rb' then
+    if file_name:match('_spec%.rb$') then
+      -- If it's an RSpec spec file, run the nearest test
+      M.debug_nearest_test()
+    else
+      -- For any other ruby file run the entire file
+      M.debug_current_file()
+
+      -- TODO: Develop a method to accurately locate the corresponding test
+      --       or spec file when working within a Rails project context.
+    end
+  else
+    print('Unsupported file type for debugging.')
+  end
 end
 
 return M

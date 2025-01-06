@@ -24,23 +24,17 @@ local function find_executable_directory(cmd)
   error(string.format('Executable "%s" not found in %s or its ancestors', cmd, original_dir))
 end
 
-local function execute_command(cmd, args, line_context, file_context, fail_on_error)
+local function execute_command(cmd, args, fail_on_error)
   local handle
   local pid_or_err
   local stdout = vim.loop.new_pipe(false)
   local working_dir = find_executable_directory(cmd)
 
-  args = args or {}
-
-  if line_context then
-    table.insert(args, string.format('%s:%d', vim.fn.expand('%:p'), vim.fn.line('.')))
-  elseif file_context then
-    table.insert(args, vim.fn.expand('%:p'))
-  end
-
-  local opts = { args = args, cwd = working_dir, stdio = { nil, stdout } }
-
-  handle, pid_or_err = vim.loop.spawn(cmd, opts, function(code)
+  handle, pid_or_err = vim.loop.spawn(cmd, {
+    args = args or {},
+    cwd = working_dir,
+    stdio = { nil, stdout }
+  }, function(code)
     if handle then
       handle:close()
     end
@@ -80,10 +74,10 @@ local function run_config(opts)
 end
 
 local function rspec_config(opts)
-  return run_config(vim.tbl_extend('force', {
+  return run_config(vim.tbl_extend('force', opts or {}, {
     command = 'bundle',
-    args = { 'exec', 'rspec' }
-  }, opts or {}))
+    args = vim.list_extend({ 'exec', 'rspec' }, opts.args or {}),
+  }))
 end
 
 local function add_dap_configs(configs)
@@ -118,7 +112,8 @@ local function setup_ruby_adapter()
           vim.env.RUBY_DEBUG_OPEN = true
           vim.env.RUBY_DEBUG_HOST = server
           vim.env.RUBY_DEBUG_PORT = port
-          execute_command(config.command, config.args, config.line_context, config.file_context, config.fail_on_error)
+
+          execute_command(config.command, config.args, config.fail_on_error)
         end
 
         vim.defer_fn(function()
@@ -145,15 +140,18 @@ local function setup_ruby_adapter()
 end
 
 local function configure_ruby_debugger()
+  local file = vim.fn.expand('%:p')
+  local line = string.format('%s:%d', file, vim.fn.line('.'))
+
   add_dap_configs({
-    rspec_config({ name = 'RSpec: run nearest test (line)', line_context = true }),
-    rspec_config({ name = 'RSpec: run current spec (file)', file_context = true }),
+    rspec_config({ name = 'RSpec: run nearest test (line)', args = { line } }),
+    rspec_config({ name = 'RSpec: run current spec (file)', args = { file } }),
     rspec_config({ name = 'RSpec: run entire suite' }),
 
     run_config({ name = 'Rails: execute `rails server`', command = 'bundle', args = { 'exec', 'rails', 'server' } }),
     run_config({ name = 'Rails: execute `bin/dev`', command = 'bin/dev' }),
 
-    run_config({ name = 'Ruby: debug current file (rdbg)', command = 'rdbg', file_context = true, fail_on_error = true }),
+    run_config({ name = 'Ruby: debug current file (rdbg)', command = 'rdbg', args = { file }, fail_on_error = true }),
     base_config({ name = 'Ruby: attach to existing session (port)', waiting = 0 }),
   })
 end
@@ -165,11 +163,14 @@ end
 
 function M.debug_nearest_test()
   local dap = load_module('dap')
+  local line = string.format('%s:%d', vim.fn.expand('%:p'), vim.fn.line('.'))
 
   local config = rspec_config({
     name = 'RSpec: run nearest test (line)',
-    line_context = true
+    args = { line }
   })
+
+  print(vim.inspect(config))
 
   vim.notify(string.format('Starting debug session "%s"...', config.name))
   return dap.run(config)
@@ -177,11 +178,12 @@ end
 
 function M.debug_current_file()
   local dap = load_module('dap')
+  local file = vim.fn.expand('%:p')
 
   local config = run_config({
     name = 'Ruby: debug current file',
     command = 'rdbg',
-    file_context = true,
+    args = { file },
     fail_on_error = true
   })
 
@@ -207,7 +209,7 @@ function M.debug_test()
       --       or spec file when working within a Rails project context.
     end
   else
-    print('Unsupported file type for debugging.')
+    vim.notify('Unsupported file type for debugging.')
   end
 end
 

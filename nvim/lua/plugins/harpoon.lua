@@ -33,6 +33,8 @@ return {
 
       -- Toggle previous & next buffers stored within Harpoon list
       nnoremap('<leader>hn', function() harpoon:list():next() end, { desc = 'Goto [N]ext Mark' })
+      nnoremap(']h', function() harpoon:list():next() end, { desc = 'Next Harpoon [M]ark' })
+      nnoremap('[h', function() harpoon:list():prev() end, { desc = 'Previous Harpoon [M]ark' })
       nnoremap('>m', function() harpoon:list():next() end, { desc = 'Next Harpoon [M]ark' })
       nnoremap('<m', function() harpoon:list():prev() end, { desc = 'Previous Harpoon [M]ark' })
     end

@@ -1,6 +1,5 @@
-# /Users/jdurand/.config/tmuxinator/obb.yml
 
-name: obb
+name: OpenBB
 root: ~/OpenBBUserData
 
 windows:

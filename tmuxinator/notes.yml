@@ -1,6 +1,5 @@
-# /Users/jdurand/.config/tmuxinator/notes.yml
 
-name: notes
+name: Notes
 root: ~/Notes/
 
 windows:

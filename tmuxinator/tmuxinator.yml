@@ -1,4 +1,4 @@
-# /Users/jdurand/.config/tmuxinator/tmuxinator.default.yml
+# ~/.config/tmuxinator/tmuxinator.default.yml
 
 name: Default
 root: ~/

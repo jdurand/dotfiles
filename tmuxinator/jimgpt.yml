@@ -1,7 +1,8 @@
-# /Users/jdurand/.config/tmuxinator/jimgpt.yml
 
 name: JimGPT
 root: ~/Code/oss/LibreChat/
+
+on_project_first_start: open /Applications/MongoDB.app
 
 windows:
   - editor:

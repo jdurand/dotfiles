@@ -122,6 +122,8 @@ return {
       require('user.extensions.nvim-dap-ruby').setup()
       ---@diagnostic enable: missing-fields
 
+      vim.fn.sign_define('DapBreakpoint', { text='🛑', texthl='DapBreakpoint', linehl='DapBreakpoint', numhl='DapBreakpoint' })
+
       local whichkey = require('which-key')
 
       local function float_debug_console()

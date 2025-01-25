@@ -99,8 +99,10 @@ local function prompt_for_port(callback)
   )
 end
 
-local function setup_ruby_adapter()
+local function setup_ruby_adapter(setup_config)
   local dap = load_module('dap')
+
+  setup_config = setup_config or {}
 
   dap.adapters.ruby = function(callback, config)
     if config.request == 'attach' then
@@ -121,7 +123,7 @@ local function setup_ruby_adapter()
         end, waiting)
       end
 
-      config.port = config.port or (config.random_port and math.random(49152, 65535))
+      config.port = config.port or (config.random_port and math.random(setup_config.debug_port_range[1], setup_config.debug_port_range[2]))
 
       if config.port then
         start_on_port(config.port)
@@ -139,26 +141,47 @@ local function setup_ruby_adapter()
   end
 end
 
-local function configure_ruby_debugger()
+local function configure_ruby_debugger(opts)
+  opts = opts or {}
+
   local file = vim.fn.expand('%:p')
   local line = string.format('%s:%d', file, vim.fn.line('.'))
 
-  add_dap_configs({
-    rspec_config({ name = 'RSpec: run nearest test (line)', args = { line } }),
-    rspec_config({ name = 'RSpec: run current spec (file)', args = { file } }),
-    rspec_config({ name = 'RSpec: run entire suite' }),
+  if opts.dap_configs then
+    for _, config in ipairs(opts.dap_configs) do
+      add_dap_configs({ run_config(config) })
+    end
+  else
+    -- TODO: find a way to generate this list dynamically based on file type and project type (i.e. rails with rspec)
+    --       provide default rails/rspec detection with manual override in setup
+    add_dap_configs({
+      rspec_config({ name = 'RSpec: run nearest test (line)', args = { line } }),
+      rspec_config({ name = 'RSpec: run current spec (file)', args = { file } }),
+      rspec_config({ name = 'RSpec: run entire suite' }),
 
-    run_config({ name = 'Rails: execute `rails server`', command = 'bundle', args = { 'exec', 'rails', 'server' } }),
-    run_config({ name = 'Rails: execute `bin/dev`', command = 'bin/dev' }),
+      run_config({ name = 'Rails: execute `rails server`', command = 'bundle', args = { 'exec', 'rails', 'server' } }),
+      run_config({ name = 'Rails: execute `bin/dev`', command = 'bin/dev' }),
 
-    run_config({ name = 'Ruby: debug current file (rdbg)', command = 'rdbg', args = { file }, fail_on_error = true }),
-    base_config({ name = 'Ruby: attach to existing session (port)', waiting = 0 }),
+      run_config({ name = 'Ruby: debug current file (rdbg)', command = 'rdbg', args = { file }, fail_on_error = true }),
+      base_config({ name = 'Ruby: attach to existing session (port)', waiting = 0 }),
+    })
+  end
+end
+
+function M.setup(opts)
+  opts = opts or {}
+
+  setup_ruby_adapter({
+    debug_port_range = opts.debug_port_range or { 49152, 65535 }
+  })
+
+  configure_ruby_debugger({
+    dap_configs = opts.dap_configs
   })
 end
 
-function M.setup()
-  setup_ruby_adapter()
-  configure_ruby_debugger()
+function M.add_config(opts)
+  add_dap_configs({ run_config(opts) })
 end
 
 function M.debug_nearest_test()
@@ -201,6 +224,9 @@ function M.debug_test()
     if file_name:match('_spec%.rb$') then
       -- If it's an RSpec spec file, run the nearest test
       M.debug_nearest_test()
+    elseif file_name:match('%.rb$') and vim.fn.isdirectory('app') == 1 then
+      -- If it's a Ruby file and it exists within a Rails app context
+      M.debug_current_file()
     else
       -- For any other ruby file run the entire file
       M.debug_current_file()

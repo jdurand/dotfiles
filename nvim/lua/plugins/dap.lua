@@ -55,8 +55,25 @@ return {
       require('nvim-dap-virtual-text').setup({
         commented = true
       })
-      require('user.extensions.nvim-dap-ruby').setup()
       ---@diagnostic enable: missing-fields
+
+      local dap_ruby = require('user.extensions.nvim-dap-ruby')
+
+      dap_ruby.setup({
+        -- debug_port_range = { 49152, 65535 }
+        -- dap_configs = {
+        --   {
+        --     name = 'Rails: execute `rails server`',
+        --     command = 'bundle',
+        --     args = { 'exec', 'rails', 'server' }
+        --   },
+        --   {
+        --     name = 'Rails: execute `bin/dev`',
+        --     command = 'bin/dev'
+        --   }
+        -- }
+      })
+      -- dap_ruby.add_config({ ... })
 
       vim.fn.sign_define('DapBreakpoint', { text='❗', texthl='DapBreakpoint', linehl='DapBreakpoint', numhl='DapBreakpoint' })
 

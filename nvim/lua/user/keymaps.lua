@@ -3,6 +3,7 @@ local keymaps = require('user.keymaps.bind')
 local nnoremap, nmap, vnoremap = keymaps.nnoremap, keymaps.nmap, keymaps.vnoremap
 
 -- Define group keybindings
+-- ----------------------------------------------------------------------------------------------------
 whichkey.add({
   { '<leader>', group = '<leader>' },
   { "<leader>c", group = "[C]ode" }, { "<leader>c_", hidden = true },
@@ -27,6 +28,7 @@ whichkey.add({
 
 -- Define the ZenMode keybind here to prevent conflicts
 -- with `config` block options in the plugin file
+-- ----------------------------------------------------------------------------------------------------
 nnoremap('<leader>z', function()
   require('zen-mode').toggle({
     window = {
@@ -36,9 +38,98 @@ nnoremap('<leader>z', function()
 end, { desc = 'Open in [Z]en Mode' })
 
 -- Other custom keymaps
+-- ----------------------------------------------------------------------------------------------------
 nmap('<leader>yf', function()
   vim.fn.setreg('*', vim.fn.expand('%'))
 end, { desc = 'Copy [f]ile path to clipboard' })
 
 -- Yank selected text on left mouse release
+-- ----------------------------------------------------------------------------------------------------
 vnoremap('<LeftRelease>', '"*ygv<escape>', { desc = 'Yank on mouse selection' })
+
+-- Easy new lines
+-- ----------------------------------------------------------------------------------------------------
+vim.api.nvim_set_keymap('n', 'ø', 'mo<Esc>o<Esc>k`o', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', 'Ø', 'mo<Esc>O<Esc>j`o', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', 'K', '<Esc>i<CR><Esc><Esc>', { noremap = true })
+
+-- Save with CTRL-S
+-- ----------------------------------------------------------------------------------------------------
+vim.api.nvim_set_keymap('n', '<C-S>', ':update<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', '<C-S>', '<C-C>:update<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('i', '<C-S>', '<C-O>:update<CR>', { noremap = true, silent = true })
+
+-- Always go to the mark’s line and column
+-- ----------------------------------------------------------------------------------------------------
+vim.api.nvim_set_keymap('n', "'", "`", { noremap = true })
+vim.api.nvim_set_keymap('v', "'", "`", { noremap = true })
+vim.api.nvim_set_keymap('n', 'g\'', 'g`', { noremap = true })
+vim.api.nvim_set_keymap('v', 'g\'', 'g`', { noremap = true })
+
+-- Remap ^ characters
+-- ----------------------------------------------------------------------------------------------------
+vim.api.nvim_set_keymap('n', 'â', '^a', { noremap = true })
+vim.api.nvim_set_keymap('n', 'î', '^i', { noremap = true })
+vim.api.nvim_set_keymap('n', 'ô', '^o', { noremap = true })
+
+-- Add new Text Objects
+-- ----------------------------------------------------------------------------------------------------
+vim.api.nvim_set_keymap('o', 'i/', ':normal T/vt/<CR>', { noremap = true })
+vim.api.nvim_set_keymap('v', 'i/', 't/oT/', { noremap = true })
+vim.api.nvim_set_keymap('o', 'a/', ':normal F/vf/<CR>', { noremap = true })
+vim.api.nvim_set_keymap('v', 'a/', 'f/oF/', { noremap = true })
+vim.api.nvim_set_keymap('o', 'i|', ':normal T|vt|<CR>', { noremap = true })
+vim.api.nvim_set_keymap('v', 'i|', 't|oT|', { noremap = true })
+vim.api.nvim_set_keymap('o', 'a|', ':normal F|vf|<CR>', { noremap = true })
+vim.api.nvim_set_keymap('v', 'a|', 'f|oF|', { noremap = true })
+
+-- Remap Enter and Backspace
+-- ----------------------------------------------------------------------------------------------------
+vim.api.nvim_set_keymap('v', '<C-M>', '<NOP>', { noremap = true }) -- This maps the Enter key in visual mode
+vim.api.nvim_set_keymap('v', '<BS>', 'dk$', { noremap = true })
+
+-- Easy line moving
+-- ----------------------------------------------------------------------------------------------------
+vim.api.nvim_set_keymap('n', '∆', 'ddp', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '˚', 'ddkkp', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', '∆', 'djPV`]', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', '˚', 'dkPV`]', { noremap = true, silent = true })
+
+-- Select only the text characters in the current line
+-- ----------------------------------------------------------------------------------------------------
+vim.api.nvim_set_keymap('n', '√', '^v$h', { noremap = true })
+
+-- Easy indentation in visual mode
+-- ----------------------------------------------------------------------------------------------------
+vim.api.nvim_set_keymap('v', '<', '<gv', { noremap = true })
+vim.api.nvim_set_keymap('v', '>', '>gv|', { noremap = true })
+vim.api.nvim_set_keymap('v', '<Tab>', '>gv|', { noremap = true })
+vim.api.nvim_set_keymap('v', '<S-Tab>', '<gv', { noremap = true })
+vim.api.nvim_set_keymap('n', '<C-i>', '<C-i>', { noremap = true })
+vim.api.nvim_set_keymap('n', '<Tab>', 'mzV>`zl', { noremap = true })
+vim.api.nvim_set_keymap('n', '<S-Tab>', 'mzV<`zh', { noremap = true })
+
+-- Clear search-highlighted terms and dismiss Noice messages
+-- ----------------------------------------------------------------------------------------------------
+vim.api.nvim_set_keymap('n', '\\', ':silent noh<Bar>echo<Bar>NoiceDismiss<CR>', { noremap = true, silent = true })
+
+-- Use Alt-4 to go to the end of the line, but not totally.
+-- ----------------------------------------------------------------------------------------------------
+vim.api.nvim_set_keymap('v', '¢', '$h', { noremap = true })
+
+-- Search and replace visually selected text
+-- ----------------------------------------------------------------------------------------------------
+vim.api.nvim_set_keymap('v', '<C-r>', '"hy:%s/<C-r>h//g<left><left>', { noremap = true })
+
+-- Buffer navigation and splits
+-- ----------------------------------------------------------------------------------------------------
+vim.api.nvim_set_keymap('n', '<C-c>', ':bp|bd #<CR>', { noremap = true })
+vim.api.nvim_set_keymap('n', '<Leader>=', ':vsplit<CR><C-w>l', { noremap = true })
+vim.api.nvim_set_keymap('n', '<Leader>l', ':vsplit<CR><C-w>l', { noremap = true })
+vim.api.nvim_set_keymap('n', '<Leader>-', ':split<CR><C-w>j', { noremap = true })
+vim.api.nvim_set_keymap('n', '<Leader>j', ':split<CR><C-w>j', { noremap = true })
+
+-- Tag navigation
+-- ----------------------------------------------------------------------------------------------------
+vim.api.nvim_set_keymap('n', '<C-]>', ':tag <C-r><C-w><CR>', { noremap = true })
+

@@ -9,22 +9,22 @@
 -- vim.api.nvim_set_hl(0, 'FoldColumn', { bg = 'none' })
 -- vim.api.nvim_set_hl(0, 'Folded', { bg = 'none' })
 -- vim.api.nvim_set_hl(0, 'SignColumn', { bg = 'none' })
-
+--
 -- -- terminal background color for floaterm
 -- vim.api.nvim_set_hl(0, 'FloaTerm', { bg = vim.g.terminal_color_0 })
 -- -- vim.api.nvim_set_hl(0, 'FloaTerm', { bg = 'none' })
-
+--
 -- -- vim.api.nvim_set_hl(0, 'BufferLineFill', { bg = '#1b1b29' })
 -- -- vim.api.nvim_set_hl(0, 'BufferLineBackground', { bg = '#000000' })
 -- -- vim.api.nvim_set_hl(0, 'BufferLineBufferSelected', { bg = 'none' })
-
+--
 -- -- transparent background for neotree
 -- vim.api.nvim_set_hl(0, 'NeoTreeNormal', { bg = 'none' })
 -- vim.api.nvim_set_hl(0, 'NeoTreeNormalNC', { bg = 'none' })
 -- vim.api.nvim_set_hl(0, 'NeoTreeVertSplit', { bg = 'none' })
 -- vim.api.nvim_set_hl(0, 'NeoTreeWinSeparator', { bg = 'none' })
 -- vim.api.nvim_set_hl(0, 'NeoTreeEndOfBuffer', { bg = 'none' })
-
+--
 -- -- transparent background for nvim-tree
 -- vim.api.nvim_set_hl(0, 'NvimTreeNormal', { bg = 'none' })
 -- vim.api.nvim_set_hl(0, 'NvimTreeVertSplit', { bg = 'none' })

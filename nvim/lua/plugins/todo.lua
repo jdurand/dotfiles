@@ -9,7 +9,6 @@ return {
   'ervandew/supertab', -- Provides context-based autocompletion using the Tab key
   'fvictorio/vim-extract-variable', -- Helps in refactoring by extracting variables to a new line
   'folke/which-key.nvim', -- Displays available keybindings in a popup
-  'echasnovski/mini.icons', -- Adds icon support for better UI representation
   {
     'jalvesaq/Nvim-R', -- Provides R language support and integration in Neovim
     branch = 'stable',

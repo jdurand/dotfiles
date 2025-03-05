@@ -2,55 +2,45 @@
 name: Libro
 root: ~/Code/libro
 
-# Run on project start, the first time
+# # Run on project start, the first time
 on_project_first_start: brew services start postgresql; brew services start redis
 
 # Run on project start, after the first time
 # on_project_restart: brew services restart postgresql; brew services restart redis
 
-# Ideal layouts for a 27" screen
-# 0: console* (2 panes) [364x83] [layout 9483,364x83,0,0[364x17,0,0,0,364x65,0,18,5]] @0 (active)
-# 1: backend (5 panes) [364x83] [layout c0db,364x83,0,0{219x83,0,0[219x74,0,0,12,219x8,0,75,17],144x83,220,0[144x56,220,0,6,144x13,220,57,7,144x12,220,71,20]}] @1
-# 3: dashbaord (2 panes) [364x83] [layout df34,364x83,0,0{219x83,0,0,3,144x83,220,0,8}] @3
-# 4: widget- (1 panes) [364x83] [layout c241,364x83,0,0,4] @4
+# Run on project start, after the first time
+on_project_stop: brew services stop postgresql; brew services stop redis
 
 windows:
   - console:
-      layout: 9483,364x83,0,0[364x17,0,0,0,364x65,0,18,5]
       panes:
-        # - vim ~/Notes/Work/local-notes.md +':cd ~/Notes/Work'
         - cd core-api && git status
   - core:
       root: ~/Code/libro/core-api
-      layout: main-vertical
+      layout: main-horizontal
       # Synchronize all panes of this window, can be enabled before or after the pane commands run.
       # 'before' represents legacy functionality and will be deprecated in a future release, in favour of 'after'
       # synchronize: after
       panes:
         - vim
-        - git pull; update && rails server
-        - foreman start -f Procfile.dev -m "mock=1,worker=1,grunt=1,js=1,css=1"
-        - guard
-        -
+        - git pull; bin/update && sleep 15 && bin/rails server
+        - sleep 30 && bin/foreman start -f Procfile.dev -m "mock=1,worker=1,grunt=1,js=1,css=1,ping=1"
   - dashbaord:
       root: ~/Code/libro/dashboard-web
-      layout: main-vertical
+      layout: main-horizontal
       panes:
         - vim
         - git pull; yarn install && yarn start --ssl
-        -
   - widget:
       root: ~/Code/libro/widgets-web
-      layout: main-vertical
+      layout: main-horizontal
       panes:
         - vim
         - git pull; yarn install && yarn start --ssl
-        -
   - portal:
       root: ~/Code/libro/portal-web
-      layout: main-vertical
+      layout: main-horizontal
       panes:
         - vim
         - npm run build && npm run dev
         - npm run test
-        -

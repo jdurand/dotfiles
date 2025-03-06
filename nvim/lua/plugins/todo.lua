@@ -1,7 +1,6 @@
 return {
   'tpope/vim-abolish', -- Allows for easily working with text variations (camelCase, snake_case, etc.)
   'tpope/vim-eunuch', -- Provides Unix shell utilities within Vim (e.g., :Move, :Delete, :Chmod)
-  'christoomey/vim-tmux-navigator', -- Seamless navigation between Vim and tmux panes
   'nvim-lua/plenary.nvim', -- A Lua library of useful functions for Neovim plugins
   'MunifTanjim/nui.nvim', -- UI component library for Neovim plugins
   'wincent/terminus', -- Enhances terminal integration in Neovim

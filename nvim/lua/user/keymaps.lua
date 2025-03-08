@@ -105,7 +105,6 @@ vim.api.nvim_set_keymap('v', '<', '<gv', { noremap = true })
 vim.api.nvim_set_keymap('v', '>', '>gv|', { noremap = true })
 vim.api.nvim_set_keymap('v', '<Tab>', '>gv|', { noremap = true })
 vim.api.nvim_set_keymap('v', '<S-Tab>', '<gv', { noremap = true })
-vim.api.nvim_set_keymap('n', '<C-i>', '<C-i>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<Tab>', 'mzV>`zl', { noremap = true })
 vim.api.nvim_set_keymap('n', '<S-Tab>', 'mzV<`zh', { noremap = true })
 
@@ -133,3 +132,7 @@ vim.api.nvim_set_keymap('n', '<Leader>j', ':split<CR><C-w>j', { noremap = true }
 -- ----------------------------------------------------------------------------------------------------
 vim.api.nvim_set_keymap('n', '<C-]>', ':tag <C-r><C-w><CR>', { noremap = true })
 
+-- Restore default behavior for Ctrl+i since Tmux overrides it
+-- Remaped C-i to A-i in the terminal emulator configuration
+vim.keymap.set('n', '<C-i>', '<C-i>', { noremap = true, silent = true })
+vim.keymap.set('n', '<A-i>', '<C-i>', { noremap = true, silent = true })

@@ -26,8 +26,10 @@ return {
       nnoremap('<C-t><', ':tabprevious<cr>', { desc = 'Previous Tab' })
       nnoremap('<C-t><C-y>', ':tabnext<cr>', { desc = 'Next Tab' })
       nnoremap('<C-t><C-r>', ':tabprevious<cr>', { desc = 'Previous Tab' })
-      nnoremap('>>', ':tabnext<cr>', { desc = 'Next Tab' })
-      nnoremap('<<', ':tabprevious<cr>', { desc = 'Previous Tab' })
+      -- nnoremap('>>', ':tabnext<cr>', { desc = 'Next Tab' })
+      -- nnoremap('<<', ':tabprevious<cr>', { desc = 'Previous Tab' })
+      nnoremap('>', ':tabnext<cr>', { desc = 'Next Tab' })
+      nnoremap('<', ':tabprevious<cr>', { desc = 'Previous Tab' })
 
       nnoremap('<C-S-PageUp>', ':-tabmove<cr>')
       nnoremap('<C-S-PageDown>', ':+tabmove<cr>')

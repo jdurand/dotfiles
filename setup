@@ -138,7 +138,7 @@ mkdir -p ~/.config
 
 # Symlink directories inside ~/.dotfiles to ~/.config
 cd ~/.dotfiles
-for dir in alacritty kitty tmuxinator nvim bat; do
+for dir in alacritty kitty ghostty tmuxinator nvim bat; do
   if [ -d "$dir" ]; then
     create_symlink "$HOME/.dotfiles/$dir" "$HOME/.config/$dir"
   else

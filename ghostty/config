@@ -1,0 +1,64 @@
+#
+# Theme
+#
+theme = tokyonight-storm
+
+#
+# Font
+#
+font-family = VictorMono Nerd Font Mono
+font-size = 15
+font-thicken = true
+font-feature = +ss05, +ss06 # alternatives for 0 and 7
+# font-feature = -calt, -liga, -dlig # disable ligatures
+# font-family-italic = VictorMono Nerd Font Mono Oblique
+
+#
+# Appearance
+#
+# Hide window decorations, suitable for tiling window managers
+# macos-non-native-fullscreen = true
+macos-titlebar-style = hidden
+
+macos-icon = holographic
+bold-is-bright = true
+cursor-color = #5ebfcf
+background-opacity = 0.85
+background-blur = 10
+window-padding-balance = true
+window-padding-x = 7
+window-padding-y = 7
+
+#
+# Clipboard settings
+#
+clipboard-trim-trailing-spaces = true
+# clipboard-paste-protection = false
+
+#
+# Window behaviour
+#
+# Confirm before closing
+confirm-close-surface = false
+
+# This setting hides the mouse cursor while typing to reduce distractions.
+mouse-hide-while-typing = true
+
+# Have Ghostty quit when all the top-level windows are closed
+quit-after-last-window-closed = true
+
+# Use the Display P3 color space for color interpretation
+window-colorspace = display-p3
+
+#
+# Keybinds
+#
+# Disable new tab creation
+keybind = super+t=ignore
+
+# Reload config
+keybind = cmd+shift+r=reload_config
+
+# This workaround remaps Ctrl+i to Ctrl+a in Tmux to prevent it from being
+# interpreted as TAB, enabling proper handling in child programs, like Neovim.
+keybind = ctrl+i=text:\x1bi

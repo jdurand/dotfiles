@@ -159,7 +159,7 @@ alt-shift-space = 'layout floating tiling'
 alt-shift-f = 'fullscreen'
 alt-shift-semicolon = 'mode service'
 
-alt-backtick = 'exec-and-forget open -a kitty'
+alt-backtick = 'exec-and-forget open -a ghostty'
 # alt-backtick = 'exec-and-forget open -a WezTerm'
 
 # Aerospace application configuration settings
@@ -242,6 +242,9 @@ run = ['layout tiling', 'move-node-to-workspace W']
 
 [[on-window-detected]]
 if.app-id = 'net.kovidgoyal.kitty'
+run = ['layout tiling', 'move-node-to-workspace T']
+[[on-window-detected]]
+if.app-id = 'com.mitchellh.ghostty'
 run = ['layout tiling', 'move-node-to-workspace T']
 [[on-window-detected]]
 if.app-id = 'com.github.wez.wezterm'

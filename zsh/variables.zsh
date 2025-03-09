@@ -16,8 +16,6 @@ export PATH="$PATH:$HOME/go/bin"
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
 
-export RUBYOPT="-W0"
-
 # Add keyboard things (mdloader_mac & QMK firmare) to $PATH
 export PATH="$PATH:$HOME/Code/keyboards/mdloader/build"
 
@@ -79,6 +77,3 @@ alias cat='bat --paging=never'
 
 # Use bat as a colorizing pager for man
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
-
-# Increase opened file limit
-ulimit -n 2048

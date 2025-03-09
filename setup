@@ -146,6 +146,9 @@ for dir in alacritty kitty ghostty tmuxinator nvim bat; do
   fi
 done
 
+# Create symlink for starship.toml
+create_symlink "$HOME/.dotfiles/starship/starship.toml" "$HOME/.config/starship.toml"
+
 # Create symlink for the default .tmuxinator.yml
 create_symlink "$HOME/.dotfiles/tmuxinator/tmuxinator.yml" "$HOME/.tmuxinator.yml"
 

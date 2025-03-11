@@ -24,23 +24,23 @@ windows:
       panes:
         - vim
         - git pull; bin/update && sleep 15 && bin/rails server
-        - sleep 30 && bin/foreman start -f Procfile.dev -m "mock=1,worker=1,grunt=1,js=1,css=1,ping=1"
+        - sleep 5; nvm use default; bin/foreman start -f Procfile.dev -m "mock=1,worker=1,grunt=1,js=1,css=1,ping=1"
   - dashbaord:
       root: ~/Code/libro/dashboard-web
       layout: main-horizontal
       panes:
         - vim
-        - git pull; yarn install && yarn start --ssl
+        - sleep 5; git pull; nvm use && yarn install && yarn start --ssl
   - widget:
       root: ~/Code/libro/widgets-web
       layout: main-horizontal
       panes:
         - vim
-        - git pull; yarn install && yarn start --ssl
+        - sleep 10; git pull; nvm use && yarn install && yarn start --ssl
   - portal:
       root: ~/Code/libro/portal-web
       layout: main-horizontal
       panes:
         - vim
-        - npm run build && npm run dev
-        - npm run test
+        - sleep 15; git pull; npx prisma generate && npm run build && npm run dev
+        - sleep 20; npm run test

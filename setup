@@ -26,15 +26,6 @@ create_symlink() {
   fi
 }
 
-# Install Oh My Zsh
-if [ -d "$HOME/.dotfiles/vendor/oh-my-zsh" ]; then
-  info "Oh My Zsh already installed, updating..."
-  ZSH=~/.dotfiles/vendor/oh-my-zsh git -C $ZSH pull
-else
-  info "Installing Oh My Zsh..."
-  ZSH=~/.dotfiles/vendor/oh-my-zsh sh -c "$(curl -fsSL https://install.ohmyz.sh/)"
-fi
-
 # Function to check and install package if necessary
 install_package_if_needed() {
   local package=$1
@@ -51,23 +42,17 @@ install_package_if_needed() {
   fi
 }
 
-# # Install Oh My Posh
-# install_package_if_needed install jandedobbeleer/oh-my-posh/oh-my-posh
-
-# Install Powerlevel10k
-install_package_if_needed powerlevel10k
-
-# Install Kitty terminal emulator with Victor Mono font
+# Install Ghostty terminal emulator with Starship prompt & Victor Mono font
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  for package in kitty font-victor-mono font-victor-mono-nerd-font; do
+  for package in ghostty starship font-victor-mono font-victor-mono-nerd-font; do
     install_package_if_needed "${package}"
   done
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
   if command -v xrandr > /dev/null; then
-    sudo apt-get install kitty
+    sudo apt-get install ghostty
     warn "you must manually install font-victor-mono font-victor-mono-nerd-font!"
   else
-    warn "Skipping Kitty installation on Synology device or non-GUI system"
+    warn "Skipping ghostty installation on Synology device or non-GUI system"
   fi
 # else
 #   "Unsupported OS type: $OSTYPE"

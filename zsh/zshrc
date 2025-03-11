@@ -1,30 +1,35 @@
-#
-# Load User Variables
+# Load zap zsh plugin manager
+if [ ! -f "${XDG_DATA_HOME:-$HOME/.local/share}/zap/zap.zsh" ]; then
+  zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh) --branch release-v1 --keep
+fi
+source "${XDG_DATA_HOME:-$HOME/.local/share}/zap/zap.zsh"
+
+function load_theme() {
+  # Load starship prompt
+  eval "$(starship init zsh)"
+  # or
+  # Load zap prompt
+  # plug "zap-zsh/zap-prompt"
+}
+
+# Load user variables
 source ~/.zsh/variables.zsh
 
-# Load Themes and Plugins
-source ~/.zsh/themes.zsh
-
-# Load Oh My Zsh Plugins
-# first run: ZSH=~/.dotfiles/vendor/oh-my-zsh sh -c "$(curl -fsSL https://install.ohmyz.sh/)"
-# -----------------------------------------------------------------------------
-export ZSH=~/.dotfiles/vendor/oh-my-zsh
-
-plugins=(battery gh jira nvm direnv fzf fzf-zsh-plugin)
-
-source $ZSH/oh-my-zsh.sh
-
-# Load catppuccin syntax highlights
-# source ~/.zsh/syntax-highlight/catppuccin_mocha-zsh-syntax-highlighting.zsh
-
-# Load Local Config
-test -e "${HOME}/.zshrc.local" && source "${HOME}/.zshrc.local"
-
-# Load iTerm2 shell integration
-test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+# Load theme before plugins for quicker prompt display
+load_theme
 
 # Load Extensions
 source ~/.zsh/extensions.zsh
 
-# Load User Aliases
+# Load local config
+test -e "${HOME}/.zshrc.local" && source "${HOME}/.zshrc.local"
+
+# Load user aliases
 source ~/.zsh/aliases.zsh
+
+# # Load user aliases
+source ~/.zsh/keybinds.zsh
+
+# Load and initialise completion system
+autoload -Uz compinit
+compinit

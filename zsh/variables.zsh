@@ -22,10 +22,10 @@ export PATH="$PATH:$HOME/Code/keyboards/mdloader/build"
 # Add mongoDB.app binaries to path
 export PATH="/Applications/MongoDB.app/Contents/Resources/Vendor/mongodb/bin:$PATH"
 
-# export QMK_HOME="/Users/jdurand/Code/keyboards/massdrop-alt"
-export QMK_HOME="/Users/jdurand/Code/keyboards/qmk_firmware"
-export QMK_FIRMWARE="/Users/jdurand/Code/keyboards/qmk_firmware"
-# export QMK_FIRMWARE="/Users/jdurand/qmk_firmware"
+# export QMK_HOME="$HOME/Code/keyboards/massdrop-alt"
+export QMK_HOME="$HOME/Code/keyboards/qmk_firmware"
+export QMK_FIRMWARE="$HOME/Code/keyboards/qmk_firmware"
+# export QMK_FIRMWARE="$HOME/qmk_firmware"
 
 # MacOS executables
 if [[ "$OSTYPE" == "darwin"* ]]; then

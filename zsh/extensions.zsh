@@ -2,45 +2,42 @@
 # Extensions and Plugins
 # -----------------------------------------------------------------------------
 
-# load zsh-autosuggestions
-source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+source ~/.zsh/waffle-plugins.zsh # depends on zsh-defer
 
-# load zsh-syntax-highlighting
-source "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+# zsh-defer waffle munch "zsh-fzf-history-search"
+waffle stack "joshskidmore/zsh-fzf-history-search"
+zsh-defer plug "zsh-users/zsh-autosuggestions"
+zsh-defer plug "zsh-users/zsh-syntax-highlighting"
 
-# Init rbenv
-eval "$(rbenv init -)"
+# Load add-zsh-hook to easily manage pre- and post-event functions
+autoload -U add-zsh-hook
 
-# load pyenv
-if command -v pyenv 1>/dev/null 2>&1; then
-  eval "$(pyenv init -)"
-
-  # Add python binaries to $PATH
-  export PATH="$PATH:$(pyenv root)/shims"
+# Load fzf zsh extension
+if command -v rbenv 1>/dev/null 2>&1; then
+  eval "$(fzf --zsh)"
 fi
 
-# Load nvm
-export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+for file in ~/.zsh/extensions/*; do
+  [[ -f $file ]] && source "$file"
+done
 
-# take .nvmrc files into account
-autoload -U add-zsh-hook
-load-nvmrc() {
-  local node_version="$(nvm version)"
-  local nvmrc_path="$(nvm_find_nvmrc)"
+if [[ -n "${FLOATERM}" ]]; then
+  zsh-defer load_direnv
+  zsh-defer plug "zap-sh/nvm"
+  zsh-defer load_rbenv
+else
+  load_direnv
+  load_rbenv
+  plug "zap-sh/nvm"
+fi
 
-  if [ -n "$nvmrc_path" ]; then
-    local nvmrc_node_version=$(nvm version "$(cat "${nvmrc_path}")")
+zsh-defer load_iterm_integration
+zsh-defer -t 2 load_pyenv
 
-    if [ "$nvmrc_node_version" = "N/A" ]; then
-      nvm install
-    elif [ "$nvmrc_node_version" != "$node_version" ]; then
-      nvm use
-    fi
-  elif [ "$node_version" != "$(nvm version default)" ]; then
-    echo "Reverting to nvm default version"
-    nvm use default
-  fi
-}
-add-zsh-hook chpwd load-nvmrc
-load-nvmrc
+# Load current node.js version on zsh startup
+if [[ -f package.json ]]; then
+  zsh-defer nvm use
+fi
+
+# Refresh theme to display extensions
+load_theme

@@ -59,6 +59,13 @@ keybind = super+t=ignore
 # Reload config
 keybind = cmd+shift+r=reload_config
 
+# Set Alt+... keybindings for correct escape sequences
+keybind = alt+h=text:\x1bh
+keybind = alt+j=text:\x1bj
+keybind = alt+k=text:\x1bk
+keybind = alt+l=text:\x1bl
+keybind = alt+v=text:\x1bv
+
 # This workaround remaps Ctrl+i to Ctrl+a in Tmux to prevent it from being
 # interpreted as TAB, enabling proper handling in child programs, like Neovim.
 keybind = ctrl+i=text:\x1bi

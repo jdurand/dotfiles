@@ -90,14 +90,12 @@ vim.api.nvim_set_keymap('v', '<BS>', 'dk$', { noremap = true })
 
 -- Easy line moving
 -- ----------------------------------------------------------------------------------------------------
-vim.api.nvim_set_keymap('n', '∆', 'ddp', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '˚', 'ddkkp', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('v', '∆', 'djPV`]', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('v', '˚', 'dkPV`]', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', '<M-j>', 'djPV`]', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('v', '<M-k>', 'dkPV`]', { noremap = true, silent = true })
 
 -- Select only the text characters in the current line
 -- ----------------------------------------------------------------------------------------------------
-vim.api.nvim_set_keymap('n', '√', '^v$h', { noremap = true })
+vim.api.nvim_set_keymap('n', '<M-v>', '^v$h', { noremap = true })
 
 -- Easy indentation in visual mode
 -- ----------------------------------------------------------------------------------------------------

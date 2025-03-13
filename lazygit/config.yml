@@ -1,0 +1,6 @@
+# docs: https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md
+
+promptToReturnFromSubprocess: false
+
+git:
+  overrideGpg: true

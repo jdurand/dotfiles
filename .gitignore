@@ -1,8 +1,15 @@
+# Vendor directories
 vendor/
 
+# Tmux
 tmux/resurrect/
 tmux/plugins/
 
+# Neovim
 nvim/lazy-lock.json
 
+# Zsh
 zsh/waffle-plugins/
+
+# Lazygit
+lazygit/state.yml

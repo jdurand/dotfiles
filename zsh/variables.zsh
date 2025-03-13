@@ -16,6 +16,10 @@ export PATH="$PATH:$HOME/go/bin"
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
 
+# Lazygit config file
+# (defaults to ~/Library/Application\Support/lazygit on MacOS)
+export LG_CONFIG_FILE="$HOME/.config/lazygit/config.yml"
+
 # Add keyboard things (mdloader_mac & QMK firmare) to $PATH
 export PATH="$PATH:$HOME/Code/keyboards/mdloader/build"
 

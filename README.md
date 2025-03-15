@@ -11,11 +11,18 @@ differences to my own may cause issues. Adapt and fork them to suit your needs.
 ## Setup
 
 To streamline the installation process, run the `./setup` script. This script will:
-- Install Oh My Zsh
-- Install Powerlevel10k
-- Install necessary dependencies for Tmux Tokyo Night Theme
-- Setup symlinks for all configurations
+- Set up packages, terminal fonts and development tools
+- Optionally install SketchyBar along with its dependencies
+- Create symlinks for configuration files
+
+### Optional Features
+
+You can pass additional options to the setup script to install optional features:
+
+- `+sketchybar`: Installs SketchyBar and its dependencies.
+
+### Example Usage
 
 ```sh
-if [ ! -d "$HOME/.dotfiles" ]; then; git clone https://github.com/jdurand/dotfiles.git "$HOME/.dotfiles"; fi; bash "$HOME/.dotfiles/setup"
+if [ ! -d "$HOME/.dotfiles" ]; then; git clone https://github.com/jdurand/dotfiles.git "$HOME/.dotfiles"; fi; zsh "$HOME/.dotfiles/setup" [+sketchybar]
 ```

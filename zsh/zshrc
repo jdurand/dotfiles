@@ -27,9 +27,13 @@ test -e "${HOME}/.zshrc.local" && source "${HOME}/.zshrc.local"
 # Load user aliases
 source ~/.zsh/aliases.zsh
 
-# # Load user aliases
+# Load user aliases
 source ~/.zsh/keybinds.zsh
 
+# Cleanup unset variables to avoid conflicts
+source ~/.zsh/cleanup.zsh
+
 # Load and initialise completion system
+fpath+=($(brew --prefix)/share/zsh/site-functions)
 autoload -Uz compinit
 compinit

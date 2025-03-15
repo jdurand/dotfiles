@@ -79,6 +79,11 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   install_package_if_needed "nowplaying-cli"
 fi
 
+# Install other dependencies
+for package in tmuxinator; do
+  install_package_if_needed "${package}"
+done
+
 cd ~
 echo "Setting up dotfiles locally..."
 

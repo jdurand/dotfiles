@@ -1,0 +1,1 @@
+/Users/jdurand/.config/fish/config.local.fish

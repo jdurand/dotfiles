@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 set -e
 
@@ -84,7 +84,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 fi
 
 # Install other dependencies
-for package in tmuxinator; do
+for package in tmuxinator fish fisher; do
   install_package_if_needed "${package}"
 done
 
@@ -137,10 +137,21 @@ create_symlink "$HOME/.dotfiles/starship/starship.toml" "$HOME/.config/starship.
 # Create symlink for the default .tmuxinator.yml
 create_symlink "$HOME/.dotfiles/tmuxinator/tmuxinator.yml" "$HOME/.tmuxinator.yml"
 
+# Create symlink for config.fish & fish_plugins
+create_symlink "$HOME/.dotfiles/fish/config.fish" "$HOME/.config/fish/config.fish"
+create_symlink "$HOME/.dotfiles/fish/fish_plugins" "$HOME/.config/fish/fish_plugins"
+
 # Create a symbolic links for Linux
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   create_symlink "$HOME/.dotfiles/imwheel/imwheelrc" "$HOME/.imwheelrc"
 fi
+
+# Install fish plugins
+fish -c '
+  for plugin in jorgebucaran/nvm.fish direnv/direnv jethrokuan/z patrickf1/fzf.fish
+    fisher install $plugin
+  end
+'
 
 # Check for +sketchybar option
 if [[ "$1" == "+sketchybar" ]]; then

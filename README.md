@@ -24,5 +24,6 @@ You can pass additional options to the setup script to install optional features
 ### Example Usage
 
 ```sh
-if [ ! -d "$HOME/.dotfiles" ]; then; git clone https://github.com/jdurand/dotfiles.git "$HOME/.dotfiles"; fi; zsh "$HOME/.dotfiles/setup" [+sketchybar]
+curl -L https://raw.githubusercontent.com/jdurand/dotfiles/refs/heads/main/_setup/install-dotfiles -o /tmp/setup-jdurand-dotfiles.bash && \
+  bash /tmp/setup-jdurand-dotfiles.bash [+sketchybar]
 ```

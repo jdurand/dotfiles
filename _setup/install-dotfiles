@@ -49,10 +49,14 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   done
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
   if command -v xrandr > /dev/null; then
-    sudo apt-get install ghostty
+    if ! snap list | grep -q ghostty; then
+      snap install ghostty --classic
+    else
+      info "ghostty is already installed."
+    fi
     warn "you must manually install font-victor-mono font-victor-mono-nerd-font!"
   else
-    warn "Skipping ghostty installation on Synology device or non-GUI system"
+    warn "Skipping ghostty installation on non-GUI system"
   fi
 # else
 #   "Unsupported OS type: $OSTYPE"

@@ -6,7 +6,13 @@
 export PATH="$PATH:$HOME/.bin"
 
 # Add homebrew bins to $PATH
-export PATH=/usr/local/bin:/opt/homebrew/bin:$PATH
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+else
+  eval "$(brew shellenv)"
+fi
 
 # Add GO bins to $PATH
 export PATH="$PATH:$HOME/go/bin"

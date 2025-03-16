@@ -3,6 +3,7 @@ local vim = vim ---@diagnostic disable-line: undefined-global
 local keymaps = require('user.keymaps.bind')
 local nnoremap = keymaps.nnoremap
 local tnoremap = keymaps.tnoremap
+local long_press_aware_keybinding = require('user.keymaps.long_press').long_press_aware_keybinding
 
 return {
   {
@@ -46,7 +47,14 @@ return {
       _G.FloatermIsOpen = is_floaterm_open
 
       -- Double-Esc to exit insert mode
-      tnoremap('<escape><escape>', '<escape><escape><C-\\><C-n>')
+      -- tnoremap('<Esc><Esc>', '<Esc><Esc><C-\\><C-n>')
+
+      -- Press Esc multiple times to exit insert mode
+      -- Allows for immediately sending Esc through
+      long_press_aware_keybinding('t', '<Esc>', function()
+        vim.api.nvim_input('<C-\\><C-n>')
+      end, 200, { noremap = true, silent = true })
+
       -- CTRL-WQ to hide terminal
       tnoremap('<C-w><C-q>', '<C-\\><C-n><C-w><C-q>')
     end,

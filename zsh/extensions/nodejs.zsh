@@ -1,5 +1,9 @@
 # export function to load node version from nvmrc
 
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
 update_node_version() {
   local node_version="$(nvm version)"
   local nvmrc_path="$(nvm_find_nvmrc)"

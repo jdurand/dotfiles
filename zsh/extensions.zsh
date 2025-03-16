@@ -23,12 +23,10 @@ done
 
 if [[ -n "${FLOATERM}" ]]; then
   zsh-defer load_direnv
-  zsh-defer plug "zap-sh/nvm"
   zsh-defer load_rbenv
 else
   load_direnv
   load_rbenv
-  plug "zap-sh/nvm"
 fi
 
 zsh-defer load_iterm_integration

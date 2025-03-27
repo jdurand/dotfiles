@@ -86,15 +86,27 @@ alias mux='tmuxinator'
 
 # FZF keybindings
 fzf_configure_bindings --git_log=\cg --git_status=\cs --processes=\cp --directory=\cf
+# Vim mode
+# -----------------------
+# enable vim key bindings
+fish_vi_key_bindings
+
+# Normal mode key bindings
+#
+# copy the current line to the clipboard
+bind yy fish_clipboard_copy
+
+# copy the visual selection to the clipboard
+bind -s --preset -M visual -m default y 'fish_clipboard_copy; commandline -f end-selection repaint-mode'
+
+# paste content from the clipboard
+bind p fish_clipboard_paste
 
 # Preferences
 # ------------------------------------------------------------------------------
 
 # disable fish greeting
 set fish_greeting
-
-# enable vim key bindings
-fish_vi_key_bindings
 
 # Load local config if exists
 if test -e "$HOME/.config/fish/config.local.fish"

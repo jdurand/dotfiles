@@ -17,8 +17,8 @@ style = "#33ccff"
 # Prompt symbols & colors
 [character]
 success_symbol = "[❯](#ff3399)"
-error_symbol = "[❯](#9c27b0)"
-vimcmd_symbol = "[❮](#33ccff)"
+error_symbol = "[❯](#ffcc00)"
+vimcmd_symbol = "[❮](#99cc00)"
 
 # Git information
 [git_branch]

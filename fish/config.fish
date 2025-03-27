@@ -71,6 +71,9 @@ function nvm_auto_use --on-variable PWD
   end
 end
 
+# Load git fzf functions
+source (dirname (realpath (status --file)))'/../fzf/extensions/fzf-git.fish'
+
 # Aliases
 # ------------------------------------------------------------------------------
 alias vim='nvim'
@@ -93,7 +96,13 @@ alias mux='tmuxinator'
 # ------------------------------------------------------------------------------
 
 # FZF keybindings
-fzf_configure_bindings --git_log=\cg --git_status=\cs --processes=\cp --directory=\cf
+#
+# fzf.fish
+fzf_configure_bindings --history=\cr --directory=\cf --variables=\cv --processes=\cp
+
+# git.fzf.fish
+setup_git_fzf_key_bindings
+
 # Vim mode
 # -----------------------
 # enable vim key bindings

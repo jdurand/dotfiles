@@ -20,6 +20,7 @@ set -x TZ "America/Montreal"
 set -x LANG "en_US.UTF-8"
 set -x LC_ALL $LANG
 set -x MANPAGER "sh -c 'col -bx | bat -l man -p'"
+set -x EDITOR 'nvim'
 
 # Add homebrew bins to $PATH
 if test -e /opt/homebrew/bin/brew
@@ -36,7 +37,14 @@ end
 # ------------------------------------------------------------------------------
 
 # Initialize Starship prompt
+function starship_transient_prompt_func
+  starship module character
+end
+# function starship_transient_rprompt_func
+#   starship module cmd_duration
+# end
 if type -q starship; starship init fish | source; end
+enable_transience
 
 # Initialize direnv
 if type -q direnv; direnv hook fish | source; end

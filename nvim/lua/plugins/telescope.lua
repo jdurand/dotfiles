@@ -60,9 +60,26 @@ return {
 
       nnoremap('<leader>;', function()
         -- scope.buffers()
-        -- use scoped buffers instead
-        require('telescope').extensions.scope.buffers()
-        vim.api.nvim_input('<ESC>')
+        -- use unscoped buffers instead
+        local unscoped = require('telescope').extensions.scope
+
+        unscoped.buffers({
+          attach_mappings = function(_, map)
+            map({ 'n', 'i' }, '<C-c>', function(--[[ prompt_bufnr ]])
+              -- local actions = require('telescope.actions')
+              local action_state = require('telescope.actions.state')
+              local selection = action_state.get_selected_entry()
+
+              -- actions.close(prompt_bufnr) -- close the Telescope interface
+              if selection and selection.bufnr then
+                vim.api.nvim_buf_delete(selection.bufnr, { force = true })
+                unscoped.buffers() -- reload bufders
+              end
+            end)
+            return true
+          end
+        })
+        vim.api.nvim_input('<Esc>')
       end, { desc = "Find Buffers" })
     end,
   },

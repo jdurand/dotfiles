@@ -25,6 +25,8 @@ set -x EDITOR 'nvim'
 # Add homebrew bins to $PATH
 if test -e /opt/homebrew/bin/brew
   /opt/homebrew/bin/brew shellenv | source
+else if test -e /home/linuxbrew/.linuxbrew/bin/brew
+  /home/linuxbrew/.linuxbrew/bin/brew shellenv | source
 else if test -e /usr/local/bin/brew
   /usr/local/bin/brew shellenv | source
 else if test -e brew

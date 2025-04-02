@@ -39,9 +39,10 @@ end, { desc = 'Open in [Z]en Mode' })
 
 -- Other custom keymaps
 -- ----------------------------------------------------------------------------------------------------
-nmap('<leader>yf', function()
-  vim.fn.setreg('*', vim.fn.expand('%'))
-end, { desc = 'Copy [f]ile path to clipboard' })
+nmap('<leader>yf', function() vim.fn.setreg('*', vim.fn.expand('%')) end, { desc = 'Copy [f]ile path to clipboard' })
+
+nnoremap('gb', function() require('user.utils').web_browser() end, { desc = 'Open link in web [b]rowser' })
+nnoremap('gB', function() require('user.utils').web_browser({ fallback_url = 'https://chatgpt.com/?hints=search' }) end, { desc = 'Open web [B]rowser' })
 
 -- Yank selected text on left mouse release
 -- ----------------------------------------------------------------------------------------------------

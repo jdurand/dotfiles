@@ -27,7 +27,24 @@ local assert_git_repo = function(callback, context)
   end
 end
 
+local web_browser = function(opts)
+  opts = opts or {}
+  local open_link = require('open-link.open')
+
+  open_link(opts.url, {
+    -- success_callback = function()
+    --   vim.notify('Link opened.')
+    -- end,
+    failure_callback = function()
+      if opts.fallback_url then
+        open_link(opts.fallback_url)
+      end
+    end
+  })
+end
+
 return {
   is_git_directory = is_git_directory,
-  assert_git_repo = assert_git_repo
+  assert_git_repo = assert_git_repo,
+  web_browser = web_browser,
 }

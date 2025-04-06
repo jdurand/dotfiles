@@ -240,6 +240,9 @@ return {
           file_types = { 'markdown', 'Avante' },
         },
         ft = { 'markdown', 'Avante' },
+        config = function()
+          require('render-markdown').setup({ latex = { enabled = false } })
+        end
       },
     },
   },

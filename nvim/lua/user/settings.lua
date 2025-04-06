@@ -54,9 +54,14 @@ vim.opt.clipboard = 'unnamedplus'
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = 'menuone,noselect'
 
--- Create an autocommand that triggers on specific events
-vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "CursorHoldI", "FocusGained" }, {
-  -- Check for file updates unless in insert mode
-  command = "if mode() != 'c' | checktime | endif",
-  pattern = { "*" }, -- Apply to all file types
-})
+-- -- Create an autocommand that triggers on specific events
+-- vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "CursorHoldI", "FocusGained" }, {
+--   -- Check for file updates unless in insert mode
+--   command = "if mode() != 'c' | checktime | endif",
+--   pattern = { "*" }, -- Apply to all file types
+-- })
+
+-- Create a user command 'Q' to close all buffers and exit Neovim
+vim.api.nvim_create_user_command('Q', 'qall', {})
+vim.api.nvim_create_user_command('QQ', 'qall!', {})
+vim.api.nvim_create_user_command('WQ', 'wqall!', {})

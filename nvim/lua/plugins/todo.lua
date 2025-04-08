@@ -5,7 +5,6 @@ return {
   'MunifTanjim/nui.nvim', -- UI component library for Neovim plugins
   'wincent/terminus', -- Enhances terminal integration in Neovim
   'RRethy/vim-illuminate', -- Automatically highlights other instances of the word under the cursor
-  'ervandew/supertab', -- Provides context-based autocompletion using the Tab key
   'fvictorio/vim-extract-variable', -- Helps in refactoring by extracting variables to a new line
   'folke/which-key.nvim', -- Displays available keybindings in a popup
   {

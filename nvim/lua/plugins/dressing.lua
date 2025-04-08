@@ -1,8 +1,6 @@
 return {
-  {
-    "stevearc/dressing.nvim",
-    config = function()
-      require("dressing").setup()
-    end,
-  },
+  'stevearc/dressing.nvim', -- Enhances input dialogs and selection menus
+  config = function()
+    require('dressing').setup()
+  end
 }

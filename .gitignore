@@ -6,6 +6,7 @@ tmux/resurrect/
 tmux/plugins/
 
 # Neovim
+.luarc.json
 nvim/lazy-lock.json
 
 # Zsh

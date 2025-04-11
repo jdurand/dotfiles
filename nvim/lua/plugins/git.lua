@@ -69,4 +69,28 @@ return {
       })
     end,
   },
+  {
+    'pwntester/octo.nvim',
+    requires = {
+      'nvim-lua/plenary.nvim',
+      'nvim-telescope/telescope.nvim',
+      -- OR 'ibhagwan/fzf-lua',
+      -- OR 'folke/snacks.nvim',
+      'nvim-tree/nvim-web-devicons',
+    },
+    config = function ()
+      require('octo').setup()
+    end
+  },
+  {
+    'petertriho/cmp-git',
+    dependencies = { 'hrsh7th/nvim-cmp' },
+    opts = {
+      -- options go here
+    },
+    init = function()
+      local cmp_config = require('cmp').get_config()
+      table.insert(cmp_config.sources, { name = 'git' })
+    end
+  }
 }

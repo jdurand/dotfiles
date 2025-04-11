@@ -6,20 +6,20 @@ local nnoremap, nmap, vnoremap = keymaps.nnoremap, keymaps.nmap, keymaps.vnorema
 -- ----------------------------------------------------------------------------------------------------
 whichkey.add({
   { '<leader>', group = '<leader>' },
-  { "<leader>c", group = "[C]ode" }, { "<leader>c_", hidden = true },
-  { "<leader>d", group = "[D]ocument" }, { "<leader>d_", hidden = true },
-  { "<leader>f", group = "[F]ind" }, { "<leader>f_", hidden = true },
-  { "<leader>g", group = "[G]it/Chat[G]PT" }, { "<leader>g_", hidden = true },
-  { "<leader>h", group = "[H]arpoon" }, { "<leader>h_", hidden = true },
-  { "<leader>r", group = "[R]ename" }, { "<leader>r_", hidden = true },
-  { "<leader>t", group = "[T]ab/[T]erminal" }, { "<leader>t_", hidden = true },
-  { "<leader>w", group = "[W]orkspace" }, { "<leader>w_", hidden = true },
-  { "<leader>y", group = "[Y]anky" }, { "<leader>y_", hidden = true },
+  { '<leader>c', group = '[C]ode' }, { '<leader>c_', hidden = true },
+  { '<leader>d', group = '[D]ocument' }, { '<leader>d_', hidden = true },
+  { '<leader>f', group = '[F]ind' }, { '<leader>f_', hidden = true },
+  { '<leader>g', group = '[G]it/Chat[G]PT' }, { '<leader>g_', hidden = true },
+  { '<leader>h', group = '[H]arpoon' }, { '<leader>h_', hidden = true },
+  { '<leader>r', group = '[R]ename' }, { '<leader>r_', hidden = true },
+  { '<leader>t', group = '[T]ab/[T]erminal' }, { '<leader>t_', hidden = true },
+  { '<leader>w', group = '[W]orkspace' }, { '<leader>w_', hidden = true },
+  { '<leader>y', group = '[Y]anky' }, { '<leader>y_', hidden = true },
 
-  { "<leader>b", hidden = true },
-  { "<leader>e", hidden = true },
-  { "<leader>n", hidden = true },
-  { "<leader>p", hidden = true },
+  { '<leader>b', hidden = true },
+  { '<leader>e', hidden = true },
+  { '<leader>n', hidden = true },
+  { '<leader>p', hidden = true },
 })
 
 whichkey.add({
@@ -109,7 +109,16 @@ vim.api.nvim_set_keymap('n', '<S-Tab>', 'mzV<`zh', { noremap = true })
 
 -- Clear search-highlighted terms and dismiss Noice messages
 -- ----------------------------------------------------------------------------------------------------
-vim.api.nvim_set_keymap('n', '\\', ':silent noh<Bar>echo<Bar>NoiceDismiss<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '\\', function()
+  -- Clears highlighted search results.
+  vim.cmd('silent noh')
+  -- Clears the command-line by echoing an empty string.
+  vim.cmd('echo')
+  -- Dismiss active noice notifications.
+  require('noice').cmd('dismiss')
+  -- -- Clears existing code completion suggestion.
+  -- require('neocodeium').clear()
+end, { noremap = true, silent = true })
 
 -- Use Alt-4 to go to the end of the line, but not totally.
 -- ----------------------------------------------------------------------------------------------------

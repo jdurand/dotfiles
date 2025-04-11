@@ -11,7 +11,7 @@ local function long_press_aware_keybinding(mode, keys, actions, delay, opts)
 
       timer:start(delay, 0, function()
         if is_key_pressed then
-          require("noice").notify(type(actions), "info")
+          require('noice').notify(type(actions), 'info')
 
           if type(actions) == 'table' and type(actions.press) == 'function' then
             execute(actions.press) -- Execute long press action

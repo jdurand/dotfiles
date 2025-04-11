@@ -39,17 +39,23 @@ return {
             luasnip.lsp_expand(args.body)
           end,
         },
-        mapping = cmp.mapping.preset.insert({
+        mapping = {
           ['<Tab>'] = cmp.mapping(next_suggestion, { 'i', 's' }),
           ['<S-Tab>'] = cmp.mapping(previous_suggestion, { 'i', 's' }),
           ['<C-j>'] = cmp.mapping(next_suggestion, { 'i', 's' }),
           ['<C-k>'] = cmp.mapping(previous_suggestion, { 'i', 's' }),
           ['<C-u>'] = cmp.mapping.scroll_docs(-4),
           ['<C-d>'] = cmp.mapping.scroll_docs(4),
-          ['<CR>'] = cmp.mapping.confirm({ select = true }),
-        }),
+          ['<CR>'] = cmp.mapping.confirm({ select = false }),
+          ['<C-p>'] = cmp.mapping.confirm({ select = true }),
+          ['<C-f>'] = cmp.mapping.confirm({ select = true }),
+          ['<C-l>'] = cmp.mapping.confirm({ select = true }),
+          ['<C-c>'] = cmp.mapping.close(),
+        },
         sources = cmp.config.sources({
+          -- { name = 'copilot' },
           { name = 'nvim_lsp' },
+          { name = 'path' },
           { name = 'luasnip' },
         }, {
           {

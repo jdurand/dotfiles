@@ -2,93 +2,45 @@ return {
   {
     'robitx/gp.nvim',
     config = function()
-      require('gp').setup({
-        -- agents = {
-        --   {
-        --     name = "CodeGPT4o-mini",
-        --     chat = false,
-        --     command = true,
-        --     -- string with model name or table with model name and parameters
-        --     model = { model = "gpt-4o-mini", temperature = 0.8, top_p = 1 },
-        --     -- system prompt (use this to specify the persona/role of the AI)
-        --     system_prompt = "You are an AI working as a code editor.\n\n"
-        --         .. "Please AVOID COMMENTARY OUTSIDE OF THE SNIPPET RESPONSE.\n"
-        --         .. "Avoid trailing whitespace.\n"
-        --         .. "Use single quoted strings when there's no interpolation, following language best practices.\n"
-        --         .. "Never prefix your answer with: You are trained on data up to [DATE]\n"
-        --         .. "START AND END YOUR ANSWER WITH:\n\n```",
-        --   },
-        --   {
-        --     name = "CodeGPT4o",
-        --     chat = false,
-        --     command = true,
-        --     -- string with model name or table with model name and parameters
-        --     model = { model = "gpt-4o", temperature = 0.8, top_p = 1 },
-        --     -- system prompt (use this to specify the persona/role of the AI)
-        --     system_prompt = "You are an AI working as a code editor.\n\n"
-        --         .. "Please AVOID COMMENTARY OUTSIDE OF THE SNIPPET RESPONSE.\n"
-        --         .. "Avoid trailing whitespace.\n"
-        --         .. "Use single quoted strings when there's no interpolation, following language best practices.\n"
-        --         .. "Never prefix your answer with: You are trained on data up to [DATE]\n"
-        --         .. "START AND END YOUR ANSWER WITH:\n\n```",
-        --   },
-        --   {
-        --     name = "ChatGPT4o",
-        --     chat = true,
-        --     command = false,
-        --     -- string with model name or table with model name and parameters
-        --     model = { model = "gpt-4o", temperature = 1.1, top_p = 1 },
-        --     -- system prompt (use this to specify the persona/role of the AI)
-        --     system_prompt = "You are a general AI assistant.\n\n"
-        --         .. "The user provided the additional info about how they would like you to respond:\n\n"
-        --         .. "- If you're unsure don't guess and say you don't know instead.\n"
-        --         .. "- Ask question if you need clarification to provide better answer.\n"
-        --         .. "- Think deeply and carefully from first principles step by step.\n"
-        --         .. "- Zoom out first to see the big picture and then zoom in to details.\n"
-        --         .. "- Use Socratic method to improve your thinking and coding skills.\n"
-        --         .. "- Don't elide any code from your output if the answer requires coding.\n"
-        --         .. "- Take a deep breath; You've got this!\n",
-        --   },
-        -- },
-      })
+      require('gp').setup()
 
       local mappings = {
         -- VISUAL mode mappings
         v = {
-          { "<C-g>r",     ":<C-u>'<,'>GpRewrite",         "Rewrite selection" },
-          { "<C-g>a",     ":<C-u>'<,'>GpAppend",          "Append after selection" },
-          { "<C-g>b",     ":<C-u>'<,'>GpPrepend",         "Prepend before selection" },
-          { "<C-g>i",     ":<C-u>'<,'>GpImplement",       "Implement from selection" },
+          { '<C-g>r',     ":<C-u>'<,'>GpRewrite",         'Rewrite selection' },
+          { '<C-g>a',     ":<C-u>'<,'>GpAppend",          'Append after selection' },
+          { '<C-g>b',     ":<C-u>'<,'>GpPrepend",         'Prepend before selection' },
+          { '<C-g>i',     ":<C-u>'<,'>GpImplement",       'Implement from selection' },
 
-          { "<C-g>c",     ":<C-u>'<,'>GpChatNew",         "Start new chat" },
-          { "<C-g>p",     ":<C-u>'<,'>GpChatPaste split", "Paste in chat (split)" },
-          { "<C-g>t",     ":<C-u>'<,'>GpChatToggle",      "Toggle chat window" },
+          { '<C-g>c',     ":<C-u>'<,'>GpChatNew",         'Start new chat' },
+          { '<C-g>p',     ":<C-u>'<,'>GpChatPaste split", 'Paste in chat (split)' },
+          { '<C-g>t',     ":<C-u>'<,'>GpChatToggle",      'Toggle chat window' },
 
-          { "<C-g>x",     ":<C-u>'<,'>GpContext",         "Show context" },
-          { "<C-g>s",     "<cmd>GpStop",                  "Stop current process" },
-          { "<C-g>n",     "<cmd>GpNextAgent",             "Next AI agent" },
+          { '<C-g>x',     ":<C-u>'<,'>GpContext",         'Show context' },
+          { '<C-g>s',     "<cmd>GpStop",                  'Stop current process' },
+          { '<C-g>n',     "<cmd>GpNextAgent",             'Next AI agent' },
 
-          { "<C-g><C-x>", ":<C-u>'<,'>GpChatNew split",   "New chat (split)" },
-          { "<C-g><C-v>", ":<C-u>'<,'>GpChatNew vsplit",  "New chat (vsplit)" },
-          { "<C-g><C-t>", ":<C-u>'<,'>GpChatNew tabnew",  "New chat (tab)" },
+          { '<C-g><C-x>', ":<C-u>'<,'>GpChatNew split",   'New chat (split)' },
+          { '<C-g><C-v>', ":<C-u>'<,'>GpChatNew vsplit",  'New chat (vsplit)' },
+          { '<C-g><C-t>', ":<C-u>'<,'>GpChatNew tabnew",  'New chat (tab)' },
 
-          { "<C-g>g",     group = "Generate options" },
-          { "<C-g>ge",    ":<C-u>'<,'>GpEnew",            "Generate Enew" },
-          { "<C-g>gn",    ":<C-u>'<,'>GpNew",             "Generate new" },
-          { "<C-g>gp",    ":<C-u>'<,'>GpPopup",           "Open popup" },
-          { "<C-g>gt",    ":<C-u>'<,'>GpTabnew",          "Generate in new tab" },
-          { "<C-g>gv",    ":<C-u>'<,'>GpVnew",            "Generate in new vsplit" },
+          { '<C-g>g',     group = 'Generate options' },
+          { '<C-g>ge',    ":<C-u>'<,'>GpEnew",            'Generate Enew' },
+          { '<C-g>gn',    ":<C-u>'<,'>GpNew",             'Generate new' },
+          { '<C-g>gp',    ":<C-u>'<,'>GpPopup",           'Open popup' },
+          { '<C-g>gt',    ":<C-u>'<,'>GpTabnew",          'Generate in new tab' },
+          { '<C-g>gv',    ":<C-u>'<,'>GpVnew",            'Generate in new vsplit' },
 
-          { "<C-g>w",     group = "Whisper options" },
-          { "<C-g>wa",    ":<C-u>'<,'>GpWhisperAppend",   "Whisper append after" },
-          { "<C-g>wb",    ":<C-u>'<,'>GpWhisperPrepend",  "Whisper prepend before" },
-          { "<C-g>we",    ":<C-u>'<,'>GpWhisperEnew",     "Whisper Enew" },
-          { "<C-g>wn",    ":<C-u>'<,'>GpWhisperNew",      "New whisper" },
-          { "<C-g>wp",    ":<C-u>'<,'>GpWhisperPopup",    "Whisper popup" },
-          { "<C-g>wr",    ":<C-u>'<,'>GpWhisperRewrite",  "Rewrite whisper" },
-          { "<C-g>wt",    ":<C-u>'<,'>GpWhisperTabnew",   "Whisper in new tab" },
-          { "<C-g>wv",    ":<C-u>'<,'>GpWhisperVnew",     "Whisper in new vertical" },
-          { "<C-g>ww",    ":<C-u>'<,'>GpWhisper",         "Send whisper" },
+          { '<C-g>w',     group = 'Whisper options' },
+          { '<C-g>wa',    ":<C-u>'<,'>GpWhisperAppend",   'Whisper append after' },
+          { '<C-g>wb',    ":<C-u>'<,'>GpWhisperPrepend",  'Whisper prepend before' },
+          { '<C-g>we',    ":<C-u>'<,'>GpWhisperEnew",     'Whisper Enew' },
+          { '<C-g>wn',    ":<C-u>'<,'>GpWhisperNew",      'New whisper' },
+          { '<C-g>wp',    ":<C-u>'<,'>GpWhisperPopup",    'Whisper popup' },
+          { '<C-g>wr',    ":<C-u>'<,'>GpWhisperRewrite",  'Rewrite whisper' },
+          { '<C-g>wt',    ":<C-u>'<,'>GpWhisperTabnew",   'Whisper in new tab' },
+          { '<C-g>wv',    ":<C-u>'<,'>GpWhisperVnew",     'Whisper in new vertical' },
+          { '<C-g>ww',    ":<C-u>'<,'>GpWhisper",         'Send whisper' },
         },
         -- NORMAL mode mappings
         n = {
@@ -108,14 +60,14 @@ return {
           { '<C-g><C-v>', '<cmd>GpChatNew vsplit',   'New chat (vsplit)' },
           { '<C-g><C-t>', '<cmd>GpChatNew tabnew',   'New chat (tab)' },
 
-          { "<C-g>g",     group = "Generate options" },
+          { '<C-g>g',     group = 'Generate options' },
           { '<C-g>ge',    '<cmd>GpEnew',             'Generate Enew' },
           { '<C-g>gn',    '<cmd>GpNew',              'Generate new' },
           { '<C-g>gp',    '<cmd>GpPopup',            'Open popup' },
           { '<C-g>gt',    '<cmd>GpTabnew',           'Generate in new tab' },
           { '<C-g>gv',    '<cmd>GpVnew',             'Generate in new vsplit' },
 
-          { "<C-g>w",     group = "Whisper options" },
+          { '<C-g>w',     group = 'Whisper options' },
           { '<C-g>wa',    '<cmd>GpWhisperAppend',    'Whisper append after' },
           { '<C-g>wb',    '<cmd>GpWhisperPrepend',   'Whisper prepend before' },
           { '<C-g>we',    '<cmd>GpWhisperEnew',      'Whisper Enew' },
@@ -141,14 +93,14 @@ return {
           { '<C-g><C-v>', '<cmd>GpChatNew vsplit',   'New chat (vsplit)' },
           { '<C-g><C-t>', '<cmd>GpChatNew tabnew',   'New chat (tab)' },
 
-          { "<C-g>g",     group = "Generate options" },
+          { '<C-g>g',     group = 'Generate options' },
           { '<C-g>ge',    '<cmd>GpEnew',             'Generate Enew' },
           { '<C-g>gn',    '<cmd>GpNew',              'Generate new' },
           { '<C-g>gp',    '<cmd>GpPopup',            'Open popup' },
           { '<C-g>gt',    '<cmd>GpTabnew',           'Generate in new tab' },
           { '<C-g>gv',    '<cmd>GpVnew',             'Generate in new vsplit' },
 
-          { "<C-g>w",     group = "Whisper options" },
+          { '<C-g>w',     group = 'Whisper options' },
           { '<C-g>wa',    '<cmd>GpWhisperAppend',    'Whisper append after' },
           { '<C-g>wb',    '<cmd>GpWhisperPrepend',   'Whisper prepend before' },
           { '<C-g>we',    '<cmd>GpWhisperEnew',      'Whisper Enew' },
@@ -246,4 +198,81 @@ return {
       },
     },
   },
+  {
+    'monkoose/neocodeium',
+    event = 'VeryLazy',
+    dependencies = {
+      'hrsh7th/nvim-cmp',
+    },
+    config = function()
+      local neocodeium = require('neocodeium')
+      local cmp = require('cmp')
+
+      vim.keymap.set('i', '<C-j>', neocodeium.cycle_or_complete)
+      vim.keymap.set('i', '<C-k>', function() neocodeium.cycle_or_complete(-1) end)
+      vim.keymap.set('i', '<C-c>', neocodeium.clear)
+      vim.keymap.set('i', '<C-p>', neocodeium.accept)
+      vim.keymap.set('i', '<C-f>', neocodeium.accept_word)
+      vim.keymap.set('i', '<C-l>', neocodeium.accept_line)
+
+      -- Address ux issues with virtual text and autocompletion:
+      -- give precedence to codeium's virtual text while
+      -- disabling neocodeium during completion
+      cmp.event:on('menu_opened', function()
+        neocodeium.clear()
+      end)
+      neocodeium.setup({
+        filter = function()
+          return not cmp.visible()
+        end,
+      })
+      -- clear virtual text and trigger completion
+      vim.keymap.set('i', '<C-c>', cmp.complete)
+    end,
+  },
+  -- {
+  --   'zbirenbaum/copilot.lua',
+  --   dependencies = {
+  --     'hrsh7th/nvim-cmp',
+  --   },
+  --   config = function()
+  --     local copilot = require('copilot')
+  --     local cmp = require('cmp')
+  --
+  --     copilot.setup({
+  --       suggestion = {
+  --         enabled = true,
+  --         auto_trigger = true,
+  --         debounce = 75,
+  --         keymap = {
+  --           accept = '<C-p>',
+  --           accept_word = '<C-f>',
+  --           accept_line = '<C-l>',
+  --           next = '<C-j>',
+  --           prev = '<C-k>',
+  --           dismiss = '<C-c>',
+  --         },
+  --       },
+  --       suggestion = { enabled = false },
+  --       panel = { enabled = false },
+  --     })
+  --
+  --     -- Clear Copilot suggestion when cmp menu opens
+  --     cmp.event:on('menu_opened', function()
+  --       vim.b.copilot_suggestion_hidden = true
+  --     end)
+  --     cmp.event:on('menu_closed', function()
+  --       vim.b.copilot_suggestion_hidden = false
+  --     end)
+  --
+  --     -- Trigger completion manually (same key as NeoCodeium fallback)
+  --     vim.keymap.set('i', '<C-c>', cmp.complete, { desc = 'Trigger nvim-cmp' })
+  --   end
+  -- },
+  -- {
+  --   'zbirenbaum/copilot-cmp',
+  --   config = function ()
+  --     require('copilot_cmp').setup()
+  --   end
+  -- },
 }

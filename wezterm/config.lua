@@ -10,19 +10,22 @@ config.hide_tab_bar_if_only_one_tab = true
 config.disable_default_key_bindings = true
 config.window_close_confirmation = 'NeverPrompt'
 
--- config.window_decorations = 'RESIZE'
--- config.window_decorations = 'NONE'
--- config.window_decorations = 'TITLE'
-config.window_decorations = 'TITLE | RESIZE'
+-- hide the top bar on macOS
+if string.match(wezterm.target_triple, 'darwin') then
+  config.window_decorations = 'RESIZE'
+else
+  config.window_decorations = 'TITLE | RESIZE'
+end
 
+-- apply color scheme according to the time of day
 local hour = os.date("*t").hour
 
 config.color_scheme = (hour >= 6 and hour < 18) and 'Tokyo Night Moon' or 'Tokyo Night'
 
 config.window_background_opacity = 0.8
 config.macos_window_background_blur = 10
-config.font = wezterm.font 'VictorMono Nerd Font Mono'
-config.font_size = 14.0
+config.font = wezterm.font('VictorMono Nerd Font Mono', { weight = 'DemiBold' })
+config.font_size = 15.0
 
 config.window_padding = {
   bottom = 0,

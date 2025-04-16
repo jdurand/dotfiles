@@ -57,9 +57,9 @@ return {
       nnoremap('[t', function() api.jump.prev({ status = 'failed' }) end, { desc = 'Previous failed test' })
       nnoremap(']t', function() api.jump.next({ status = 'failed' }) end, { desc = 'Next failed test' })
 
-      nnoremap('trt', function() api.run.run(); overseer.open() end, { desc = 'Run nearest test' })
-      nnoremap('trl', function() api.run.run_last(); overseer.open() end, { desc = 'Re-run last test' })
-      nnoremap('trf', function() api.run.run(vim.fn.expand('%')); overseer.open() end, { desc = 'Run current file' })
+      nnoremap('trt', function() api.run.run(); overseer.open({ enter = false }) end, { desc = 'Run nearest test' })
+      nnoremap('trl', function() api.run.run_last(); overseer.open({ enter = false }) end, { desc = 'Re-run last test' })
+      nnoremap('trf', function() api.run.run(vim.fn.expand('%')); overseer.open({ enter = false }) end, { desc = 'Run current file' })
 
       nnoremap('trD', function() api.run.run({ suite = false, strategy = 'dap' }) end, { desc = 'Debug nearest test' })
       -- Workaround for the lack of a DAP strategy in nvim-dap-ruby

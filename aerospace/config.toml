@@ -159,8 +159,8 @@ alt-shift-space = 'layout floating tiling'
 alt-shift-f = 'fullscreen'
 alt-shift-semicolon = 'mode service'
 
-alt-backtick = 'exec-and-forget open -a ghostty'
-# alt-backtick = 'exec-and-forget open -a WezTerm'
+# alt-backtick = 'exec-and-forget open -a ghostty'
+alt-backtick = 'exec-and-forget open -a WezTerm'
 
 # Aerospace application configuration settings
 # run `aerospace list-apps` to get a list of running apps
@@ -259,18 +259,6 @@ if.app-id = 'com.google.Chrome'
 run = ['layout tiling', 'move-node-to-workspace Q']
 
 [[on-window-detected]]
-if.app-id = 'com.openai.chat'
-run = ['layout tiling', 'move-node-to-workspace S']
-
-[[on-window-detected]]
-if.app-id = 'md.obsidian'
-run = ['layout tiling', 'move-node-to-workspace S']
-
-[[on-window-detected]]
-if.app-id = 'io.readwise.read'
-run = ['layout tiling', 'move-node-to-workspace R']
-
-[[on-window-detected]]
 if.app-id = 'com.apple.mail'
 run = ['layout tiling', 'move-node-to-workspace E']
 
@@ -283,20 +271,44 @@ if.app-id = 'com.google.Chrome.app.kjbdgfilnfhdoflbpgamdcdgpehopbep'
 run = ['layout tiling', 'move-node-to-workspace E']
 
 [[on-window-detected]]
-if.app-id = 'com.google.Chrome.app.mdpkiolbdkhdjpekfbkbmhigcaggjagi'
-run = ['layout tiling', 'move-node-to-workspace C']
+if.app-id = 'io.readwise.read'
+run = ['layout tiling', 'move-node-to-workspace R']
 
 [[on-window-detected]]
-if.app-id = 'com.google.Chrome.app.cinhimbnkkaeohfgghhklpknlkffjgod'
-run = ['layout tiling', 'move-node-to-workspace M']
+if.app-id = 'com.openai.chat'
+run = ['layout tiling', 'move-node-to-workspace A']
+[[on-window-detected]]
+if.app-name-regex-substring = 'Gemini'
+run = ['layout tiling', 'move-node-to-workspace A']
+
+[[on-window-detected]]
+if.app-id = 'md.obsidian'
+run = ['layout tiling', 'move-node-to-workspace S']
 
 [[on-window-detected]]
 if.app-id = 'com.apple.MobileSMS'
 run = ['layout tiling', 'move-node-to-workspace F']
+
 [[on-window-detected]]
 if.app-id = 'net.whatsapp.WhatsApp'
 run = ['layout tiling', 'move-node-to-workspace F']
 
+[[on-window-detected]]
+if.app-id = 'com.microsoft.VSCode'
+run = ['layout tiling', 'move-node-to-workspace C']
+[[on-window-detected]]
+if.app-id = 'com.exafunction.windsurf'
+run = ['layout tiling', 'move-node-to-workspace C']
+
+# if.app-name-regex-substring = 'YouTube'
+# if.window-title-regex-substring = 'music'
+[[on-window-detected]]
+if.app-id = 'com.google.Chrome.app.cinhimbnkkaeohfgghhklpknlkffjgod'
+run = ['layout tiling', 'move-node-to-workspace Z']
+
+[[on-window-detected]]
+if.app-id = 'com.google.Chrome.app.mdpkiolbdkhdjpekfbkbmhigcaggjagi'
+run = ['layout tiling', 'move-node-to-workspace C']
 
 # 'service' binding mode declaration.
 [mode.service.binding]

@@ -22,6 +22,14 @@ set -x LC_ALL $LANG
 set -x MANPAGER "sh -c 'col -bx | bat -l man -p'"
 set -x EDITOR 'nvim'
 
+# Set environment variables for Rails with Puma in clustered mode.
+# OBJC_DISABLE_INITIALIZE_FORK_SAFETY: Disables the Objective-C runtime's safety checks when forking processes,
+# allowing better compatibility with multi-threaded servers like Puma.
+set -x OBJC_DISABLE_INITIALIZE_FORK_SAFETY "YES"
+# PGGSSENCMODE: Disables GSSAPI encryption for PostgreSQL connections,
+# which can help prevent authentication issues in clustered environments.
+set -x PGGSSENCMODE "disable"
+
 # Add homebrew bins to $PATH
 if test -e /opt/homebrew/bin/brew
   /opt/homebrew/bin/brew shellenv | source

@@ -87,3 +87,11 @@ alias cat='bat --paging=never'
 
 # Use bat as a colorizing pager for man
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+
+# Set environment variables for Rails with Puma in clustered mode.
+# OBJC_DISABLE_INITIALIZE_FORK_SAFETY: Disables the Objective-C runtime's safety checks when forking processes,
+# allowing better compatibility with multi-threaded servers like Puma.
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+# PGGSSENCMODE: Disables GSSAPI encryption for PostgreSQL connections,
+# which can help prevent authentication issues in clustered environments.
+export PGGSSENCMODE=disable

@@ -12,17 +12,17 @@ return {
           { '<C-g>b',     ":<C-u>'<,'>GpPrepend",         'Prepend before selection' },
           { '<C-g>i',     ":<C-u>'<,'>GpImplement",       'Implement from selection' },
 
-          { '<C-g>c',     ":<C-u>'<,'>GpChatNew",         'Start new chat' },
-          { '<C-g>p',     ":<C-u>'<,'>GpChatPaste split", 'Paste in chat (split)' },
-          { '<C-g>t',     ":<C-u>'<,'>GpChatToggle",      'Toggle chat window' },
+          -- { '<C-g>c',     ":<C-u>'<,'>GpChatNew",         'Start new chat' },
+          -- { '<C-g>p',     ":<C-u>'<,'>GpChatPaste split", 'Paste in chat (split)' },
+          -- { '<C-g>t',     ":<C-u>'<,'>GpChatToggle",      'Toggle chat window' },
 
           { '<C-g>x',     ":<C-u>'<,'>GpContext",         'Show context' },
           { '<C-g>s',     "<cmd>GpStop",                  'Stop current process' },
           { '<C-g>n',     "<cmd>GpNextAgent",             'Next AI agent' },
 
-          { '<C-g><C-x>', ":<C-u>'<,'>GpChatNew split",   'New chat (split)' },
-          { '<C-g><C-v>', ":<C-u>'<,'>GpChatNew vsplit",  'New chat (vsplit)' },
-          { '<C-g><C-t>', ":<C-u>'<,'>GpChatNew tabnew",  'New chat (tab)' },
+          -- { '<C-g><C-x>', ":<C-u>'<,'>GpChatNew split",   'New chat (split)' },
+          -- { '<C-g><C-v>', ":<C-u>'<,'>GpChatNew vsplit",  'New chat (vsplit)' },
+          -- { '<C-g><C-t>', ":<C-u>'<,'>GpChatNew tabnew",  'New chat (tab)' },
 
           { '<C-g>g',     group = 'Generate options' },
           { '<C-g>ge',    ":<C-u>'<,'>GpEnew",            'Generate Enew' },
@@ -48,17 +48,17 @@ return {
           { '<C-g>a',     '<cmd>GpAppend',           'Append after' },
           { '<C-g>b',     '<cmd>GpPrepend',          'Prepend before' },
 
-          { '<C-g>c',     '<cmd>GpChatNew',          'Start new chat' },
-          { '<C-g>t',     '<cmd>GpChatToggle',       'Toggle chat window' },
+          -- { '<C-g>c',     '<cmd>GpChatNew',          'Start new chat' },
+          -- { '<C-g>t',     '<cmd>GpChatToggle',       'Toggle chat window' },
 
           { '<C-g>x',     '<cmd>GpContext',          'Show context' },
           { '<C-g>f',     '<cmd>GpChatFinder',       'Chat finder' },
           { '<C-g>s',     '<cmd>GpStop',             'Stop current process' },
           { '<C-g>n',     '<cmd>GpNextAgent',        'Next AI agent' },
 
-          { '<C-g><C-x>', '<cmd>GpChatNew split',    'New chat (split)' },
-          { '<C-g><C-v>', '<cmd>GpChatNew vsplit',   'New chat (vsplit)' },
-          { '<C-g><C-t>', '<cmd>GpChatNew tabnew',   'New chat (tab)' },
+          -- { '<C-g><C-x>', '<cmd>GpChatNew split',    'New chat (split)' },
+          -- { '<C-g><C-v>', '<cmd>GpChatNew vsplit',   'New chat (vsplit)' },
+          -- { '<C-g><C-t>', '<cmd>GpChatNew tabnew',   'New chat (tab)' },
 
           { '<C-g>g',     group = 'Generate options' },
           { '<C-g>ge',    '<cmd>GpEnew',             'Generate Enew' },
@@ -89,9 +89,9 @@ return {
           { '<C-g>s',     '<cmd>GpStop',             'Stop current process' },
           { '<C-g>n',     '<cmd>GpNextAgent',        'Next AI agent' },
 
-          { '<C-g><C-x>', '<cmd>GpChatNew split',    'New chat (split)' },
-          { '<C-g><C-v>', '<cmd>GpChatNew vsplit',   'New chat (vsplit)' },
-          { '<C-g><C-t>', '<cmd>GpChatNew tabnew',   'New chat (tab)' },
+          -- { '<C-g><C-x>', '<cmd>GpChatNew split',    'New chat (split)' },
+          -- { '<C-g><C-v>', '<cmd>GpChatNew vsplit',   'New chat (vsplit)' },
+          -- { '<C-g><C-t>', '<cmd>GpChatNew tabnew',   'New chat (tab)' },
 
           { '<C-g>g',     group = 'Generate options' },
           { '<C-g>ge',    '<cmd>GpEnew',             'Generate Enew' },
@@ -228,6 +228,12 @@ return {
       })
       -- clear virtual text and trigger completion
       vim.keymap.set('i', '<C-c>', cmp.complete)
+      -- open codeium chat
+      vim.keymap.set('n', '<C-g>c', neocodeium.chat)
+      vim.keymap.set('v', '<C-g>c', function()
+        vim.cmd('y') -- Yank visually selected text
+        neocodeium.chat()
+      end)
     end,
   },
   -- {
@@ -253,7 +259,7 @@ return {
   --           dismiss = '<C-c>',
   --         },
   --       },
-  --       suggestion = { enabled = false },
+  --       -- suggestion = { enabled = false },
   --       panel = { enabled = false },
   --     })
   --

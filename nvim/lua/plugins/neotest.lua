@@ -31,19 +31,23 @@ return {
         adapters = {
           rspec({
             rspec_cmd = function(type) -- file, test, dir
-              if type == 'test' then
-                return {
-                  'bundle', 'exec', 'rspec',
-                  '--fail-fast',
-                  '--color',
-                }
+              local executable = 'bin/rspec'
+              local command = {}
+
+              if io.popen('command -v ' .. executable):read('*a') ~= '' then
+                command = { executable }
               else
-                return {
-                  'bundle', 'exec', 'rspec',
-                  '--color',
-                }
+                command = { 'bundle', 'exec', 'rspec' }
               end
-            end,
+
+              table.insert(command, '--color')
+
+              if type == 'test' then
+                table.insert(command, '--fail-fast')
+              end
+
+              return command
+            end
           }),
         },
         overseer = {

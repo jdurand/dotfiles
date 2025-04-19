@@ -1,1 +1,1 @@
-/Users/jdurand/.config/fish/config.local.fish
+../../.config/fish/config.local.fish

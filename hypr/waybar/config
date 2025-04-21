@@ -1,0 +1,56 @@
+{
+	"include": [
+		"$HOME/.config/waybar/Modules",
+		"$HOME/.config/waybar/ModulesWorkspaces",
+		"$HOME/.config/waybar/ModulesCustom",
+		"$HOME/.config/waybar/ModulesGroups",
+		"$HOME/.config/waybar/UserModules",
+	],
+
+	"layer": "top",
+	"position": "top",
+	"height": 14,
+	"margin-left": 10,
+	"margin-right": 10,
+	"margin-top": 2,
+
+	"workspace-name-mappings": {
+		"1": "1",
+		"2": "2",
+		"3": "3",
+		"4": "Q",
+		"5": "W",
+		"6": "E",
+		"7": "A",
+		"8": "S",
+		"9": "D",
+		"10": "Z",
+		"11": "X",
+		"12": "C"
+	},
+
+	"modules-left": [
+		"custom/menu",
+		"custom/separator#blank_2",
+		"hyprland/workspaces",
+		"custom/separator#blank_2",
+		"mpris",
+		"tray"
+	],
+
+	"modules-center": [
+		"idle_inhibitor",
+		"custom/separator#blank",
+		"clock#3",
+		"custom/separator#blank",
+		"group/notify"
+	],
+
+	"modules-right": [
+		"hyprland/window",
+		"custom/separator#blank_2",
+		"pulseaudio",
+		"custom/separator#blank",
+		"custom/power",
+	],
+}

@@ -54,11 +54,14 @@ return {
       local files = require('mini.files')
 
       files.setup({
+        options = {
+          use_as_default_explorer = true,
+        },
         mappings = {
           close       = 'q',
           go_in       = 'l',
           go_in_plus  = '<CR>',
-          go_out      = 'H',
+          -- go_out      = 'H',
           go_out_plus = 'h',
           mark_goto   = "'",
           mark_set    = 'm',
@@ -69,6 +72,32 @@ return {
           trim_right  = '>',
           show_help   = '?',
         },
+      })
+
+      -- Hide hidden files
+      local show_dotfiles = false
+      local function dotfile_filter(entry)
+        if show_dotfiles then
+          return true
+        else
+          return not vim.startswith(entry.name, ".")
+        end
+      end
+      -- Apply filter on open
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'MiniFilesBufferCreate',
+        callback = function(args)
+          -- Set toggle keybinding (but delay refresh to avoid recursion)
+          vim.keymap.set('n', 'H', function()
+            show_dotfiles = not show_dotfiles
+            files.refresh({ content = { filter = dotfile_filter } })
+          end, { buffer = args.data.buf_id, desc = 'Toggle hidden files in mini.files' })
+
+          -- Apply filter *after* initial open to avoid triggering itself
+          vim.defer_fn(function()
+            files.refresh({ content = { filter = dotfile_filter } })
+          end, 10)
+        end,
       })
 
       local open_file_explorer = function()

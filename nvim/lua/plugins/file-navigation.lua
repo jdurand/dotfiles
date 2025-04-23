@@ -52,13 +52,17 @@ return {
     'echasnovski/mini.files',
     config = function()
       local files = require('mini.files')
+      local ext = require('user.extensions.mini-files')
 
       files.setup({
+        options = {
+          use_as_default_explorer = true,
+        },
         mappings = {
           close       = 'q',
           go_in       = 'l',
           go_in_plus  = '<CR>',
-          go_out      = 'H',
+          -- go_out      = 'H',
           go_out_plus = 'h',
           mark_goto   = "'",
           mark_set    = 'm',
@@ -69,6 +73,11 @@ return {
           trim_right  = '>',
           show_help   = '?',
         },
+      })
+
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'MiniFilesBufferCreate',
+        callback = ext.on_files_buffer_create
       })
 
       local open_file_explorer = function()

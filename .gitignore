@@ -14,3 +14,8 @@ zsh/waffle-plugins/
 
 # Lazygit
 lazygit/state.yml
+
+# Karabiner
+karabiner/assets
+karabiner/automatic_backups
+karabiner/karabiner.json

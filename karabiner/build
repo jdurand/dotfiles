@@ -1,0 +1,27 @@
+#!/bin/bash
+
+set -euo pipefail
+
+BASE_DIR="$HOME/.dotfiles/karabiner"
+RULES_DIR="$BASE_DIR/rules"
+OUTPUT="$BASE_DIR/karabiner.json"
+
+# Check dependencies
+if ! command -v jq &>/dev/null; then
+  echo "❌ 'jq' is required but not installed."
+  exit 1
+fi
+
+# Combine all rules into a JSON array
+rules_json=$(jq -s '.' "$RULES_DIR"/*.json)
+
+cp $OUTPUT $OUTPUT.bak
+
+# Inject rules into the first profile's complex_modifications.rules
+jq --argjson rules "$rules_json" '
+  .profiles[0].complex_modifications.rules = $rules
+' "$OUTPUT.bak" > "$OUTPUT"
+
+rm $OUTPUT.bak
+
+echo "✅ Built $OUTPUT"

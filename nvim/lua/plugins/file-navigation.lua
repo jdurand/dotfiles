@@ -75,27 +75,47 @@ return {
       })
 
       -- Hide hidden files
-      local show_dotfiles = false
-      local function dotfile_filter(entry)
-        if show_dotfiles then
-          return true
-        else
-          return not vim.startswith(entry.name, ".")
+      local show_hidden = false
+      local ignored_files = {}
+      -- Load ignored files into a set
+      local function load_git_ignored()
+        ignored_files = {} -- only of no path is passed in?
+
+        -- git ls-files $dir --others --ignored --exclude-standard
+        local lines = vim.fn.systemlist('git ls-files --others --ignored --exclude-standard')
+        if vim.v.shell_error == 0 then
+          for _, path in ipairs(lines) do
+            -- Use absolute paths for comparison
+            local abs_path = vim.fn.fnamemodify(path, ':p')
+            ignored_files[abs_path] = true
+          end
         end
       end
-      -- Apply filter on open
+      load_git_ignored()
+      -- Filter function used by mini.files
+      local function hidden_filter(entry)
+        if show_hidden then
+          return true
+        end
+        if vim.startswith(entry.name, ".") then
+          return false
+        end
+        local abs_path = vim.fn.fnamemodify(entry.path, ':p')
+        return not ignored_files[abs_path]
+      end
+      -- Hook into MiniFiles open
       vim.api.nvim_create_autocmd('User', {
         pattern = 'MiniFilesBufferCreate',
         callback = function(args)
-          -- Set toggle keybinding (but delay refresh to avoid recursion)
+          -- load_git_ignored()
+
           vim.keymap.set('n', 'H', function()
-            show_dotfiles = not show_dotfiles
-            files.refresh({ content = { filter = dotfile_filter } })
+            show_hidden = not show_hidden
+            require('mini.files').refresh({ content = { filter = hidden_filter } })
           end, { buffer = args.data.buf_id, desc = 'Toggle hidden files in mini.files' })
 
-          -- Apply filter *after* initial open to avoid triggering itself
           vim.defer_fn(function()
-            files.refresh({ content = { filter = dotfile_filter } })
+            require('mini.files').refresh({ content = { filter = hidden_filter } })
           end, 10)
         end,
       })

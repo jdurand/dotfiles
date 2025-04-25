@@ -1,5 +1,54 @@
 local nnoremap = require('user.keymaps.bind').nnoremap
 
+-- Asynchronously reload .gitignored files
+local function async_load_git_ignored(callback)
+  local handle
+  local stdout = vim.loop.new_pipe(false)
+  local result = {}
+  local ignored = {}
+
+  handle = vim.loop.spawn('git', {
+    args = { 'ls-files', '--others', '--ignored', '--exclude-standard' },
+    stdio = { nil, stdout, nil },
+    cwd = vim.fn.getcwd(),
+  }, function()
+    stdout:close()
+    handle:close()
+
+    ignored = {}
+    for _, path in ipairs(result) do
+      local abs = vim.fn.fnamemodify(path, ':p')
+
+      ignored[abs] = true
+    end
+    if callback then
+      vim.schedule(function()
+        callback(ignored)
+      end)
+    end
+  end)
+
+  stdout:read_start(function(err, data)
+    assert(not err, err)
+    if data then
+      for line in data:gmatch("[^\r\n]+") do
+        table.insert(result, line)
+      end
+    end
+  end)
+end
+
+-- Filter function used by mini.files
+local function filter_hidden_files(entry, ignored)
+  if vim.startswith(entry.name, '.') then
+    return false
+  end
+
+  local abs_path = vim.fn.fnamemodify(entry.path, ':p')
+
+  return not ignored[abs_path]
+end
+
 return {
   {
     'nvim-neo-tree/neo-tree.nvim',
@@ -74,49 +123,24 @@ return {
         },
       })
 
-      -- Hide hidden files
       local show_hidden = false
-      local ignored_files = {}
-      -- Load ignored files into a set
-      local function load_git_ignored()
-        ignored_files = {} -- only of no path is passed in?
+      local ignored_files_cache = {}
 
-        -- git ls-files $dir --others --ignored --exclude-standard
-        local lines = vim.fn.systemlist('git ls-files --others --ignored --exclude-standard')
-        if vim.v.shell_error == 0 then
-          for _, path in ipairs(lines) do
-            -- Use absolute paths for comparison
-            local abs_path = vim.fn.fnamemodify(path, ':p')
-            ignored_files[abs_path] = true
-          end
-        end
-      end
-      load_git_ignored()
-      -- Filter function used by mini.files
-      local function hidden_filter(entry)
-        if show_hidden then
-          return true
-        end
-        if vim.startswith(entry.name, ".") then
-          return false
-        end
-        local abs_path = vim.fn.fnamemodify(entry.path, ':p')
-        return not ignored_files[abs_path]
-      end
       -- Hook into MiniFiles open
       vim.api.nvim_create_autocmd('User', {
         pattern = 'MiniFilesBufferCreate',
         callback = function(args)
-          -- load_git_ignored()
-
+          -- Setup toggle key
           vim.keymap.set('n', 'H', function()
             show_hidden = not show_hidden
-            require('mini.files').refresh({ content = { filter = hidden_filter } })
+            files.refresh({ content = { filter = function(entry) return show_hidden or filter_hidden_files(entry, ignored_files_cache) end } })
           end, { buffer = args.data.buf_id, desc = 'Toggle hidden files in mini.files' })
 
-          vim.defer_fn(function()
-            require('mini.files').refresh({ content = { filter = hidden_filter } })
-          end, 10)
+          -- Async load ignored files and refresh after
+          async_load_git_ignored(function(ignored)
+            ignored_files_cache = ignored -- save ignored files in cache
+            files.refresh({ content = { filter = function(entry) return show_hidden or filter_hidden_files(entry, ignored) end } })
+          end)
         end,
       })
 

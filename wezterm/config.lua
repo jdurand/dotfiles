@@ -59,6 +59,9 @@ config.keys = {
   -- close pane
   { key = 'W', mods = 'CMD', action = wezterm.action.CloseCurrentPane { confirm = false } },
 
+  -- close application
+  { key = 'q', mods = 'CMD', action = wezterm.action.QuitApplication },
+
   -- toggle fullscreen
   { key = 'F11', action = wezterm.action.ToggleFullScreen },
 }

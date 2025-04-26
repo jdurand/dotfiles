@@ -98,14 +98,16 @@ cmd-h = [] # Disable "hide application"
 # cmd-alt-h = [] # Disable "hide others"
 
 # Keybindings for layout management
-alt-slash = 'layout tiles horizontal vertical'
-alt-comma = 'layout accordion horizontal vertical'
+cmd-slash = 'layout tiles horizontal vertical'
+cmd-comma = 'layout accordion horizontal vertical'
 
-# alt-h = 'focus left'
-# alt-j = 'focus down'
-# alt-k = 'focus up'
-# alt-l = 'focus right'
-
+# cmd-h = 'focus left'
+# cmd-j = 'focus down'
+# cmd-k = 'focus up'
+# cmd-l = 'focus right'
+#
+# bound to cmd+h,j,k,l in karabiner
+# see: karabiner/rules/left_command-raycast_and_hjkl_arrows.json
 cmd-alt-h = 'focus left'
 cmd-alt-j = 'focus down'
 cmd-alt-k = 'focus up'

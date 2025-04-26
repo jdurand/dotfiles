@@ -59,6 +59,21 @@
           "modifiers": ["left_command", "left_option"]
         }
       ],
+      "conditions": [
+        {
+          "type": "frontmost_application_unless",
+          "bundle_identifiers": [
+            "^com\\.apple\\.Safari",
+            "^com\\.google\\.Chrome",
+            "^com\\.microsoft\\.Edge",
+            "^com\\.microsoft\\.outlook",
+            "^com\\.microsoft\\.Word",
+            "^com\\.apple\\.TextEdit",
+            "^com\\.obsidian.md",
+            "^company\\.thebrowser\\.Browser"
+          ]
+        }
+      ],
       "type": "basic"
     },
     {

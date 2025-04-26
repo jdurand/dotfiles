@@ -1,0 +1,22 @@
+{
+  "description": "CTRL-K => CMD-K",
+  "enabled": false,
+  "manipulators": [
+    {
+      "from": {
+        "key_code": "k",
+        "modifiers": {
+          "mandatory": ["left_control"],
+          "optional": ["any"]
+        }
+      },
+      "to": [
+        {
+          "key_code": "k",
+          "modifiers": ["left_command"]
+        }
+      ],
+      "type": "basic"
+    }
+  ]
+}

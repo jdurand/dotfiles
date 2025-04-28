@@ -73,6 +73,7 @@ return {
           trim_right  = '>',
           show_help   = '?',
         },
+        content = { prefix = ext.files_content_prefix }
       })
 
       vim.api.nvim_create_autocmd('User', {

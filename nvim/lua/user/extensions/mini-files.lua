@@ -19,49 +19,62 @@ local function load_git_ignored_cache(callback)
     stdout:close()
     handle:close()
 
-    -- Fill ignored files
+    -- Normalize and collect ignored files
     for _, path in ipairs(result) do
-      local abs = vim.fn.fnamemodify(path, ':p')
+      local abs = vim.fn.fnamemodify(path, ':p'):gsub('/*$', '')
       ignored_files[abs] = true
 
-      -- Mark parent directories as potentially fully ignored
       local parent = vim.fn.fnamemodify(abs, ':h')
       while parent and parent ~= '/' do
-        parent = parent:gsub('/*$', '') -- normalize to no trailing slash
+        parent = parent:gsub('/*$', '')
         potential_dirs[parent] = true
         parent = vim.fn.fnamemodify(parent, ':h')
       end
     end
 
-    -- A folder is only ignored if **all** its contents are ignored
     local ignored_dirs = {}
+    local memo = {}
 
-    for dir, _ in pairs(potential_dirs) do
-      dir = dir:gsub('/*$', '') -- normalize to no trailing slash
+    local function is_dir_fully_ignored(dir)
+      dir = dir:gsub('/*$', '')
+      if memo[dir] ~= nil then return memo[dir] end
+
       local fs = vim.loop.fs_scandir(dir)
-      if fs then
-        local all_ignored = true
-        while true do
-          local name, type = vim.loop.fs_scandir_next(fs)
-          if not name then break end
+      if not fs then
+        memo[dir] = true
+        return true
+      end
 
-          local full_path = vim.fn.fnamemodify(dir .. '/' .. name, ':p')
-          full_path = full_path:gsub('/*$', '') -- normalize to no trailing slash
+      local all_ignored = true
+      while true do
+        local name, type = vim.loop.fs_scandir_next(fs)
+        if not name then break end
 
-          if not vim.startswith(name, '.') and type == 'file' and not ignored_files[full_path] then
-            all_ignored = false
-            break
+        local full_path = vim.fn.fnamemodify(dir .. '/' .. name, ':p'):gsub('/*$', '')
+
+        if not vim.startswith(name, '.') then
+          if type == 'file' then
+            if not ignored_files[full_path] then
+              all_ignored = false
+              break
+            end
           elseif type == 'directory' then
-            if not potential_dirs[full_path] then
+            if not is_dir_fully_ignored(full_path) then
               all_ignored = false
               break
             end
           end
         end
+      end
 
-        if all_ignored then
-          ignored_dirs[dir] = true
-        end
+      memo[dir] = all_ignored
+      return all_ignored
+    end
+
+    -- Evaluate all potential directories
+    for dir, _ in pairs(potential_dirs) do
+      if is_dir_fully_ignored(dir) then
+        ignored_dirs[dir] = true
       end
     end
 
@@ -135,6 +148,39 @@ local function on_buffer_create(args)
   end
 end
 
+local function content_prefix(fs_entry)
+  local icon, hl = require('mini.files').default_prefix(fs_entry)
+  local is_hidden = fs_entry.name:match('^%.')
+  local abs_path = vim.fn.fnamemodify(fs_entry.path, ':p')
+  abs_path = abs_path:gsub('/*$', '') -- normalize to no trailing slash
+
+  -- show hidden and ignored files & directories in dark grey
+  -- local dark_grey = 'Comment' -- dark grey
+  local dark_grey = 'LineNr' -- darker grey
+  --
+  if is_hidden then
+    hl = dark_grey
+  elseif fs_entry.fs_type == 'file' and ignored_cache.files then
+    if ignored_cache.files[abs_path] then
+      hl = dark_grey
+    end
+  elseif fs_entry.fs_type == 'directory' and ignored_cache.dirs then
+    if ignored_cache.dirs[abs_path] then
+      hl = dark_grey
+    end
+  end
+
+  -- show normal directories with a different icon
+  if fs_entry.fs_type == 'directory' then
+    if not is_hidden then
+      icon = ' '
+    end
+  end
+
+  return icon, hl
+end
+
 return {
-  on_files_buffer_create = on_buffer_create
+  on_files_buffer_create = on_buffer_create,
+  files_content_prefix = content_prefix
 }

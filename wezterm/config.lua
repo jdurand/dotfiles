@@ -64,6 +64,17 @@ config.keys = {
 
   -- toggle fullscreen
   { key = 'F11', action = wezterm.action.ToggleFullScreen },
+
+  -- This workaround remaps Ctrl+i to Ctrl+a in Tmux to prevent it from being
+  -- interpreted as TAB, enabling proper handling in child programs, like Neovim.
+  { key = 'i', mods = 'CTRL', action = wezterm.action.SendString('\x1bi') },
+
+  -- zoom in (increase font size)
+  { key = '=', mods = 'SUPER', action = wezterm.action.IncreaseFontSize },
+  -- zoom out (decrease font size)
+  { key = '-', mods = 'SUPER', action = wezterm.action.DecreaseFontSize },
+  -- reset font size
+  { key = '0', mods = 'SUPER', action = wezterm.action.ResetFontSize },
 }
 
 -- config.inactive_pane_hsb = {

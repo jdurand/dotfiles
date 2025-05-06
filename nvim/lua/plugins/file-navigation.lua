@@ -9,12 +9,26 @@ return {
       { '<leader><C-f>', '<cmd>Neotree toggle<cr>', desc = 'NeoTree' },
     },
     config = function()
+      local function open_and_focus_in(state)
+        local node = state.tree:get_node()
+        if node.type == "directory" then
+          require("neo-tree.sources.filesystem.commands").toggle_node(state)
+          vim.defer_fn(function()
+            require("neo-tree.ui.renderer").focus_node(state, node:get_child_ids()[1])
+          end, 50)
+        else
+          require('neo-tree.sources.common.commands').open(state)
+        end
+      end
+
       require('neo-tree').setup({
         window = {
           mappings = {
             ['<space>'] = {
               'toggle_preview', config = { use_float = true, use_image_nvim = false }
             },
+            ['h'] = 'close_node',
+            ['l'] = open_and_focus_in,
             ['<C-f>'] = 'close_window',
             ['<C-l>'] = 'focus_preview',
             ['<C-d>'] = { 'scroll_preview', config = { direction = -5 } },

@@ -49,7 +49,7 @@ return {
           ['<CR>'] = cmp.mapping.confirm({ select = false }),
           ['<C-p>'] = cmp.mapping.confirm({ select = true }),
           ['<C-f>'] = cmp.mapping.confirm({ select = true }),
-          ['<C-l>'] = cmp.mapping.confirm({ select = true }),
+          -- ['<C-l>'] = cmp.mapping.confirm({ select = true }),
           ['<C-c>'] = cmp.mapping.close(),
         },
         sources = cmp.config.sources({

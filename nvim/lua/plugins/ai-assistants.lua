@@ -213,21 +213,22 @@ return {
       vim.keymap.set('i', '<C-c>', neocodeium.clear)
       vim.keymap.set('i', '<C-p>', neocodeium.accept)
       vim.keymap.set('i', '<C-f>', neocodeium.accept_word)
-      vim.keymap.set('i', '<C-l>', neocodeium.accept_line)
-
-      -- Address ux issues with virtual text and autocompletion:
-      -- give precedence to codeium's virtual text while
-      -- disabling neocodeium during completion
-      cmp.event:on('menu_opened', function()
-        neocodeium.clear()
+      -- vim.keymap.set('i', '<C-l>', neocodeium.accept_line)
+      vim.keymap.set('i', '<C-l>', function()
+        cmp.close()
+        neocodeium.cycle_or_complete()
       end)
+
       neocodeium.setup({
-        filter = function()
-          return not cmp.visible()
-        end,
+        manual = true,
       })
-      -- clear virtual text and trigger completion
-      vim.keymap.set('i', '<C-c>', cmp.complete)
+
+      -- create an autocommand which closes cmp when ai completions are displayed
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'NeoCodeiumCompletionDisplayed',
+        callback = function() cmp.close() end
+      })
+
       -- open codeium chat
       vim.keymap.set('n', '<C-g>c', neocodeium.chat)
       vim.keymap.set('v', '<C-g>c', function()

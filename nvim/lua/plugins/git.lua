@@ -83,6 +83,38 @@ return {
     end
   },
   {
+    'sindrets/diffview.nvim',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    config = function()
+      vim.api.nvim_create_autocmd('BufWinEnter', {
+        callback = function(args)
+          if vim.wo.diff then
+            nnoremap('co', ':diffget LOCAL<CR>', { desc = "Choose Ours (LOCAL)", buffer = args.buf })
+            nnoremap('ct', ':diffget REMOTE<CR>', { desc = "Choose Theirs (REMOTE)", buffer = args.buf })
+            nnoremap('cc', ':diffget<CR>',        { desc = "Choose under Cursor", buffer = args.buf })
+            nnoremap('ca', [[:argdo %diffget REMOTE<CR>]], { desc = "Choose All (REMOTE)", buffer = args.buf })
+            nnoremap('c0', 'u',                   { desc = "Choose None (Undo)", buffer = args.buf })
+            nnoremap('cb', ':diffput<CR>',       { desc = "Choose Both (put current into other)", buffer = args.buf })
+
+            if package.loaded['noice'] then
+              require('noice').notify(
+                'Diffview Key Bindings:\n' ..
+                'co: Choose Ours (LOCAL)\n' ..
+                'ct: Choose Theirs (REMOTE)\n' ..
+                'ca: Choose All (REMOTE)\n' ..
+                'c0: Choose None (Undo)\n' ..
+                'cb: Choose Both (diffput)\n' ..
+                'cc: Choose under Cursor',
+                'info',
+                { title = 'Diff Merge Bindings' }
+              )
+            end
+          end
+        end,
+      })
+    end
+  },
+  {
     'petertriho/cmp-git',
     dependencies = { 'hrsh7th/nvim-cmp' },
     opts = {

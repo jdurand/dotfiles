@@ -31,11 +31,8 @@ return {
     'neovim/nvim-lspconfig',
     dependencies = {
       -- Automatically install LSPs to stdpath for neovim
-      {
-        'williamboman/mason.nvim',
-        config = true
-      },
-      'williamboman/mason-lspconfig.nvim',
+      { 'williamboman/mason.nvim', version = '1.11.0' },
+      { 'williamboman/mason-lspconfig.nvim', version = '1.32.0' },
 
       -- Useful status updates for LSP
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`

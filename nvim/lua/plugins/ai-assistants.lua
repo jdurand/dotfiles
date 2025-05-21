@@ -1,3 +1,16 @@
+
+local function get_project_root()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local clients = vim.lsp.get_clients({ bufnr = bufnr })
+
+  for _, client in ipairs(clients) do
+    local root_dir = client.config.root_dir
+    if root_dir then return root_dir end
+  end
+
+  return vim.fn.getcwd()
+end
+
 return {
   {
     'robitx/gp.nvim',
@@ -204,6 +217,9 @@ return {
     dependencies = {
       'hrsh7th/nvim-cmp',
     },
+    enabled = function()
+      return vim.fn.filereadable(get_project_root() .. '/.windsurf_enabled') == 1
+    end,
     config = function()
       local neocodeium = require('neocodeium')
       local cmp = require('cmp')

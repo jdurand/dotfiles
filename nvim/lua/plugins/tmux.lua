@@ -29,8 +29,8 @@ return {
     })
 
     -- nnoremap('<M-h>', "<cmd>lua require('tmux').resize_left(5)<cr>")
-    -- nnoremap('<M-k>', "<cmd>lua require('tmux').resize_top(2)<cr>")
     -- nnoremap('<M-j>', "<cmd>lua require('tmux').resize_bottom(2)<cr>")
+    -- nnoremap('<M-k>', "<cmd>lua require('tmux').resize_top(2)<cr>")
     -- nnoremap('<M-l>', "<cmd>lua require('tmux').resize_right(5)<cr>")
 
     nnoremap('<C-\\>', "<cmd>lua require('tmux').move_left()<cr>")

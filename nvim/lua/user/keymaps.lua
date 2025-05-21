@@ -89,10 +89,10 @@ vim.api.nvim_set_keymap('v', 'a|', 'f|oF|', { noremap = true })
 vim.api.nvim_set_keymap('v', '<C-M>', '<NOP>', { noremap = true }) -- This maps the Enter key in visual mode
 vim.api.nvim_set_keymap('v', '<BS>', 'dk$', { noremap = true })
 
--- Easy line moving
--- ----------------------------------------------------------------------------------------------------
-vim.api.nvim_set_keymap('v', '<M-j>', 'djPV`]', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('v', '<M-k>', 'dkPV`]', { noremap = true, silent = true })
+-- -- Easy line moving
+-- -- ----------------------------------------------------------------------------------------------------
+-- vim.api.nvim_set_keymap('v', '<M-j>', 'djPV`]', { noremap = true, silent = true })
+-- vim.api.nvim_set_keymap('v', '<M-k>', 'dkPV`]', { noremap = true, silent = true })
 
 -- Select only the text characters in the current line
 -- ----------------------------------------------------------------------------------------------------

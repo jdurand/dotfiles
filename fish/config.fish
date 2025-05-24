@@ -30,6 +30,10 @@ set -x OBJC_DISABLE_INITIALIZE_FORK_SAFETY "YES"
 # which can help prevent authentication issues in clustered environments.
 set -x PGGSSENCMODE "disable"
 
+# qlty
+set -x QLTY_INSTALL "$HOME/.qlty"
+set -x PATH $QLTY_INSTALL/bin $PATH
+
 # Add homebrew bins to $PATH
 if test -e /opt/homebrew/bin/brew
   /opt/homebrew/bin/brew shellenv | source

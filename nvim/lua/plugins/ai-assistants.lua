@@ -1,3 +1,4 @@
+local long_press_aware_keybinding = require('user.keymaps.long_press').long_press_aware_keybinding
 
 local function get_project_root()
   local bufnr = vim.api.nvim_get_current_buf()
@@ -234,6 +235,19 @@ return {
         cmp.close()
         neocodeium.cycle_or_complete()
       end)
+
+      long_press_aware_keybinding('i', '<Tab>', {
+        tap = function()
+          if neocodeium.visible() then
+            neocodeium.accept()
+          else
+            neocodeium.cycle_or_complete()
+          end
+        end,
+        press = function()
+          vim.api.nvim_input('<Tab>')
+        end,
+      }, 500, { noremap = true, silent = true })
 
       neocodeium.setup({
         manual = true,

@@ -154,9 +154,11 @@ fish -c '
 '
 
 # Check for +sketchybar option
-if [[ "$1" == "+sketchybar" ]]; then
-  info "Installing SketchyBar and its dependencies..."
-  zsh ./_setup/install-sketchybar
+if [[ "$1" == "+aerospace" ]]; then
+  info "Installing Aerospace, SketchyBar and their dependencies..."
+  zsh ./_setup/install-aerospace
+
+  aerospace reload-config
   brew services restart sketchybar
 fi
 

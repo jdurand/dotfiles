@@ -7,7 +7,7 @@ theme = TokyoNight Storm
 # Font
 #
 font-family = VictorMono Nerd Font Mono
-font-size = 15
+font-size = 14
 font-thicken = true
 font-feature = +ss05, +ss06 # alternatives for 0 and 7
 # font-feature = -calt, -liga, -dlig # disable ligatures
@@ -34,6 +34,11 @@ window-padding-y = 7
 #
 clipboard-trim-trailing-spaces = true
 # clipboard-paste-protection = false
+
+#
+# Notifications
+#
+app-notifications = "no-clipboard-copy"
 
 #
 # Window behaviour

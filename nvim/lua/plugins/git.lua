@@ -79,7 +79,11 @@ return {
       'nvim-tree/nvim-web-devicons',
     },
     config = function ()
-      require('octo').setup()
+      if vim.fn.executable('gh') == 1 then
+        require('octo').setup()
+      else
+        vim.notify('GitHub CLI (gh) not found — skipping octo.nvim setup', vim.log.levels.WARN)
+      end
     end
   },
   {

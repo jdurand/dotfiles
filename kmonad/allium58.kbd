@@ -37,14 +37,19 @@
 ;;
 ;; [Unit]
 ;; Description=KMonad Allium58
-;; After=network.target
+;; Before=graphical.target
+;; After=multi-user.target
 ;; 
 ;; [Service]
 ;; Type=simple
-;; ExecStart=/usr/local/bin/kmonad -f /home/jdurand/.config/kmonad/allium58.kbd
+;; ExecStart=/usr/bin/kmonad /home/jdurand/.config/kmonad/allium58.kbd
 ;; Restart=always
-;; User=root
-;; Group=root
+;; User=jdurand
+;; Group=input
+;; CapabilityBoundingSet=CAP_SYS_ADMIN CAP_SYS_NICE
+;; AmbientCapabilities=CAP_SYS_ADMIN CAP_SYS_NICE
+;; NoNewPrivileges=true
 ;; 
 ;; [Install]
 ;; WantedBy=multi-user.target
+

@@ -1,0 +1,154 @@
+#!/bin/bash
+
+export PATH="/home/linuxbrew/.linuxbrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+
+command -v jq >/dev/null || { echo "[FATAL] jq not found"; exit 1; }
+command -v curl >/dev/null || { echo "[FATAL] curl not found"; exit 1; }
+
+# CONFIG
+CHECK_INTERVAL="${1:-1800}"  # 30 minutes if no argument is provided
+CITY=${2:-"Montreal"}
+COUNTRY=${3:-"Canada"}
+DARK_DIR="$HOME/Pictures/wallpapers/Dynamic-Wallpapers/Dark"
+LIGHT_DIR="$HOME/Pictures/wallpapers/Dynamic-Wallpapers/Light"
+OUTPUT="DP-1"
+
+# FUNCTION: get coordinates using Nominatim
+fetch_coords() {
+  local response=$(curl -s "https://nominatim.openstreetmap.org/search?city=$CITY&country=$COUNTRY&format=json&limit=1")
+  if [[ -z "$response" || "$response" == "[]" ]]; then
+    echo "[ERROR] Could not fetch coordinates for $CITY, $COUNTRY"
+    exit 1
+  fi
+  echo "$response" | jq -r '.[0] | "\(.lat) \(.lon)"'
+}
+
+fetch_and_cache_coords() {
+  read LAT LON < <(fetch_coords)
+  echo "$LAT $LON" > "$COORDS_CACHE_FILE"
+}
+
+# FUNCTION: determine if it's currently night
+is_night() {
+  local lat="$1"
+  local lon="$2"
+
+  local sun_data=$(curl -s "https://api.sunrise-sunset.org/json?lat=$lat&lng=$lon&formatted=0")
+  local sunrise_str=$(echo "$sun_data" | jq -r '.results.sunrise')
+  local sunset_str=$(echo "$sun_data" | jq -r '.results.sunset')
+
+  local now=$(date -u +%s)
+
+  # Normalize ISO8601 to space-separated format (drop timezone, replace T)
+  local sunrise=$(date -u -d "${sunrise_str/T/ }" +%s 2>/dev/null || date -u -d '06:00:00' +%s)
+  local sunset=$(date -u -d "${sunset_str/T/ }" +%s 2>/dev/null || date -u -d '18:00:00' +%s)
+
+  echo "[DEBUG] Now: $now | Sunrise: $sunrise | Sunset: $sunset"
+
+  (( now < sunrise || now > sunset ))
+}
+
+# FUNCTION: set wallpaper using hyprctl
+set_wallpaper() {
+  local mode="$1"     # "Dark" or "Light"
+  local dir="$2"      # Corresponding dir: $DARK_DIR or $LIGHT_DIR
+  local current=$(hyprctl hyprpaper listactive | grep "$OUTPUT" | awk -F' = ' '{print $2}')
+
+  if [[ "$current" == "$DARK_DIR"* || "$current" == "$LIGHT_DIR"* ]]; then
+    # Current wallpaper is from a light/dark set — use matching wallpaper
+    set_matching_wallpaper "$mode" "$dir"
+  else
+    # Use a random wallpaper from matching prefix
+    local prefix="${HYPRPAPER_RANDOM_PREFIX:-$HOME/Pictures/wallpapers/Lofi**}"
+    set_random_wallpaper "$prefix"
+  fi
+}
+
+set_random_wallpaper() {
+  local prefix="$1"
+  local image=$(find $prefix -type f \( -iname "*.jpg" -o -iname "*.png" \) | shuf -n 1)
+
+  if [[ -z "$image" ]]; then
+    echo "[ERROR] No wallpapers found under prefix: $prefix"
+    return 1
+  fi
+
+  hyprctl hyprpaper unload all >/dev/null
+  hyprctl hyprpaper preload "$image"
+  hyprctl hyprpaper wallpaper "$OUTPUT,$image"
+
+  echo "[LOG] Wallpaper set to: $image"
+}
+
+set_matching_wallpaper() {
+  local mode="$1"                     # "Dark" or "Light"
+  local dir="$2"                      # path to Dark or Light wallpapers
+  local current=$(hyprctl hyprpaper listactive | grep "$OUTPUT" | awk -F' = ' '{print $2}')
+
+  if [[ "$current" == "$dir"* ]]; then
+    echo "[LOG] Wallpaper already set from $mode mode. Skipping."
+    return
+  fi
+
+  local base=$(basename "$current")
+  local match=$(echo "$base" | sed -E 's/[-_](dark|light)\.(jpg|png)//I')
+  local image=$(find "$dir" -type f \( -iname "${match}-$(echo "$mode" | tr '[:upper:]' '[:lower:]').jpg" \
+                                      -o -iname "${match}_$(echo "$mode" | tr '[:upper:]' '[:lower:]').jpg" \
+                                      -o -iname "${match}-$(echo "$mode" | tr '[:upper:]' '[:lower:]').png" \
+                                      -o -iname "${match}_$(echo "$mode" | tr '[:upper:]' '[:lower:]').png" \) | head -n 1)
+
+  if [[ -z "$image" ]]; then
+    echo "[WARN] No matching $mode wallpaper for $match. Picking random."
+    image=$(find "$dir" -type f \( -iname "*.jpg" -o -iname "*.png" \) | shuf -n 1)
+  fi
+
+  hyprctl hyprpaper unload all >/dev/null
+  hyprctl hyprpaper preload "$image"
+  hyprctl hyprpaper wallpaper "$OUTPUT,$image"
+
+  echo "[LOG] Wallpaper set to: $image"
+}
+
+# MAIN
+COORDS_CACHE_DIR="$HOME/.cache/watch-sunset"
+COORDS_CACHE_FILE="$COORDS_CACHE_DIR/$CITY-$COUNTRY.coords"
+
+mkdir -p $COORDS_CACHE_DIR
+
+if [[ -f "$COORDS_CACHE_FILE" ]]; then
+  read LAT LON < "$COORDS_CACHE_FILE"
+
+  # Validate: must be non-empty and numeric
+  if [[ -z "$LAT" || -z "$LON" || ! "$LAT" =~ ^-?[0-9]+(\.[0-9]+)?$ || ! "$LON" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then
+    echo "[WARN] Invalid cached coordinates. Refetching..."
+    rm -f "$COORDS_CACHE_FILE"
+    fetch_and_cache_coords
+  fi
+else
+  fetch_and_cache_coords
+fi
+
+while true; do
+  if ! pgrep -x hyprlock &>/dev/null; then
+    if [[ -z "$LAT" || -z "$LON" ]]; then
+      echo "[ERROR] Latitude or longitude missing. Exiting."
+      exit 1
+    fi
+
+    if is_night "$LAT" "$LON"; then
+      echo '[LOG] Applying night time settings...'
+      hyprctl hyprsunset gamma 80
+      hyprctl hyprsunset temperature 4500
+
+      set_wallpaper "dark" "$DARK_DIR"
+    else
+      echo '[LOG] Applying day time settings...'
+      hyprctl hyprsunset gamma 100
+      hyprctl hyprsunset temperature 6500
+
+      set_wallpaper "light" "$LIGHT_DIR"
+    fi
+  fi
+
+  sleep "$CHECK_INTERVAL"
+done

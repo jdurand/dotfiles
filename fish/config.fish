@@ -133,6 +133,9 @@ bind p fish_clipboard_paste
 # disable fish greeting
 set fish_greeting
 
+# set the fish history pager mode to 'prefix' for better history navigation
+set -U fish_history_pager_mode prefix
+
 # Load local config if exists
 if test -e "$HOME/.config/fish/config.local.fish"
   source "$HOME/.config/fish/config.local.fish"

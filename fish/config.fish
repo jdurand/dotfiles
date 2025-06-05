@@ -98,12 +98,6 @@ alias ggit='lazygit'
 alias ack='ag'
 alias ls='eza --icons=always'
 alias cat='bat --paging=never'
-
-function tmuxinator
-  set tmuxinator (brew --prefix tmuxinator)/bin/tmuxinator
-  $tmuxinator $argv
-end
-
 alias mux='tmuxinator'
 
 # Keybindings

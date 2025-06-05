@@ -23,7 +23,7 @@ windows:
       # synchronize: after
       panes:
         - vim
-        - git pull; bin/update && sleep 15 && bin/rails server
+        - git pull; nvm use; bin/update && sleep 15 && bin/rails server
         - sleep 5; nvm use; bin/foreman start -f Procfile.dev -m "mock=1,worker=1,grunt=1,js=1,css=1"
   - dashbaord:
       root: ~/Code/libro/dashboard-web

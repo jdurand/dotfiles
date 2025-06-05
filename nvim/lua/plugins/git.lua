@@ -119,6 +119,10 @@ return {
     end
   },
   {
+    'akinsho/git-conflict.nvim',
+    config = true
+  },
+  {
     'petertriho/cmp-git',
     dependencies = { 'hrsh7th/nvim-cmp' },
     opts = {

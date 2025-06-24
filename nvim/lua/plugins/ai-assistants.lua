@@ -155,13 +155,17 @@ return {
       -- add any opts here
       -- for example
       provider = 'openai',
-      openai = {
-        endpoint = 'https://api.openai.com/v1',
-        model = 'gpt-4o', -- your desired model (or use gpt-4o, etc.)
-        timeout = 30000, -- timeout in milliseconds
-        temperature = 0, -- adjust if needed
-        max_tokens = 4096,
-        -- reasoning_effort = "high" -- only supported for reasoning models (o1, etc.)
+      providers = {
+        openai = {
+          endpoint = 'https://api.openai.com/v1',
+          model = 'gpt-4o', -- your desired model (or use gpt-4o, etc.)
+          timeout = 30000, -- timeout in milliseconds
+          max_tokens = 4096,
+          -- reasoning_effort = "high" -- only supported for reasoning models (o1, etc.)
+          -- extra_request_body = {
+          --   temperature = 0, -- adjust if needed
+          -- },
+        },
       },
       -- behaviour = {
       --   enable_cursor_planning_mode = true, -- enable cursor planning mode!

@@ -89,38 +89,106 @@ return {
   {
     'sindrets/diffview.nvim',
     dependencies = { 'nvim-lua/plenary.nvim' },
-    config = function()
-      vim.api.nvim_create_autocmd('BufWinEnter', {
-        callback = function(args)
-          if vim.wo.diff then
-            nnoremap('co', ':diffget LOCAL<CR>', { desc = "Choose Ours (LOCAL)", buffer = args.buf })
-            nnoremap('ct', ':diffget REMOTE<CR>', { desc = "Choose Theirs (REMOTE)", buffer = args.buf })
-            nnoremap('cc', ':diffget<CR>',        { desc = "Choose under Cursor", buffer = args.buf })
-            nnoremap('ca', [[:argdo %diffget REMOTE<CR>]], { desc = "Choose All (REMOTE)", buffer = args.buf })
-            nnoremap('c0', 'u',                   { desc = "Choose None (Undo)", buffer = args.buf })
-            nnoremap('cb', ':diffput<CR>',       { desc = "Choose Both (put current into other)", buffer = args.buf })
 
-            if package.loaded['noice'] then
-              require('noice').notify(
-                'Diffview Key Bindings:\n' ..
-                'co: Choose Ours (LOCAL)\n' ..
-                'ct: Choose Theirs (REMOTE)\n' ..
-                'ca: Choose All (REMOTE)\n' ..
-                'c0: Choose None (Undo)\n' ..
-                'cb: Choose Both (diffput)\n' ..
-                'cc: Choose under Cursor',
-                'info',
-                { title = 'Diff Merge Bindings' }
-              )
+    config = function()
+      vim.api.nvim_create_autocmd({ 'BufReadPost', 'BufWritePost' }, {
+        callback = function(args)
+          local bufnr = args.buf
+          local content = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+
+          for _, line in ipairs(content) do
+            if line:match('^<<<<<<<') or line:match('^=======$') or line:match('^>>>>>>>') then
+              vim.cmd('DiffviewOpen')
+              break
             end
           end
         end,
+      })
+
+      -- vim.api.nvim_create_autocmd({ 'BufReadPost', 'BufWritePost' }, {
+      vim.api.nvim_create_autocmd('BufWinEnter', {
+        callback = function(args)
+          if vim.bo[args.buf].filetype:match('^Diffview') then
+            -- Get all buffers in the current window
+            -- local buffers = vim.api.nvim_list_bufs()
+
+            -- Get all buffers in the current tab
+            local buffers = vim.api.nvim_list_bufs()
+            local current_tabpage = vim.api.nvim_get_current_tabpage()
+            local tab_buffers = {}
+
+            for _, buf in ipairs(buffers) do
+              if vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_tabpage_get_win(current_tabpage) == vim.api.nvim_get_current_win() then
+                table.insert(tab_buffers, buf)
+              end
+            end
+
+            -- Define the keybindings
+            local keybindings = {
+              { 'n', '<C-f>', ':DiffviewToggleFiles<CR>', { desc = "Toggle Files" } },
+              { 'n', 'co', ':diffget LOCAL<CR>', { desc = "Choose Ours (OURS)" } },
+              { 'n', 'ct', ':diffget REMOTE<CR>', { desc = "Choose Theirs (THEIRS)" } },
+              { 'n', 'cc', ':diffget<CR>', { desc = "Choose under Cursor" } },
+              { 'n', 'ca', ':argdo %diffget REMOTE<CR>', { desc = "Choose All (THEIRS)" } },
+              { 'n', 'c0', 'u', { desc = "Choose None (Undo)" } },
+              { 'n', 'cb', ':diffput<CR>', { desc = "Choose Both (put current into other)" } },
+            }
+
+            -- Apply keybindings to each buffer in the window
+            for _, buf in ipairs(buffers) do
+              for _, keymap in ipairs(keybindings) do
+                vim.api.nvim_buf_set_keymap(buf, keymap[1], keymap[2], keymap[3], keymap[4])
+              end
+            end
+          end
+        end,
+
+        -- callback = function(args)
+        --   vim.notify(vim.wo.diff == true and "Diff mode is enabled" or "Diff mode is disabled")
+        --   vim.notify(vim.bo[args.buf].filetype)
+        --
+        --   if vim.bo[args.buf].filetype:match('^Diffview') then
+        --   -- if vim.bo[args.buf].filetype == 'diff' or vim.b.diffview_view ~= nil then
+        --     nnoremap('<C-f>', ':DiffviewToggleFiles<CR>', { desc = "Toggle Files", buffer = args.buf })
+        --
+        --     nnoremap('co', ':DiffviewFilePanelToggle<CR>:diffget LOCAL<CR>', { desc = "Choose Ours (LOCAL)", buffer = args.buf })
+        --     nnoremap('ct', ':DiffviewFilePanelToggle<CR>:diffget REMOTE<CR>', { desc = "Choose Theirs (REMOTE)", buffer = args.buf })
+        --     nnoremap('cc', ':DiffviewFilePanelToggle<CR>:diffget<CR>',        { desc = "Choose under Cursor", buffer = args.buf })
+        --     nnoremap('ca', ':DiffviewFilePanelToggle<CR>:argdo %diffget REMOTE<CR>', { desc = "Choose All (REMOTE)", buffer = args.buf })
+        --     nnoremap('c0', 'u',                   { desc = "Choose None (Undo)", buffer = args.buf })
+        --     nnoremap('cb', ':DiffviewFilePanelToggle<CR>:diffput<CR>',       { desc = "Choose Both (put current into other)", buffer = args.buf })
+        --
+        --     if package.loaded['noice'] then
+        --       require('noice').notify(
+        --         'Diffview Key Bindings:\n' ..
+        --         'co: Choose Ours (LOCAL)\n' ..
+        --         'ct: Choose Theirs (REMOTE)\n' ..
+        --         'ca: Choose All (REMOTE)\n' ..
+        --         'c0: Choose None (Undo)\n' ..
+        --         'cb: Choose Both (diffput)\n' ..
+        --         'cc: Choose under Cursor',
+        --         'info',
+        --         { title = 'Diff Merge Bindings' }
+        --       )
+        --     end
+        --   end
+        -- end,
       })
     end
   },
   {
     'akinsho/git-conflict.nvim',
-    config = true
+    config = function()
+      -- exclude diffview from conflict highlighting
+      vim.api.nvim_create_autocmd('BufWinEnter', {
+        pattern = '*',
+        callback = function()
+          if vim.bo.filetype:match('^Diffview') then
+            vim.b.git_conflict_disabled = true
+          end
+        end
+      })
+    end,
   },
   {
     'petertriho/cmp-git',

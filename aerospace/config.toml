@@ -230,6 +230,10 @@ if.app-id = 'company.thebrowser.Browser'
 run = 'layout floating'
 
 [[on-window-detected]]
+if.app-id = 'app.zen-browser.zen'
+run = 'layout floating'
+
+[[on-window-detected]]
 if.app-id = 'com.google.Chrome.app.cinhimbnkkaeohfgghhklpknlkffjgod'
 run = 'layout floating'
 
@@ -260,6 +264,11 @@ Q = 'built-in'
 if.during-aerospace-startup = true
 if.app-id = 'company.thebrowser.Browser'
 run = ['layout tiling', 'move-node-to-workspace W']
+
+[[on-window-detected]]
+if.during-aerospace-startup = true
+if.app-id = 'app.zen-browser.zen'
+run = ['layout tiling', 'move-node-to-workspace Z']
 
 [[on-window-detected]]
 if.app-id = 'net.kovidgoyal.kitty'

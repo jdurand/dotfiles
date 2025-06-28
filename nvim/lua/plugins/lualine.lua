@@ -109,6 +109,17 @@ return {
       vim.api.nvim_set_hl(0, "NeotestFailed", { fg = "#B22222", bg = neon_theme.normal.b.bg })   -- Red for failed
       vim.api.nvim_set_hl(0, "NeotestRunning", { fg = "#7A8C9A", bg = neon_theme.normal.b.bg })  -- Gray for running
 
+      local trouble = require('trouble').statusline({
+        mode = 'lsp_document_symbols',
+        groups = {},
+        title = false,
+        filter = { range = true },
+        format = '{kind_icon}{symbol.name:Normal}',
+        -- The following line is needed to fix the background color
+        -- Set it to the lualine section you want to use
+        hl_group = 'lualine_c_normal',
+      })
+
       require('lualine').setup({
         options = {
           -- theme = 'auto',
@@ -137,9 +148,13 @@ return {
             'diff',
             harpoon_component,
           },
+          -- lualine_c = {
+          --   'diagnostics',
+          --   { 'filename', path = 1 },
+          -- },
           lualine_c = {
-            'diagnostics',
-            { 'filename', path = 1 },
+            trouble.get,
+            cond = trouble.has,
           },
           lualine_x = {
             {

@@ -3,7 +3,7 @@
 # -----------------------------------------------------------------------------
 
 # Add custom (local) bins to $PATH
-export PATH="$PATH:$HOME/.bin"
+export PATH="$PATH:$HOME/.local/bin"
 
 # Add homebrew bins to $PATH
 if [[ "$OSTYPE" == "darwin"* ]]; then

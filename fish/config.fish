@@ -2,7 +2,7 @@
 
 # Set environment variables
 # ------------------------------------------------------------------------------
-set -x PATH $PATH $HOME/.bin
+set -x PATH $PATH $HOME/.local/bin
 set -x PATH $PATH $HOME/go/bin
 set -x PATH $PATH $ANDROID_HOME/emulator
 set -x PATH $PATH $ANDROID_HOME/platform-tools
@@ -62,6 +62,11 @@ enable_transience
 
 # Initialize direnv
 if type -q direnv; direnv hook fish | source; end
+
+# Evaluate direnv for the current directory on shell start
+if type -q direnv
+  direnv export fish | source
+end
 
 # Initialize rbenv
 if type -q rbenv; rbenv init - | source; end

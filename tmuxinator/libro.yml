@@ -2,14 +2,14 @@
 name: Libro
 root: ~/Code/libro
 
-# # Run on project start, the first time
-on_project_first_start: brew services start postgresql; brew services start redis
+# Run on project start, the first time
+# on_project_first_start: brew services start postgresql; brew services start redis
 
 # Run on project start, after the first time
 # on_project_restart: brew services restart postgresql; brew services restart redis
 
 # Run on project start, after the first time
-on_project_stop: brew services stop postgresql; brew services stop redis
+# on_project_stop: brew services stop postgresql; brew services stop redis
 
 windows:
   - console:
@@ -23,8 +23,8 @@ windows:
       # synchronize: after
       panes:
         - vim
-        - git pull; nvm use; bin/update && sleep 15 && bin/rails server
-        - sleep 5; nvm use; bin/foreman start -f Procfile.dev -m "mock=1,worker=1,grunt=1,js=1,css=1"
+        - git pull; docker dev server
+        - docker dev foreman
   - dashbaord:
       root: ~/Code/libro/dashboard-web
       layout: main-horizontal

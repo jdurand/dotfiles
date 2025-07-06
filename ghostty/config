@@ -69,6 +69,9 @@ keybind = alt+v=text:\x1bv
 # Toggle fullscreen
 keybind = f11=toggle_fullscreen
 
+# Shift + Enter = line jump
+keybind = shift+enter=text:\n
+
 # This workaround remaps Ctrl+i to Ctrl+a in Tmux to prevent it from being
 # interpreted as TAB, enabling proper handling in child programs, like Neovim.
 keybind = ctrl+i=text:\x1bi

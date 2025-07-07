@@ -129,8 +129,8 @@
 
 	"custom/power": {
 		"format": "⏻",
-		"on-click": "hyprctl dispatch exit",
-		"on-click-right": "$HOME/.config/hypr/scripts/ChangeBlur.sh",
+		"on-click": "$HOME/.config/hypr/scripts/logout",
+		"on-click-right": "$HOME/.config/hypr/scripts/change-blur",
 		"tooltip": true,
 		"tooltip-format": "Left Click: Logout Menu\nRight Click: Change Blur"
 	},

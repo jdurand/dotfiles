@@ -20,10 +20,11 @@
 		"custom/weather", 
     // "custom/hypridle",
 		"tray",
+    "custom/separator#blank_2",
+		"mpris",
 	],
 	"modules-right": [
 		"group/notify",
-		"mpris", 
 		"network", 
 		"bluetooth", 
 		"pulseaudio", 

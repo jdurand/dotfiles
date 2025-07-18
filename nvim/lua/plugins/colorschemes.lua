@@ -3,7 +3,7 @@ return {
     'folke/tokyonight.nvim',
     priority = 1000,
     config = function()
-      local transparent = false -- set to true if you would like to enable transparency
+      local transparent = true -- less transparent than before for a bit more opacity
 
       require('tokyonight').setup({
         transparent = transparent,
@@ -19,7 +19,13 @@ return {
           --   colors.border = colors.none
           -- end
         end,
-        on_highlights = function(--[[highlights, colors]]) end,
+        on_highlights = function(highlights, colors)
+          if transparent then
+            highlights.BufferLineSeparator = { bg = colors.none, fg = colors.fg_gutter, blend = 50 }
+            highlights.BufferLineSeparatorSelected = { bg = colors.none, fg = colors.fg_gutter, blend = 50 }
+            highlights.BufferLineSeparatorVisible = { bg = colors.none, fg = colors.fg_gutter, blend = 50 }
+          end
+        end,
       })
 
       -- vim.cmd.colorscheme 'tokyonight-night'

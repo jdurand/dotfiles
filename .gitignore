@@ -22,3 +22,6 @@ karabiner/karabiner.json
 
 # Ignore Claude AI files
 .claude/
+
+# Ignore .env
+.env

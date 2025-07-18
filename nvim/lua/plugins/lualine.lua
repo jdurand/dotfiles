@@ -153,8 +153,10 @@ return {
           --   { 'filename', path = 1 },
           -- },
           lualine_c = {
-            trouble.get,
-            cond = trouble.has,
+            {
+              trouble.get,
+              cond = trouble.has,
+            },
           },
           lualine_x = {
             {

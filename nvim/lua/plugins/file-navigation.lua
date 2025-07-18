@@ -41,7 +41,7 @@ return {
       'nvim-lua/plenary.nvim',
       'nvim-tree/nvim-web-devicons', -- not strictly required, but recommended
       'MunifTanjim/nui.nvim',
-      '3rd/image.nvim', -- Optional image support in preview window: See `# Preview Mode` for more information
+      '3rd/image.nvim',              -- Optional image support in preview window: See `# Preview Mode` for more information
     }
   },
   {
@@ -92,7 +92,16 @@ return {
 
       vim.api.nvim_create_autocmd('User', {
         pattern = 'MiniFilesBufferCreate',
-        callback = ext.on_files_buffer_create
+        callback = function(args)
+          ext.on_files_buffer_create(args)
+
+          -- Add project root keymap
+          nnoremap('<Esc>', function()
+            local root = vim.fn.getcwd()
+            files.close()
+            files.open(root, true)
+          end, { buffer = args.data.buf_id, desc = 'Go to project root' })
+        end
       })
 
       local open_file_explorer = function()

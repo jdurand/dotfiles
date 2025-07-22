@@ -6,6 +6,7 @@ local nnoremap, nmap, vnoremap = keymaps.nnoremap, keymaps.nmap, keymaps.vnorema
 -- ----------------------------------------------------------------------------------------------------
 whichkey.add({
   { '<leader>', group = '<leader>' },
+  { '<leader>a', group = '[A]vante (AI)' }, { '<leader>a_', hidden = true },
   { '<leader>c', group = '[C]ode' }, { '<leader>c_', hidden = true },
   { '<leader>d', group = '[D]ocument' }, { '<leader>d_', hidden = true },
   { '<leader>f', group = '[F]ind' }, { '<leader>f_', hidden = true },
@@ -13,8 +14,12 @@ whichkey.add({
   { '<leader>h', group = '[H]arpoon' }, { '<leader>h_', hidden = true },
   { '<leader>r', group = '[R]ename' }, { '<leader>r_', hidden = true },
   { '<leader>t', group = '[T]ab/[T]erminal' }, { '<leader>t_', hidden = true },
-  { '<leader>w', group = '[W]orkspace' }, { '<leader>w_', hidden = true },
+  { '<leader>w', group = '[W]ork' }, { '<leader>w_', hidden = true },
   { '<leader>y', group = '[Y]anky' }, { '<leader>y_', hidden = true },
+
+  { '<leader>wn', group = 'New feature' }, { '<leader>wn_', hidden = true },
+  { '<leader>wo', group = 'Open feature' }, { '<leader>wo_', hidden = true },
+  { '<leader>wg', group = 'Generate feature' }, { '<leader>wg_', hidden = true },
 
   { '<leader>b', hidden = true },
   { '<leader>e', hidden = true },
@@ -47,6 +52,10 @@ nnoremap('gB', function() require('user.utils').web_browser({ fallback_url = 'ht
 -- Yank selected text on left mouse release
 -- ----------------------------------------------------------------------------------------------------
 vnoremap('<LeftRelease>', '"*ygv<escape>', { desc = 'Yank on mouse selection' })
+
+-- Open Claude CLI
+-- ----------------------------------------------------------------------------------------------------
+nnoremap('<leader>ac', ':FloatermNew claude<CR>', { desc = 'open claude CLI' })
 
 -- Easy new lines
 -- ----------------------------------------------------------------------------------------------------

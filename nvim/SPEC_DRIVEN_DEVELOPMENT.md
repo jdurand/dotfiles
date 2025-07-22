@@ -36,16 +36,16 @@ your-project/
 ## Key Bindings
 
 ### Feature Management
-- `<leader>sfn` - Create new feature (interactive form)
-- `<leader>sfj` - Create feature from Jira ticket
-- `<leader>sfo` - Open all feature files in tabs
-- `<leader>sfs` - Open feature spec.md
-- `<leader>sft` - Open feature tasks.md
-- `<leader>sfd` - Open feature design.md
+- `<leader>wnf` - Create new feature (interactive form)
+- `<leader>wnj` - Create feature from Jira ticket
+- `<leader>woa` - Open all feature files in tabs
+- `<leader>wos` - Open feature spec.md
+- `<leader>wot` - Open feature tasks.md
+- `<leader>wod` - Open feature design.md
 
 ### Claude Integration
-- `<leader>sst` - Generate tasks from spec (spec → tasks)
-- `<leader>stc` - Generate code from current task (task → code)
+- `<leader>wgt` - Generate tasks from spec (spec → tasks)
+- `<leader>wgc` - Generate code from current task (task → code)
 
 ### Testing
 - `<leader>trt` - Run nearest test
@@ -56,11 +56,6 @@ your-project/
 
 ### Formatting
 - `<leader>cf` - Format current buffer
-
-### Git Integration
-- `<leader>gg` - Open Neogit
-- `<leader>gc` - Git commit
-- `<leader>gp` - Git push
 
 ## Commands
 

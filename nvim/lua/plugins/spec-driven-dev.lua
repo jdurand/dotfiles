@@ -38,49 +38,47 @@ spec_driven.setup({
 -- Key mappings for spec-driven development
 local function setup_keymaps()
   -- Feature management
-  nnoremap('<leader>sfn', function()
+  nnoremap('<leader>wnf', function()
     spec_driven.create_feature_interactive()
   end, { desc = 'Create new feature' })
 
-  nnoremap('<leader>sfj', function()
+  nnoremap('<leader>wnj', function()
     spec_driven.create_feature_from_jira()
   end, { desc = 'Create feature from Jira ticket' })
 
-  nnoremap('<leader>sw', function()
+  nnoremap('<leader>ww', function()
     spec_driven.start_work()
   end, { desc = 'Start work on Jira ticket' })
 
-  nnoremap('<leader>sfo', function()
-    spec_driven.open_feature_files()
-  end, { desc = 'Open feature files' })
-
   -- Claude integration
-  nnoremap('<leader>sst', function()
+  nnoremap('<leader>wgt', function()
     spec_driven.spec_to_tasks()
   end, { desc = 'Generate tasks from spec' })
 
-  nnoremap('<leader>stc', function()
+  nnoremap('<leader>wgc', function()
     spec_driven.task_to_code()
   end, { desc = 'Generate code from task' })
 
-  -- Test integration (using existing neotest keymaps: trt, trf, trA, trs, tro)
-
   -- Quick file navigation within features
-  nnoremap('<leader>sfs', function()
+  nnoremap('<leader>woa', function()
+    spec_driven.open_feature_files()
+  end, { desc = 'Open feature files' })
+
+  nnoremap('<leader>wos', function()
     local feature = spec_driven.get_current_feature()
     if feature then
       vim.cmd('edit features/' .. feature .. '/spec.md')
     end
   end, { desc = 'Open feature spec' })
 
-  nnoremap('<leader>sft', function()
+  nnoremap('<leader>wot', function()
     local feature = spec_driven.get_current_feature()
     if feature then
       vim.cmd('edit features/' .. feature .. '/tasks.md')
     end
   end, { desc = 'Open feature tasks' })
 
-  nnoremap('<leader>sfd', function()
+  nnoremap('<leader>wod', function()
     local feature = spec_driven.get_current_feature()
     if feature then
       vim.cmd('edit features/' .. feature .. '/design.md')
@@ -94,7 +92,15 @@ local function setup_keymaps()
       local name = vim.api.nvim_buf_get_name(buffer)
 
       if name:match('claude') then
+        -- Switch to normal mode when pressing Escape in terminal mode
+        tnoremap('<Esc>', '<C-\\><C-n>', { buffer = buffer })
+        -- Send Escape when pressing Ctrl-X in terminal mode
         tnoremap('<C-x>', '<Esc>', { buffer = buffer })
+        -- Map Ctrl+h/j/k/l to navigate between tmux panes
+        tnoremap('<C-h>', '<cmd>lua require("tmux").move_left()<cr>', { buffer = buffer })
+        tnoremap('<C-j>', '<cmd>lua require("tmux").move_bottom()<cr>', { buffer = buffer })
+        tnoremap('<C-k>', '<cmd>lua require("tmux").move_top()<cr>', { buffer = buffer })
+        tnoremap('<C-l>', '<cmd>lua require("tmux").move_right()<cr>', { buffer = buffer })
       end
     end
   })

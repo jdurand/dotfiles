@@ -37,7 +37,7 @@ return {
         -- },
         twilight = { enabled = true }, -- enable to start Twilight when zen mode opens
         gitsigns = { enabled = true }, -- disables git signs
-        tmux = { enabled = true }, -- disables the tmux statusline
+        tmux = { enabled = true },     -- disables the tmux statusline
         -- this will change the font size on kitty when in zen mode
         -- to make this work, you need to set the following kitty options:
         -- - allow_remote_control socket-only
@@ -62,7 +62,7 @@ return {
         },
       },
       -- callback where you can add custom code when the Zen window opens
-      on_open = function(--[[ win ]])
+      on_open = function( --[[ win ]])
         -- vim.o.cmdheight = 1
         require('lualine').hide({ place = {}, unhide = false })
 
@@ -76,6 +76,8 @@ return {
 
         require('tokyonight').setup({ transparent = false })
         vim.cmd.colorscheme(vim.g.colors_name)
+
+        vim.fn.system('tmux set status on')
       end,
     }
   },
@@ -87,7 +89,7 @@ return {
         -- we try to get the foreground from the highlight groups or fallback color
         color = { "Normal", "#ffffff" },
         term_bg = "#000000", -- if guibg=NONE, this will be used to calculate text color
-        inactive = false, -- when true, other windows will be fully dimmed (unless they contain the same buffer)
+        inactive = false,    -- when true, other windows will be fully dimmed (unless they contain the same buffer)
       },
       -- context = 10, -- amount of lines we will try to show around the current line
       -- treesitter = true, -- use treesitter when available for the filetype

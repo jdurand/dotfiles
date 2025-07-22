@@ -14,8 +14,12 @@ whichkey.add({
   { '<leader>h', group = '[H]arpoon' }, { '<leader>h_', hidden = true },
   { '<leader>r', group = '[R]ename' }, { '<leader>r_', hidden = true },
   { '<leader>t', group = '[T]ab/[T]erminal' }, { '<leader>t_', hidden = true },
-  { '<leader>w', group = '[W]orkspace' }, { '<leader>w_', hidden = true },
+  { '<leader>w', group = '[W]ork' }, { '<leader>w_', hidden = true },
   { '<leader>y', group = '[Y]anky' }, { '<leader>y_', hidden = true },
+
+  { '<leader>wn', group = 'New feature' }, { '<leader>wn_', hidden = true },
+  { '<leader>wo', group = 'Open feature' }, { '<leader>wo_', hidden = true },
+  { '<leader>wg', group = 'Generate feature' }, { '<leader>wg_', hidden = true },
 
   { '<leader>b', hidden = true },
   { '<leader>e', hidden = true },

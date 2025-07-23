@@ -52,22 +52,39 @@ local function setup_keymaps()
 
   -- Claude integration
   nnoremap('<leader>wgt', function()
-    spec_driven.spec_to_tasks()
+    spec_driven.generate_task_list()
   end, { desc = 'Generate tasks from spec' })
 
   nnoremap('<leader>wgc', function()
     spec_driven.task_to_code()
-  end, { desc = 'Generate code from task' })
+  end, { desc = 'Generate code from current task' })
+
+  nnoremap('<leader>wga', function()
+    spec_driven.generate_all_code()
+  end, { desc = 'Generate code for all tasks' })
 
   -- Quick file navigation within features
   nnoremap('<leader>woa', function()
     spec_driven.open_feature_files()
   end, { desc = 'Open feature files' })
 
+  nnoremap('<leader>wol', function()
+    spec_driven.list_features()
+  end, { desc = 'List available features' })
+
   nnoremap('<leader>wos', function()
     local feature = spec_driven.get_current_feature()
     if feature then
       vim.cmd('edit features/' .. feature .. '/spec.md')
+      -- Check if feature was found via branch detection and show feedback
+      local current_file = vim.fn.expand("%:p")
+      local in_feature_dir = current_file:match("/features/([^/]+)/")
+      if not in_feature_dir then
+        print("🎯 Opened spec for feature '" .. feature .. "' (detected from git branch)")
+      end
+    else
+      print("❌ No feature found. Use :CreateFeatureFromJira or :CreateFeature")
+      vim.notify("No feature found. Use :CreateFeatureFromJira or :CreateFeature", vim.log.levels.ERROR, { title = "Spec-Driven Development" })
     end
   end, { desc = 'Open feature spec' })
 
@@ -75,6 +92,15 @@ local function setup_keymaps()
     local feature = spec_driven.get_current_feature()
     if feature then
       vim.cmd('edit features/' .. feature .. '/tasks.md')
+      -- Check if feature was found via branch detection and show feedback
+      local current_file = vim.fn.expand("%:p")
+      local in_feature_dir = current_file:match("/features/([^/]+)/")
+      if not in_feature_dir then
+        print("🎯 Opened tasks for feature '" .. feature .. "' (detected from git branch)")
+      end
+    else
+      print("❌ No feature found. Use :CreateFeatureFromJira or :CreateFeature")
+      vim.notify("No feature found. Use :CreateFeatureFromJira or :CreateFeature", vim.log.levels.ERROR, { title = "Spec-Driven Development" })
     end
   end, { desc = 'Open feature tasks' })
 
@@ -82,6 +108,15 @@ local function setup_keymaps()
     local feature = spec_driven.get_current_feature()
     if feature then
       vim.cmd('edit features/' .. feature .. '/design.md')
+      -- Check if feature was found via branch detection and show feedback
+      local current_file = vim.fn.expand("%:p")
+      local in_feature_dir = current_file:match("/features/([^/]+)/")
+      if not in_feature_dir then
+        print("🎯 Opened design for feature '" .. feature .. "' (detected from git branch)")
+      end
+    else
+      print("❌ No feature found. Use :CreateFeatureFromJira or :CreateFeature")
+      vim.notify("No feature found. Use :CreateFeatureFromJira or :CreateFeature", vim.log.levels.ERROR, { title = "Spec-Driven Development" })
     end
   end, { desc = 'Open feature design' })
 

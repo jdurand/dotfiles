@@ -20,13 +20,10 @@ your-project/
 │   │   ├── spec.md           # Feature specification
 │   │   ├── tasks.md          # Implementation tasks
 │   │   ├── design.md         # Architectural notes
-│   │   ├── user_auth.rb      # Implementation files
-│   │   └── user_auth_spec.rb # Test files
 │   ├── payment-processing/
 │   │   ├── spec.md
 │   │   ├── tasks.md
 │   │   ├── design.md
-│   │   └── payment.js
 │   └── ...
 ├── spec/                     # Global tests
 ├── lib/                      # Shared libraries
@@ -71,7 +68,7 @@ your-project/
 
 ### 1. Create Feature
 
-#### From Jira Ticket (NEW!)
+#### From Jira Ticket
 ```bash
 # Create feature from Jira ticket (automatically detects ticket from branch name)
 <leader>sfj

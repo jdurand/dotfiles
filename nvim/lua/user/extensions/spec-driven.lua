@@ -32,11 +32,74 @@ local config = {
 }
 
 -- Utility functions
+
+-- Helper function to print error and show notification
+local function print_error(message)
+  print("❌ " .. message)
+  vim.notify(message, vim.log.levels.ERROR, { title = "Spec-Driven Development" })
+end
+-- Find feature directory based on Jira ticket from branch name
+local function find_feature_by_ticket(ticket_number)
+  if not ticket_number then return nil end
+
+  -- Look for feature directories that start with the ticket number
+  local features_path = config.features_dir
+  if vim.fn.isdirectory(features_path) == 0 then
+    return nil
+  end
+
+  local directories = vim.fn.glob(features_path .. "/*", false, true)
+  for _, dir in ipairs(directories) do
+    local feature_name = vim.fn.fnamemodify(dir, ":t")
+    -- Check if feature directory starts with the ticket number (case insensitive)
+    -- Escape special regex characters in ticket number
+    local escaped_ticket = ticket_number:lower():gsub("([%-%.%+%[%]%(%)%$%^%%%?%*])", "%%%1")
+    if feature_name:lower():match("^" .. escaped_ticket) then
+      return feature_name
+    end
+  end
+
+  return nil
+end
+
+-- Extract Jira ticket number from git branch name
+local function get_jira_ticket_from_branch()
+  local branch_name = vim.fn.system("git rev-parse --abbrev-ref HEAD 2>/dev/null"):gsub("%s+", "")
+
+  if branch_name == "" or branch_name == "HEAD" then
+    return nil
+  end
+
+  -- Match pattern: [A-Za-z]{2,5}[-_][0-9]{1,5}
+  local jira_ticket = branch_name:match("([A-Za-z][A-Za-z][A-Za-z]?[A-Za-z]?[A-Za-z]?[_-]%d%d?%d?%d?%d?)")
+
+  if jira_ticket then
+    -- Convert to uppercase and normalize separator to dash
+    jira_ticket = jira_ticket:upper():gsub("_", "-")
+    return jira_ticket
+  end
+
+  return nil
+end
+
 local function get_current_feature()
+  -- First try to get from current file path
   local current_file = vim.fn.expand("%:p")
   local feature_match = current_file:match("/" .. config.features_dir .. "/([^/]+)/")
-  return feature_match
+
+  if feature_match then
+    return feature_match
+  end
+
+  -- If not in a feature directory, try to find feature based on git branch
+  local ticket_number = get_jira_ticket_from_branch()
+  if ticket_number then
+    return find_feature_by_ticket(ticket_number)
+  end
+
+  return nil
 end
+
 
 local function get_feature_path(feature_name)
   return config.features_dir .. "/" .. feature_name
@@ -277,10 +340,11 @@ local function call_claude_sync(prompt, system_prompt, title)
     print("✅ " .. title .. " completed successfully")
     return output, nil
   else
-    print("❌ " .. title .. " failed (exit code: " .. exit_code .. ")")
+    local error_msg = title .. " failed (exit code: " .. exit_code .. ")"
     if output and output ~= "" then
-      print("❌ Error details: " .. output)
+      error_msg = error_msg .. ". Error details: " .. output
     end
+    print_error(error_msg)
     return nil, "Claude command failed with exit code " .. exit_code .. ". Error: " .. (output or "No output")
   end
 end
@@ -361,7 +425,7 @@ end
 -- Helper function to generate proper product specification from Jira ticket data
 local function generate_spec_from_jira(feature_name, jira_description, callback)
   local system_prompt =
-  [[You are a technical specification generator. You MUST output ONLY markdown. DO NOT respond conversationally. DO NOT ask questions. DO NOT provide explanations. START IMMEDIATELY with markdown that begins with "#".]]
+  [[You are a technical specification generator. You MUST output ONLY markdown. DO NOT respond conversationally. DO NOT ask questions. DO NOT provide explanations. START IMMEDIATELY with markdown that begins with "#". Keep all lines under 80 characters.]]
 
   local prompt = string.format(
     [[JIRA TICKET DATA:
@@ -412,7 +476,7 @@ REQUIRED STRUCTURE - Be extremely detailed in each section:
 ## Testing Strategy
 [Comprehensive testing approach including unit tests, integration tests, data validation, performance testing]
 
-CRITICAL: Extract every detail from the ticket. Do not invent information. Be thorough with what's provided. Start with "# " and output ONLY markdown.]],
+CRITICAL: Extract every detail from the ticket. Do not invent information. Be thorough with what's provided. Start with "# " and output ONLY markdown. Keep all lines under 80 characters.]],
     jira_description)
 
   print("🤖 Generating specific specification with Claude...")
@@ -517,6 +581,32 @@ local function call_claude(prompt, system_prompt, task_name)
   return nil
 end
 
+-- Helper function to extract ticket number from URL or return as-is
+local function extract_ticket_number(input)
+  if not input or input == "" then
+    return nil
+  end
+
+  -- Clean up whitespace
+  input = input:gsub("^%s*(.-)%s*$", "%1")
+
+  -- Check if it's a URL and extract ticket number
+  local ticket_from_url = input:match("/browse/([A-Z]+%-%d+)")
+  if ticket_from_url then
+    return ticket_from_url:upper()
+  end
+
+  -- Check if it's just a ticket number (with or without project prefix)
+  local ticket_direct = input:match("([A-Z]+%-?%d+)")
+  if ticket_direct then
+    -- Ensure it has the dash format
+    ticket_direct = ticket_direct:upper():gsub("([A-Z]+)(%d+)", "%1-%2")
+    return ticket_direct
+  end
+
+  return nil
+end
+
 -- Jira API integration functions
 local function fetch_jira_ticket(ticket_number)
   print("🎫 DEBUG: Fetching issue number: " .. tostring(ticket_number))
@@ -526,25 +616,30 @@ local function fetch_jira_ticket(ticket_number)
   local jira_email = vim.fn.getenv("JIRA_EMAIL")
   local jira_api_token = vim.fn.getenv("JIRA_API_TOKEN")
 
+  -- Convert userdata to strings or nil (handle vim.NIL properly)
+  jira_base_url = (jira_base_url ~= vim.NIL and jira_base_url ~= nil) and tostring(jira_base_url) or nil
+  jira_email = (jira_email ~= vim.NIL and jira_email ~= nil) and tostring(jira_email) or nil
+  jira_api_token = (jira_api_token ~= vim.NIL and jira_api_token ~= nil) and tostring(jira_api_token) or nil
+
   print("🔍 DEBUG: Environment check:")
   print("   JIRA_BASE_URL: " .. (jira_base_url or "NOT SET"))
   print("   JIRA_EMAIL: " .. (jira_email or "NOT SET"))
   print("   JIRA_API_TOKEN: " .. (jira_api_token and (string.sub(jira_api_token, 1, 10) .. "...") or "NOT SET"))
 
   if not jira_base_url or jira_base_url == "" then
-    print("❌ JIRA_BASE_URL environment variable not set.")
+    print_error("JIRA_BASE_URL environment variable not set.")
     print("💡 Set it with: export JIRA_BASE_URL=\"https://your-company.atlassian.net\"")
     return nil
   end
 
   if not jira_email or jira_email == "" then
-    print("❌ JIRA_EMAIL environment variable not set.")
+    print_error("JIRA_EMAIL environment variable not set.")
     print("💡 Set it with: export JIRA_EMAIL=\"your-email@company.com\"")
     return nil
   end
 
   if not jira_api_token or jira_api_token == "" then
-    print("❌ JIRA_API_TOKEN environment variable not set.")
+    print_error("JIRA_API_TOKEN environment variable not set.")
     print("💡 Set it with: export JIRA_API_TOKEN=\"your-api-token\"")
     print("💡 Create token at: https://id.atlassian.com/manage-profile/security/api-tokens")
     return nil
@@ -581,13 +676,13 @@ local function fetch_jira_ticket(ticket_number)
   print("🔍 HTTP Status: " .. (http_code or "unknown"))
 
   if vim.v.shell_error ~= 0 then
-    print("❌ Curl command failed. Exit code: " .. vim.v.shell_error)
+    print_error("Curl command failed. Exit code: " .. vim.v.shell_error)
     print("🔍 Response: " .. response)
     return nil
   end
 
   if http_code and http_code ~= "200" then
-    print("❌ HTTP Error " .. http_code)
+    print_error("HTTP Error " .. http_code)
     if http_code == "401" then
       print("🔑 Authentication failed. Check your email and API token")
     elseif http_code == "403" then
@@ -602,13 +697,13 @@ local function fetch_jira_ticket(ticket_number)
   -- Parse JSON response using vim.fn.json_decode for better reliability
   local success, ticket_data = pcall(vim.fn.json_decode, json_response)
   if not success then
-    print("❌ Failed to parse Jira response as JSON")
+    print_error("Failed to parse Jira response as JSON")
     print("🔍 Raw response (first 500 chars): " .. json_response:sub(1, 500))
     return nil
   end
 
   if ticket_data.errorMessages then
-    print("❌ Jira API error: " .. table.concat(ticket_data.errorMessages, ", "))
+    print_error("Jira API error: " .. table.concat(ticket_data.errorMessages, ", "))
     return nil
   end
 
@@ -779,7 +874,7 @@ function M.start_work()
   local ok, err = pcall(function()
     local ticket_number = vim.fn.input("Jira ticket number (e.g. LIB-1234): ")
     if ticket_number == "" then
-      print("❌ No ticket number provided")
+      print_error("No ticket number provided")
       return
     end
 
@@ -790,7 +885,7 @@ function M.start_work()
     -- Fetch ticket from Jira API
     local ticket_data = fetch_jira_ticket(ticket_number)
     if not ticket_data then
-      print("❌ Failed to fetch ticket data")
+      print_error("Failed to fetch ticket data")
       return
     end
 
@@ -914,7 +1009,7 @@ Return only the markdown specification content.]], jira_details)
 
     print("📝 Writing spec file: " .. spec_path)
     write_file(spec_path, spec_content)
-    write_file(tasks_path, "# Tasks\n\n*Generate tasks from spec using <leader>sst*\n")
+    write_file(tasks_path, "# Tasks\n\n*Generate tasks from spec using :GenerateTaskList*\n")
     write_file(design_path, "# Design\n\n*Optional architectural notes*\n")
 
     print("📁 Created feature directory: " .. feature_path)
@@ -927,31 +1022,73 @@ Return only the markdown specification content.]], jira_details)
   end)
 
   if not ok then
-    print("❌ StartWork failed with error:")
-    print(tostring(err))
+    print_error("StartWork failed with error: " .. tostring(err))
     print("🔍 Please check your Jira configuration and try again")
     print("💡 Jira URL should be like: https://company.atlassian.net (without /jira)")
   end
 end
 
--- Jira integration functions
-local function get_jira_ticket_from_branch()
-  local branch_name = vim.fn.system("git rev-parse --abbrev-ref HEAD 2>/dev/null"):gsub("%s+", "")
-
-  if branch_name == "" or branch_name == "HEAD" then
-    return nil
+-- List all available feature directories
+function M.list_features()
+  local features_path = config.features_dir
+  if vim.fn.isdirectory(features_path) == 0 then
+    print("📁 No features directory found at: " .. features_path)
+    return
   end
 
-  -- Match pattern: [A-Za-z]{2,5}[-_][0-9]{1,5}
-  local jira_ticket = branch_name:match("([A-Za-z][A-Za-z][A-Za-z]?[A-Za-z]?[A-Za-z]?[_-]%d%d?%d?%d?%d?)")
-
-  if jira_ticket then
-    -- Convert to uppercase and normalize separator to dash
-    jira_ticket = jira_ticket:upper():gsub("_", "-")
-    return jira_ticket
+  local directories = vim.fn.glob(features_path .. "/*", false, true)
+  if #directories == 0 then
+    print("📁 No features found in: " .. features_path)
+    return
   end
 
-  return nil
+  -- Get current branch ticket for sorting
+  local ticket_number = get_jira_ticket_from_branch()
+  local matched_feature = nil
+  local other_features = {}
+
+  -- Separate matched feature from others
+  for _, dir in ipairs(directories) do
+    if vim.fn.isdirectory(dir) == 1 then
+      local feature_name = vim.fn.fnamemodify(dir, ":t")
+
+      -- Check if this feature matches current branch ticket
+      if ticket_number then
+        local escaped_ticket = ticket_number:lower():gsub("([%-%.%+%[%]%(%)%$%^%%%?%*])", "%%%1")
+        if feature_name:lower():match("^" .. escaped_ticket) then
+          matched_feature = feature_name
+        else
+          table.insert(other_features, feature_name)
+        end
+      else
+        table.insert(other_features, feature_name)
+      end
+    end
+  end
+
+  print("📋 Available features:")
+
+  -- Show matched feature first (highlighted)
+  if matched_feature then
+    print("  🎯 " .. matched_feature .. " (matches current branch)")
+  end
+
+  -- Show other features
+  for _, feature_name in ipairs(other_features) do
+    print("  📁 " .. feature_name)
+  end
+
+  -- Show current branch and ticket detection status
+  if ticket_number then
+    if matched_feature then
+      print("\n✅ Current branch (" .. ticket_number .. ") → feature: " .. matched_feature)
+    else
+      print("\n❌ Current branch (" .. ticket_number .. ") → no matching feature found")
+      print("💡 Create feature first with :CreateFeatureFromJira or :CreateFeature")
+    end
+  else
+    print("\n💡 No Jira ticket detected in current branch name")
+  end
 end
 
 -- Core functions
@@ -1066,7 +1203,7 @@ List any dependencies or prerequisites.
   end
 
   -- Create empty tasks.md
-  write_file(get_tasks_path(feature_name), "# Tasks\n\n*Generate tasks from spec using <leader>sst*\n")
+  write_file(get_tasks_path(feature_name), "# Tasks\n\n*Generate tasks from spec using :GenerateTaskList*\n")
 
   -- Create empty design.md
   write_file(get_design_path(feature_name), "# Design\n\n*Optional architectural notes*\n")
@@ -1110,170 +1247,138 @@ Return only the feature name in kebab-case format. Base it entirely on the descr
 end
 
 -- Generate spec from description using Claude
-function M.generate_spec_from_description(feature_name, description)
-  local system_prompt =
-  [[You are a senior product manager and software engineer creating detailed feature specifications.
+-- Create feature from description: generate name and comprehensive spec
+function M.create_feature_from_description(description)
+  print("🤖 Generating feature name from description...")
 
-IMPORTANT:
-- Base your specification ENTIRELY on the user-provided description below
-- While you may have access to git history or other project context, you must focus exclusively on the feature description provided by the user
-- Do not incorporate details from commit messages or other external context unless explicitly mentioned in the user's description
-- Return ONLY the markdown specification content, not any commentary about what you're doing
-- Do not mention creating files or describe your actions
+  -- First generate the feature name
+  local name_system_prompt = [[You generate feature names. Output ONLY a kebab-case feature name. NO explanations.]]
+  local name_prompt = string.format(
+    [[Generate a short, descriptive kebab-case feature name (2-4 words) from this description:
 
-Given a feature name and high-level description, create a comprehensive specification with:
-1. Clear overview explaining what the feature does (based on user description)
-2. Detailed functional requirements (use checkboxes)
-3. Specific acceptance criteria (use checkboxes)
-4. Technical considerations and constraints
-5. Dependencies and prerequisites
-6. Security considerations if applicable
-7. Performance considerations if applicable
+%s
 
-Format as clean markdown with proper headers. Be specific and actionable.]]
+Output ONLY the feature name in kebab-case format. Examples: user-authentication, payment-processing, search-filters]],
+    description)
 
-  local prompt = string.format([[Create a detailed feature specification for:
+  local feature_name, name_error = call_claude_sync(name_prompt, name_system_prompt, "Generate Feature Name")
 
-**Feature Name:** %s
+  if not feature_name or name_error then
+    print_error("Failed to generate feature name: " .. (name_error or "Unknown error"))
+    return
+  end
 
-**Description:** %s
+  -- Clean up the generated name
+  feature_name = feature_name:gsub("%s+", ""):gsub("[^a-zA-Z0-9%-]", ""):lower()
+  print("✅ Generated feature name: " .. feature_name)
 
-Return only the markdown specification content. Do not include any commentary about file creation or your actions. Base everything on the description provided above.]],
-    feature_name, description)
+  -- Create feature directory
+  local feature_path = get_feature_path(feature_name)
+  ensure_dir(feature_path)
 
-  call_claude(prompt, system_prompt, "Generate Feature Specification")
-  print("📝 Please copy the generated spec and paste it into: " .. get_spec_path(feature_name))
-  return nil
+  -- Generate comprehensive spec
+  print("🤖 Generating comprehensive specification...")
+  local spec_system_prompt =
+  [[You generate product specifications. Output ONLY markdown specifications starting with # title. Keep all lines under 80 characters.]]
+
+  local spec_prompt = string.format([[Create a comprehensive product specification from this description:
+
+%s
+
+REQUIRED STRUCTURE:
+# [Feature Name]
+
+## Overview
+[Brief overview of the feature based on description]
+
+## Functional Requirements
+- [ ] [Specific requirement 1]
+- [ ] [Specific requirement 2]
+- [ ] [Additional requirements based on description]
+
+## Acceptance Criteria
+- [ ] [Testable criteria 1]
+- [ ] [Testable criteria 2]
+- [ ] [Additional criteria based on description]
+
+## Technical Considerations
+[Implementation notes, constraints, dependencies]
+
+## Security & Performance
+[Relevant security and performance considerations]
+
+CRITICAL: Base everything on the description. Be specific and actionable. Output ONLY markdown. Keep all lines under 80 characters.]],
+    description)
+
+  local spec_content, spec_error = call_claude_sync(spec_prompt, spec_system_prompt, "Generate Feature Spec")
+
+  if spec_content and not spec_error then
+    -- Write the generated spec
+    write_file(get_spec_path(feature_name), spec_content)
+    print("✅ Generated comprehensive specification in spec.md")
+
+    -- Create empty tasks and design files
+    write_file(get_tasks_path(feature_name),
+      string.format("# Tasks for %s\n\n*Generate tasks using :GenerateTaskList*", feature_name))
+    write_file(get_design_path(feature_name),
+      string.format("# Design Notes for %s\n\n## Architecture\n\n## Technical Details\n\n## Implementation Notes",
+        feature_name))
+
+    print("📁 Created feature directory: " .. feature_path)
+    print("📝 Next steps:")
+    print("   1. Review generated spec.md")
+    print("   2. Use :GenerateTaskList to generate tasks")
+    print("   3. Use :TaskToCode to generate code")
+
+    -- Open the spec file
+    vim.cmd("edit " .. get_spec_path(feature_name))
+  else
+    print_error("Failed to generate specification: " .. (spec_error or "Unknown error"))
+
+    -- Create basic structure as fallback
+    local basic_spec = string.format([[# %s
+
+## Overview
+%s
+
+## Requirements
+- [ ] Requirement 1
+- [ ] Requirement 2
+
+## Acceptance Criteria
+- [ ] Criteria 1
+- [ ] Criteria 2]], feature_name, description)
+
+    write_file(get_spec_path(feature_name), basic_spec)
+    write_file(get_tasks_path(feature_name),
+      string.format("# Tasks for %s\n\n*Generate tasks using :GenerateTaskList*", feature_name))
+    write_file(get_design_path(feature_name),
+      string.format("# Design Notes for %s\n\n## Architecture\n\n## Technical Details\n\n## Implementation Notes",
+        feature_name))
+
+    print("📁 Created feature directory with basic template: " .. feature_path)
+    vim.cmd("edit " .. get_spec_path(feature_name))
+  end
 end
 
 -- Enhanced create feature with multi-input UI
 function M.create_feature_interactive()
-  -- Create a temporary buffer for input
-  local buf = vim.api.nvim_create_buf(false, true)
-  local win_width = math.floor(vim.o.columns * 0.8)
-  local win_height = 10
-  local win_row = math.floor((vim.o.lines - win_height) / 2)
-  local win_col = math.floor((vim.o.columns - win_width) / 2)
-
-  -- Create floating window
-  local win = vim.api.nvim_open_win(buf, true, {
-    relative = 'editor',
-    width = win_width,
-    height = win_height,
-    row = win_row,
-    col = win_col,
-    style = 'minimal',
-    border = 'rounded',
-    title = ' Create Feature ',
-    title_pos = 'center',
-  })
-
-  -- Set up the input form
-  local lines = {
-    "# Create Feature",
-    "",
-    "Feature Name: ",
-    "",
-    "Description:",
-    "",
-    "",
-    "",
-    "# Press <C-s> to create or <Esc> to cancel",
-  }
-
-  vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
-  vim.api.nvim_win_set_cursor(win, { 3, 14 }) -- Position after "Feature Name: "
-
-  -- Set buffer options
-  vim.bo[buf].buftype = 'nofile'
-  vim.bo[buf].filetype = 'markdown'
-
-  -- Helper function to extract values
-  local function get_form_values()
-    local all_lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-    local feature_name = all_lines[3]:match("Feature Name: (.+)") or ""
-
-    local description_lines = {}
-    local in_description = false
-    for i = 1, #all_lines do
-      local line = all_lines[i]
-      if line == "Description:" then
-        in_description = true
-      elseif line and line:match("^# Press") then
-        -- Stop when we reach the instruction line
-        break
-      elseif in_description and line then
-        -- Include all lines after "Description:" until instruction line
-        table.insert(description_lines, line)
-      end
+  -- Simple input prompt for feature description
+  vim.ui.input({
+    prompt = "📝 Feature description: ",
+    default = "",
+  }, function(description)
+    if not description or description == "" then
+      print_error("Feature description is required")
+      return
     end
-    local description = table.concat(description_lines, "\n"):gsub("^%s*", ""):gsub("%s*$", "")
 
-    return feature_name:gsub("^%s*", ""):gsub("%s*$", ""), description
-  end
-
-  -- Set up keymaps for the form
-  local function setup_form_keymaps()
-    vim.keymap.set('n', '<C-s>', function()
-      local feature_name, description = get_form_values()
-      vim.api.nvim_win_close(win, true)
-
-      if feature_name == "" then
-        if description == "" then
-          print("Feature name or description is required")
-          return
-        end
-
-        -- Generate feature name from description
-        print("🤖 Generating feature name from description using Claude...")
-        local generated_name = M.generate_feature_name_from_description(description)
-        if generated_name then
-          print("✅ Generated feature name: " .. generated_name)
-          M.create_feature(generated_name, description)
-        else
-          print("Failed to generate feature name")
-        end
-      else
-        M.create_feature(feature_name, description)
-      end
-    end, { buffer = buf, desc = 'Create feature' })
-
-    vim.keymap.set('n', '<Esc>', function()
-      vim.api.nvim_win_close(win, true)
-    end, { buffer = buf, desc = 'Cancel' })
-
-    vim.keymap.set('i', '<C-s>', function()
-      local feature_name, description = get_form_values()
-      vim.api.nvim_win_close(win, true)
-
-      if feature_name == "" then
-        if description == "" then
-          print("Feature name or description is required")
-          return
-        end
-
-        -- Generate feature name from description
-        print("🤖 Generating feature name from description using Claude...")
-        local generated_name = M.generate_feature_name_from_description(description)
-        if generated_name then
-          print("✅ Generated feature name: " .. generated_name)
-          M.create_feature(generated_name, description)
-        else
-          print("Failed to generate feature name")
-        end
-      else
-        M.create_feature(feature_name, description)
-      end
-    end, { buffer = buf, desc = 'Create feature' })
-  end
-
-  setup_form_keymaps()
-
-  -- Enter insert mode
-  vim.cmd('startinsert!')
+    -- Generate feature name and spec from description
+    M.create_feature_from_description(description)
+  end)
 end
 
-function M.spec_to_tasks()
+function M.generate_task_list()
   local feature_name = get_current_feature()
   if not feature_name then
     print("Not in a feature directory")
@@ -1317,7 +1422,7 @@ Based ONLY on the feature specification above, create a detailed task breakdown.
 
   -- Use Claude to generate specific tasks from the spec
   local system_prompt =
-  [[You are a task breakdown generator. You MUST output ONLY markdown tasks. DO NOT respond conversationally. DO NOT ask questions. DO NOT provide explanations. START IMMEDIATELY with "# Tasks for" followed by markdown task list.
+  [[You are a task breakdown generator. You MUST output ONLY markdown tasks. DO NOT respond conversationally. DO NOT ask questions. DO NOT provide explanations. START IMMEDIATELY with "# Tasks for" followed by markdown task list. Keep all lines under 80 characters.
 
 Create task breakdown with these sections:
 # Tasks for [Feature Name]
@@ -1375,7 +1480,7 @@ REQUIRED STRUCTURE - Be extremely detailed and specific in each section:
 - [ ] [Deployment preparation tasks]
 - [ ] [Post-deployment validation tasks]
 
-CRITICAL: Extract every implementable detail from the specification. Create specific, actionable tasks. Do not create generic tasks. Start with "# Tasks for" and output ONLY markdown with checkboxes.]],
+CRITICAL: Extract every implementable detail from the specification. Create specific, actionable tasks. Do not create generic tasks. Start with "# Tasks for" and output ONLY markdown with checkboxes. Keep all lines under 80 characters.]],
     spec_content)
 
   print("🤖 Generating specific tasks from spec using Claude...")
@@ -1409,7 +1514,7 @@ Please manually create the tasks or adjust the Claude prompt.
 See spec.md for the feature specification.]], feature_name, tasks_result)
 
       write_file(tasks_path, placeholder_tasks)
-      print("❌ Task generation failed - Claude responded conversationally")
+      print_error("Task generation failed - Claude responded conversationally")
     end
   else
     -- Fallback to placeholder if Claude failed
@@ -1424,7 +1529,7 @@ Please manually create the tasks or try again.
 See spec.md for the feature specification.]], feature_name, tasks_error or "Claude generation failed")
 
     write_file(tasks_path, placeholder_tasks)
-    print("❌ Task generation failed - created placeholder tasks.md")
+    print_error("Task generation failed - created placeholder tasks.md")
   end
 
   -- Refresh the buffer if it's open
@@ -1443,14 +1548,14 @@ end
 function M.task_to_code()
   local feature_name = get_current_feature()
   if not feature_name then
-    print("Not in a feature directory")
+    print_error("No feature found. Use :CreateFeatureFromJira or :CreateFeature")
     return
   end
 
   -- Get current line (task)
   local current_line = vim.fn.getline(".")
   if not current_line:match("^%s*-.*") and not current_line:match("^%s*%d+%.") then
-    print("Cursor not on a task line")
+    print_error("Cursor not on a task line")
     return
   end
 
@@ -1458,7 +1563,17 @@ function M.task_to_code()
   local tasks_content = read_file(get_tasks_path(feature_name))
   local spec_content = read_file(get_spec_path(feature_name))
 
-  -- Get existing files in the feature directory
+  if not tasks_content or tasks_content == "" then
+    print_error("No tasks found. Generate tasks first with :GenerateTaskList")
+    return
+  end
+
+  if not spec_content or spec_content == "" then
+    print_error("No specification found. Create spec.md first")
+    return
+  end
+
+  -- Get existing files in the feature directory for context
   local feature_path = get_feature_path(feature_name)
   local existing_files = {}
   local existing_files_list = vim.fn.glob(feature_path .. "/*", false, true)
@@ -1468,111 +1583,145 @@ function M.task_to_code()
       local file_name = vim.fn.fnamemodify(file_path, ":t")
 
       -- Skip common large/irrelevant files
-      if file_name:match("%.log$") or
-          file_name:match("%.tmp$") or
-          file_name:match("%.cache$") or
-          file_name:match("%.lock$") or
-          file_name:match("node_modules") or
-          file_name:match("%.git") then
-        goto continue
+      if not (file_name:match("%.log$") or file_name:match("%.tmp$") or
+            file_name:match("%.cache$") or file_name:match("%.lock$") or
+            file_name:match("node_modules") or file_name:match("%.git")) then
+        table.insert(existing_files, file_name)
       end
-
-      local file_content = read_file(file_path) or ""
-
-      -- Check file size and truncate if necessary
-      local line_count = select(2, file_content:gsub('\n', '')) + 1
-      local max_lines = 150
-
-      if line_count > max_lines then
-        local lines = {}
-        for line in file_content:gmatch("[^\r\n]*") do
-          table.insert(lines, line)
-          if #lines >= max_lines then
-            table.insert(lines, "")
-            table.insert(lines, "... [FILE TRUNCATED - " .. (line_count - max_lines) .. " more lines]")
-            table.insert(lines, "... [To see full file, Claude can use Read tool with file path: " .. file_path .. "]")
-            break
-          end
-        end
-        existing_files[file_name] = table.concat(lines, "\n")
-      else
-        existing_files[file_name] = file_content
-      end
-
-      ::continue::
     end
   end
 
-  local system_prompt =
-  [[You are a senior software engineer implementing features based on specifications and task breakdowns.
+  -- Create complete prompt for Claude including context and implementation request
+  local full_prompt = string.format([[# Task Implementation Context
 
-IMPORTANT:
-- Analyze the task to determine what files need to be created or modified
-- You can work with multiple files and multiple languages as needed
-- Create new files or modify existing ones based on the task requirements
-- Return your response in this format:
-
-FILE: filename.ext
-```language
-file content here
-```
-
-FILE: another-file.ext
-```language
-another file content here
-```
-
-If you need to modify existing files, include the complete updated file content.
-
-Generate clean, production-ready code that:
-- Follows language best practices
-- Includes proper error handling
-- Has clear, concise comments
-- Follows the existing code style
-- Is testable and maintainable]]
-
-  local existing_files_section = ""
-  if next(existing_files) then
-    existing_files_section = "EXISTING FILES:\n"
-    for filename, content in pairs(existing_files) do
-      existing_files_section = existing_files_section .. string.format("\nFILE: %s\n```\n%s\n```\n", filename, content)
-    end
-  end
-
-  local prompt = string.format([[Implement this task:
-
-TASK: %s
-
-FEATURE SPEC:
+## Current Task
 %s
 
-TASK BREAKDOWN:
+## Feature: %s
+
+## Specification
 %s
 
+## All Tasks (for context)
 %s
 
-Based on the task, spec, and existing files, determine what files need to be created or modified and provide the complete implementation.]],
-    current_line, spec_content, tasks_content, existing_files_section)
+## Existing Files
+%s
 
-  print("🤖 Generating code for task using Claude...")
+---
 
-  -- Launch Claude in interactive mode for code generation
-  print("🚀 Launching interactive Claude session for code generation...")
+Please implement the code for the current task described above. Generate clean, production-ready code.]],
+    current_line, feature_name, spec_content, tasks_content,
+    #existing_files > 0 and ("- " .. table.concat(existing_files, "\n- ")) or "None")
+
+  -- Write prompt to temp file to avoid shell quoting issues
+  local temp_prompt_file = get_feature_path(feature_name) .. "/.task_prompt.txt"
+  write_file(temp_prompt_file, full_prompt)
+
+  print("🚀 Launching Claude CLI for task implementation...")
   print("🎯 Task: " .. current_line)
   print("📁 Feature: " .. feature_name)
 
-  local success, result = pcall(call_claude, prompt, system_prompt, "Generate Code from Task")
-  if not success then
-    print("❌ Failed to launch Claude: " .. tostring(result))
-    print("💡 You can manually run: claude --model " .. config.claude_model)
+  -- Launch Claude using bash to avoid fish shell quoting issues
+  local claude_cmd = string.format("bash -c 'claude \"$(cat %s)\" --model %s && rm %s'", temp_prompt_file,
+    config.claude_model, temp_prompt_file)
+  vim.cmd(string.format("FloatermNew --title=TaskToCode --width=0.9 --height=0.9 %s", claude_cmd))
+end
+
+-- Generate code for ALL tasks in the feature
+function M.generate_all_code()
+  local feature_name = get_current_feature()
+  if not feature_name then
+    print_error("No feature found. Use :CreateFeatureFromJira or :CreateFeature")
+    return
   end
+
+  -- Get file context
+  local tasks_content = read_file(get_tasks_path(feature_name))
+  local spec_content = read_file(get_spec_path(feature_name))
+
+  if not tasks_content or tasks_content == "" then
+    print_error("No tasks found. Generate tasks first with :GenerateTaskList")
+    return
+  end
+
+  if not spec_content or spec_content == "" then
+    print_error("No specification found. Create spec.md first")
+    return
+  end
+
+  -- Get existing files in the feature directory for context
+  local feature_path = get_feature_path(feature_name)
+  local existing_files = {}
+  local existing_files_list = vim.fn.glob(feature_path .. "/*", false, true)
+
+  for _, file_path in ipairs(existing_files_list) do
+    if not file_path:match("%.md$") then -- Skip markdown files
+      local file_name = vim.fn.fnamemodify(file_path, ":t")
+
+      -- Skip common large/irrelevant files
+      if not (file_name:match("%.log$") or file_name:match("%.tmp$") or
+            file_name:match("%.cache$") or file_name:match("%.lock$") or
+            file_name:match("node_modules") or file_name:match("%.git")) then
+        table.insert(existing_files, file_name)
+      end
+    end
+  end
+
+  -- Create complete prompt for Claude including context and implementation request
+  local full_prompt = string.format([[# Complete Feature Implementation Context
+
+## Feature: %s
+
+## Specification
+%s
+
+## ALL Tasks to Implement
+%s
+
+## Existing Files
+%s
+
+---
+
+Please implement complete code for ALL tasks described above. Generate all necessary files with clean, production-ready code.]],
+    feature_name, spec_content, tasks_content,
+    #existing_files > 0 and ("- " .. table.concat(existing_files, "\n- ")) or "None")
+
+  -- Write prompt to temp file to avoid shell quoting issues
+  local temp_prompt_file = get_feature_path(feature_name) .. "/.all_tasks_prompt.txt"
+  write_file(temp_prompt_file, full_prompt)
+
+  print("🚀 Launching Claude CLI for complete feature implementation...")
+  print("📁 Feature: " .. feature_name)
+  print("🎯 Implementing ALL tasks")
+
+  -- Launch Claude using bash to avoid fish shell quoting issues
+  local claude_cmd = string.format("bash -c 'claude \"$(cat %s)\" --model %s && rm %s'", temp_prompt_file,
+    config.claude_model, temp_prompt_file)
+  vim.cmd(string.format("FloatermNew --title=GenerateAllCode --width=0.9 --height=0.9 %s", claude_cmd))
 end
 
 function M.open_feature_files()
   local feature_name = get_current_feature()
   if not feature_name then
-    print("Not in a feature directory")
+    local ticket_number = get_jira_ticket_from_branch()
+    if ticket_number then
+      print("❌ No feature directory found for ticket: " .. ticket_number)
+      print("💡 Create feature first with :CreateFeatureFromJira or :CreateFeature")
+    else
+      print("❌ Not in a feature directory and no Jira ticket detected in branch name")
+      print("💡 Switch to a feature branch or create a new feature")
+    end
     return
+  end
+
+  -- Check if feature was found via branch detection
+  local current_file = vim.fn.expand("%:p")
+  local in_feature_dir = current_file:match("/" .. config.features_dir .. "/([^/]+)/")
+  if not in_feature_dir then
+    local ticket_number = get_jira_ticket_from_branch()
+    print("🎯 Opening feature '" .. feature_name .. "' detected from branch: " .. (ticket_number or "unknown"))
   end
 
   -- Open all feature files in tabs
@@ -1602,25 +1751,26 @@ function M.start_work()
   local success, err = pcall(function()
     print("🚀 Starting work on Jira ticket...")
 
-    -- Get ticket number from current branch or prompt user
-    local ticket_number = get_jira_ticket_from_branch()
-
-    if ticket_number then
-      print("🎫 Auto-detected ticket from branch: " .. ticket_number)
-    else
-      -- Prompt user for ticket number
-      ticket_number = vim.fn.input("Enter Jira ticket number (e.g., LIB-123): ")
-      if not ticket_number or ticket_number == "" then
-        print("❌ No ticket number provided")
-        return
-      end
+    -- Always prompt user for ticket number or URL
+    local input = vim.fn.input("Enter Jira ticket number (e.g., LIB-123): ")
+    if not input or input == "" then
+      print_error("No ticket number provided")
+      return
     end
+
+    local ticket_number = extract_ticket_number(input)
+    if not ticket_number then
+      print_error("Could not extract valid ticket number from: " .. input)
+      return
+    end
+
+    print("🎫 Using ticket: " .. ticket_number)
 
     -- Fetch ticket data from Jira
     print("📡 Fetching ticket data from Jira...")
     local ticket = fetch_jira_ticket(ticket_number)
     if not ticket then
-      print("❌ Failed to fetch ticket data")
+      print_error("Failed to fetch ticket data")
       return
     end
 
@@ -1672,7 +1822,7 @@ function M.start_work()
     -- Create descriptive feature name from ticket data
     local feature_name = create_feature_name_from_ticket(ticket)
     if not feature_name then
-      print("❌ Failed to create feature name from ticket data")
+      print_error("Failed to create feature name from ticket data")
       return
     end
     print("📁 Creating feature directory: " .. feature_name)
@@ -1721,8 +1871,8 @@ function M.start_work()
     print("🎯 StartWork completed successfully!")
     print("📝 Next steps:")
     print("   1. Review generated spec.md")
-    print("   2. Use <leader>sst to generate tasks")
-    print("   3. Use <leader>stc to generate code")
+    print("   2. Use :GenerateTaskList to generate tasks")
+    print("   3. Use :TaskToCode to generate code")
   end)
 
   if not success then
@@ -1735,19 +1885,21 @@ function M.start_work()
 end
 
 function M.create_feature_from_jira()
-  -- Get ticket number from current branch or prompt user
-  local ticket_number = get_jira_ticket_from_branch()
-
-  if ticket_number then
-    print("🎫 Auto-detected ticket from branch: " .. ticket_number)
-  else
-    -- Prompt user for ticket number
-    ticket_number = vim.fn.input("Enter Jira ticket number (e.g., LIB-123): ")
-    if not ticket_number or ticket_number == "" then
-      print("❌ No ticket number provided")
-      return
-    end
+  -- Always prompt user for ticket number or URL
+  local input = vim.fn.input(
+  "Enter Jira ticket number or URL (e.g., LIB-123 or https://company.atlassian.net/browse/LIB-123): ")
+  if not input or input == "" then
+    print_error("No ticket number provided")
+    return
   end
+
+  local ticket_number = extract_ticket_number(input)
+  if not ticket_number then
+    print_error("Could not extract valid ticket number from: " .. input)
+    return
+  end
+
+  print("🎫 Using ticket: " .. ticket_number)
 
   -- Fetch ticket data from Jira
   print("📡 Fetching ticket data from Jira...")
@@ -1762,7 +1914,7 @@ function M.create_feature_from_jira()
   -- Create descriptive feature name from ticket data
   local feature_name = create_feature_name_from_ticket(ticket)
   if not feature_name then
-    print("❌ Failed to create feature name from ticket data")
+    print_error("Failed to create feature name from ticket data")
     return
   end
   print("📁 Feature name: " .. feature_name)
@@ -1811,8 +1963,8 @@ function M.create_feature_from_jira()
   print("🎯 Feature created from Jira ticket!")
   print("📝 Next steps:")
   print("   1. Review generated spec.md")
-  print("   2. Use <leader>sst to generate tasks")
-  print("   3. Use <leader>stc to generate code")
+  print("   2. Use :GenerateTaskList to generate tasks")
+  print("   3. Use :TaskToCode to generate code")
 end
 
 -- Automation hooks
@@ -1916,11 +2068,12 @@ function M.setup(opts)
     end
   end, { nargs = "*" })
 
-  vim.api.nvim_create_user_command("SpecToTasks", M.spec_to_tasks, {})
-  vim.api.nvim_create_user_command("TaskToCode", M.task_to_code, {})
-  vim.api.nvim_create_user_command("OpenFeature", M.open_feature_files, {})
-  vim.api.nvim_create_user_command("CreateFeatureFromJira", M.create_feature_from_jira, {})
   vim.api.nvim_create_user_command("StartWork", M.start_work, {})
+  vim.api.nvim_create_user_command("CreateFeatureFromJira", M.create_feature_from_jira, {})
+  vim.api.nvim_create_user_command("OpenFeature", M.open_feature_files, {})
+  vim.api.nvim_create_user_command("GenerateTaskList", M.generate_task_list, {})
+  vim.api.nvim_create_user_command("TaskToCode", M.task_to_code, {})
+  vim.api.nvim_create_user_command("GenerateAllCode", M.generate_all_code, {})
 end
 
 return M

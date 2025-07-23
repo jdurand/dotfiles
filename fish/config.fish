@@ -60,14 +60,6 @@ end
 if type -q starship; starship init fish | source; end
 enable_transience
 
-# Initialize direnv
-if type -q direnv; direnv hook fish | source; end
-
-# Evaluate direnv for the current directory on shell start
-if type -q direnv
-  direnv export fish | source
-end
-
 # Initialize rbenv
 if type -q rbenv; rbenv init - | source; end
 
@@ -89,6 +81,9 @@ function nvm_auto_use --on-variable PWD
     end
   end
 end
+
+# Initialize direnv
+if type -q direnv; direnv hook fish | source; end
 
 # Load git fzf functions
 source (dirname (realpath (status --file)))'/../fzf/extensions/fzf-git.fish'

@@ -9,7 +9,11 @@ return {
   {
     'voldikss/vim-floaterm',
     config = function()
-      vim.g.floaterm_shell = 'fish'
+      -- vim.g.floaterm_shell = 'fish'
+      -- Automatically run direnv reload in each new Floaterm
+      vim.g.floaterm_shell = 'fish --init-command "direnv reload >/dev/null ^&1"'
+      -- vim.g.floaterm_shell = 'zsh -c "direnv reload; exec zsh"'
+      -- vim.g.floaterm_shell = 'bash -c "direnv reload; exec bash"'
       vim.g.floaterm_wintype = 'float'
       vim.g.floaterm_borderchars = '─│─│╭╮╯╰'
       vim.g.floaterm_width = 0.9

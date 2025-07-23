@@ -22,11 +22,11 @@ for file in ~/.zsh/extensions/*; do
 done
 
 if [[ -n "${FLOATERM}" ]]; then
-  zsh-defer load_direnv
   zsh-defer load_rbenv
+  zsh-defer load_direnv
 else
-  load_direnv
   load_rbenv
+  load_direnv
 fi
 
 zsh-defer load_iterm_integration

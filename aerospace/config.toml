@@ -241,6 +241,12 @@ run = 'layout floating'
 if.app-name-regex-substring = 'password|keychain'
 run = 'layout floating'
 
+# if a window without title is detected
+[[on-window-detected]]
+# if.app-name-regex-substring = '.*'
+if.window-title-regex-substring = '^$'
+run = 'layout floating'
+
 # # Any window opened from the 'T' workspace should have floating behavior
 # [[on-window-detected]]
 # if.workspace = 'T'

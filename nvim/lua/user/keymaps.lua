@@ -6,6 +6,7 @@ local nnoremap, nmap, vnoremap = keymaps.nnoremap, keymaps.nmap, keymaps.vnorema
 -- ----------------------------------------------------------------------------------------------------
 whichkey.add({
   { '<leader>', group = '<leader>' },
+  { '<leader>a', group = '[A]I' }, { '<leader>a_', hidden = true },
   { '<leader>c', group = '[C]ode' }, { '<leader>c_', hidden = true },
   { '<leader>d', group = '[D]ocument' }, { '<leader>d_', hidden = true },
   { '<leader>f', group = '[F]ind' }, { '<leader>f_', hidden = true },

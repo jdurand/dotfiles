@@ -73,8 +73,10 @@ local DEPENDENCY_PATTERNS = {
 local function is_dependency_path(path)
   local name = vim.fn.fnamemodify(path, ':t')
   for _, pattern in ipairs(DEPENDENCY_PATTERNS) do
-    if name == pattern or name:match(pattern:gsub('%*', '.*')) then
+    if name == pattern then
       return true
+    elseif pattern:sub(-1) ~= '*' and name:match(pattern:gsub('%*$', '.*')) then
+      return false
     end
   end
   return false

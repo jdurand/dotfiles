@@ -1,0 +1,12 @@
+# ~/.config/tmuxinator/tmuxinator.default.yml
+
+name: default
+root: ~/
+
+windows:
+  - default:
+    layout: main-horizontal
+    panes:
+      - gtop
+      - 
+

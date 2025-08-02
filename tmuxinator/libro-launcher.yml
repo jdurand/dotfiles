@@ -1,0 +1,23 @@
+
+name: libro-launcher
+root: ~/Code/libro
+
+on_project_start: |
+  tmuxinator start libro-core-api &
+  tmuxinator start libro-dashboard &
+  tmuxinator start libro-widgets &
+  tmuxinator start libro-portal &
+
+on_project_stop: |
+  tmux kill-session -t libro-core-api 2>/dev/null
+  tmux kill-session -t libro-dashboard 2>/dev/null
+  tmux kill-session -t libro-widgets 2>/dev/null
+  tmux kill-session -t libro-portal 2>/dev/null
+
+windows:
+  - setup:
+      panes:
+        - |
+          echo "Libro development environment started 🚀"
+          sleep 1
+          tmux switch-client -t libro-core-api

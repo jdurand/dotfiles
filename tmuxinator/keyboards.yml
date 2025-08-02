@@ -1,5 +1,5 @@
 
-name: Keyboards
+name: keyboards
 root: ~/work/oss/keyboards/qmk_firmware/
 
 windows:

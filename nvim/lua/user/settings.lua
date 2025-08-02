@@ -54,12 +54,33 @@ vim.opt.clipboard = 'unnamedplus'
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = 'menuone,noselect'
 
--- -- Create an autocommand that triggers on specific events
--- vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "CursorHoldI", "FocusGained" }, {
---   -- Check for file updates unless in insert mode
---   command = "if mode() != 'c' | checktime | endif",
---   pattern = { "*" }, -- Apply to all file types
+-- Create an autocommand that triggers on specific events to auto-reload files
+vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "CursorHoldI", "FocusGained" }, {
+  -- Check for file updates unless in insert mode
+  command = "if mode() != 'c' | checktime | endif",
+  pattern = { "*" }, -- Apply to all file types
+})
+
+-- -- More responsive auto-reload with throttling
+-- local reload_timer = nil
+-- vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+--   callback = function()
+--     if reload_timer then
+--       vim.fn.timer_stop(reload_timer)
+--     end
+--     reload_timer = vim.fn.timer_start(250, function()
+--       if vim.fn.mode() ~= 'c' then
+--         vim.cmd('checktime')
+--       end
+--       reload_timer = nil
+--     end)
+--   end,
 -- })
+
+-- Additional autocmd for more aggressive reloading when files change externally
+vim.api.nvim_create_autocmd({ "FileChangedShellPost" }, {
+  command = "echohl WarningMsg | echo 'File changed on disk. Buffer reloaded.' | echohl None",
+})
 
 -- Create a user command 'Q' to close all buffers and exit Neovim
 vim.api.nvim_create_user_command('Q', 'qall', {})

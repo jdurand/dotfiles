@@ -1,5 +1,5 @@
 
-name: JimGPT
+name: libre-chat
 root: ~/Code/oss/LibreChat/
 
 on_project_first_start: open /Applications/MongoDB.app

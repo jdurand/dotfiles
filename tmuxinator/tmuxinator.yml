@@ -1,6 +1,6 @@
 # ~/.config/tmuxinator/tmuxinator.default.yml
 
-name: Default
+name: default
 root: ~/
 
 windows:

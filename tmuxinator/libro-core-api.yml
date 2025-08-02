@@ -1,0 +1,26 @@
+
+name: libro-core-api
+root: ~/Code/libro/core-api
+
+# Run on project start, the first time
+# on_project_first_start: brew services start postgresql; brew services start redis
+
+# Run on project start, after the first time
+# on_project_restart: brew services restart postgresql; brew services restart redis
+
+# Run on project start, after the first time
+# on_project_stop: brew services stop postgresql; brew services stop redis
+
+startup_window: editor
+
+windows:
+  - console:
+      panes:
+        - git pull; docker dev server
+        - docker dev foreman
+        - git status
+  - editor:
+      root: ~/Code/libro/core-api
+      layout: main-horizontal
+      panes:
+        - nvim

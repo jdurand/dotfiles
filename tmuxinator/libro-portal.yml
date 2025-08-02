@@ -1,0 +1,16 @@
+
+name: libro-portal
+root: ~/Code/libro/portal-web
+
+startup_window: editor
+
+windows:
+  - console:
+      panes:
+        - sleep 15; git pull; npx prisma generate && npm run build && npm run dev
+        - sleep 20; npm run test
+        - git status
+  - editor:
+      layout: main-horizontal
+      panes:
+        - vim

@@ -1,5 +1,5 @@
 
-name: Config
+name: dotfiles
 root: ~/.dotfiles
 
 # Optional tmux socket

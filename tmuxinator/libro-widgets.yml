@@ -1,0 +1,15 @@
+
+name: libro-widgets
+root: ~/Code/libro/widgets-web
+
+startup_window: editor
+
+windows:
+  - console:
+      panes:
+        - sleep 10; git pull; nvm use && yarn install && yarn start --ssl
+        - git status
+  - editor:
+      layout: main-horizontal
+      panes:
+        - vim

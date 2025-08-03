@@ -147,3 +147,12 @@ end
 # see: https://github.com/Homebrew/homebrew-core/issues/59484
 #      https://discourse.brew.sh/t/why-does-tmuxinator-sets-gem-home/7296
 if set -q GEM_HOME; set -Ue GEM_HOME; end
+
+# Run startup script
+if test -e "$HOME/.dotfiles/fish/startup.fish"
+  if test -z "$TMUX" -a -z "$NVIM"
+    if status is-interactive
+      source "$HOME/.dotfiles/fish/startup.fish"
+    end
+  end
+end

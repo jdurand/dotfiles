@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# Jira Environment Setup Script
+# This script helps you securely configure Jira credentials for the spec-driven development workflow
+
+echo "🔧 Setting up Jira environment variables for spec-driven development"
+echo "=================================================="
+echo ""
+
+# Check if we're sourcing or executing
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  echo "⚠️  This script should be sourced, not executed directly."
+  echo "💡 Run: source $0"
+  echo "   or: . $0"
+  exit 1
+fi
+
+# Get Jira base URL
+echo "📍 Enter your Jira base URL (e.g., https://your-company.atlassian.net):"
+read -r JIRA_BASE_URL
+export JIRA_BASE_URL
+
+# Get Jira email
+echo ""
+echo "📧 Enter your Jira email address:"
+read -r JIRA_EMAIL
+export JIRA_EMAIL
+
+# Get Jira API token (hide input)
+echo ""
+echo "🔑 Enter your Jira API token (input will be hidden):"
+echo "💡 Create one at: https://id.atlassian.com/manage-profile/security/api-tokens"
+read -rs JIRA_API_TOKEN
+export JIRA_API_TOKEN
+
+echo ""
+echo "✅ Environment variables set for this session:"
+echo "   JIRA_BASE_URL=$JIRA_BASE_URL"
+echo "   JIRA_EMAIL=$JIRA_EMAIL"
+echo "   JIRA_API_TOKEN=***[hidden]***"
+echo ""
+echo "🔒 Security Notes:"
+echo "   - These variables are only set for this shell session"
+echo "   - Add them to your ~/.zshrc or ~/.bashrc for persistence"
+echo "   - Never commit API tokens to git repositories"
+echo ""
+echo "📝 To make permanent, add these lines to your shell config:"
+echo "   export JIRA_BASE_URL=\"$JIRA_BASE_URL\""
+echo "   export JIRA_EMAIL=\"$JIRA_EMAIL\""
+echo "   export JIRA_API_TOKEN=\"$JIRA_API_TOKEN\""
+echo ""
+echo "🚀 You can now use the StartWork command (<leader>sw) in Neovim!"

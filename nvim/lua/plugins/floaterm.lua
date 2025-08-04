@@ -22,9 +22,18 @@ return {
       nnoremap('<leader>tt', ':FloatermToggle<CR>', { desc = 'Show [T]erminal' })
       tnoremap('<leader>tt', '<C-\\><C-n>:FloatermToggle<CR>', { desc = 'Hide [T]erminal' })
 
-      nnoremap('<leader>tg', ':FloatermNew lazygit<CR>', { desc = 'Lazy[G]it' })
-      nnoremap('<leader>td', ':FloatermNew! --height=0.9 --width=0.95 --wintype=float --name=gtasks --position=bottom gtasks tasks view --tasklist "Reclaim.ai"<CR>', { desc = 'Google Tasks (TO[D]O)' })
+      nnoremap('<leader>tg', function()
+        -- Check if we're inside tmux
+        if vim.env.TMUX then
+          local cwd = vim.fn.getcwd()
+          vim.fn.system('tmux display-popup -d "' .. cwd .. '" -w 90% -h 90% -E lazygit')
+        else
+          -- Fallback to floaterm if not in tmux
+          vim.cmd('FloatermNew lazygit')
+        end
+      end, { desc = 'Lazy[G]it' })
 
+      nnoremap('<leader>td', ':FloatermNew! --height=0.9 --width=0.95 --wintype=float --name=gtasks --position=bottom gtasks tasks view --tasklist "Reclaim.ai"<CR>', { desc = 'Google Tasks (TO[D]O)' })
       nnoremap('<leader>tn', ':FloatermNew<CR>', { desc = '[N]ew Terminal' })
       tnoremap('<leader>tn', '<C-\\><C-n>:FloatermNew<CR>', { desc = '[N]ew Terminal' })
 

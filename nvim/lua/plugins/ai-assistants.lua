@@ -276,6 +276,49 @@ return {
     'coder/claudecode.nvim',
     dependencies = { 'folke/snacks.nvim' },
     config = function()
+      -- Get the native terminal provider and extend it
+      local provider = require('claudecode.terminal.native')
+
+      ---@diagnostic disable: missing-fields
+      require('claudecode').setup({
+        terminal = {
+          provider = setmetatable({
+            ensure_visible = function()
+              local active_bufnr = provider.get_active_bufnr()
+
+              if active_bufnr and vim.api.nvim_buf_is_valid(active_bufnr) then
+                -- Check if buffer is visible in any window
+                local windows = vim.api.nvim_list_wins()
+
+                for _, win in ipairs(windows) do
+                  if vim.api.nvim_win_get_buf(win) == active_bufnr then
+                    -- Already visible
+                    return
+                  end
+                end
+
+                -- Buffer exists but not visible, open it without focus
+                provider.open('claude',
+                  { ENABLE_IDE_INTEGRATION = 'true' },
+                  { split_side = 'right', split_width_percentage = 0.30 },
+                  false
+                )
+              else
+                -- No active buffer
+                -- Prevent opening a new window, as the default behavior does
+              end
+            end,
+          }, {
+            -- Delegate all other methods to native provider
+            __index = provider
+          }),
+        },
+        diff_opts = {
+          keep_terminal_focus = true,
+        },
+      })
+      ---@diagnostic enable: missing-fields
+
       vim.api.nvim_create_autocmd('TermOpen', {
         pattern = '*',
         callback = function()

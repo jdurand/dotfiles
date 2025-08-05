@@ -1,3 +1,4 @@
+local tnoremap = require('user.keymaps.bind').tnoremap
 local long_press_aware_keybinding = require('user.keymaps.long_press').long_press_aware_keybinding
 
 local function get_project_root()
@@ -274,7 +275,29 @@ return {
   {
     'coder/claudecode.nvim',
     dependencies = { 'folke/snacks.nvim' },
-    config = true,
+    config = function()
+      vim.api.nvim_create_autocmd('TermOpen', {
+        pattern = '*',
+        callback = function()
+          local buffer = vim.api.nvim_get_current_buf()
+          local name = vim.api.nvim_buf_get_name(buffer)
+
+          if name:match('claude') then
+            -- Switch to normal mode when pressing Escape in terminal mode
+            tnoremap('<Esc>', '<C-\\><C-n>', { buffer = buffer })
+
+            -- Send Escape when pressing Ctrl-X in terminal mode
+            tnoremap('<C-x>', '<Esc>', { buffer = buffer })
+
+            -- Map Ctrl+h/j/k/l to navigate between tmux panes
+            tnoremap('<C-h>', '<cmd>lua require("tmux").move_left()<cr>', { buffer = buffer })
+            tnoremap('<C-j>', '<cmd>lua require("tmux").move_bottom()<cr>', { buffer = buffer })
+            tnoremap('<C-k>', '<cmd>lua require("tmux").move_top()<cr>', { buffer = buffer })
+            tnoremap('<C-l>', '<cmd>lua require("tmux").move_right()<cr>', { buffer = buffer })
+          end
+        end
+      })
+    end,
     keys = {
       { '<leader>a', nil, desc = 'AI/Claude Code' },
       { '<leader>ac', '<cmd>ClaudeCode<cr>', desc = 'Toggle Claude' },

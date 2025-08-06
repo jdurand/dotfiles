@@ -1,0 +1,172 @@
+#!/bin/bash
+
+# Screen recording script using wf-recorder
+# Supports both video (mp4) and GIF output
+
+RECORDINGS_DIR="$HOME/Videos/Recordings"
+TEMP_DIR="/tmp/screenrecord"
+PIDFILE="$TEMP_DIR/recording.pid"
+MODE_FILE="$TEMP_DIR/recording.mode"
+
+# Create directories if they don't exist
+mkdir -p "$RECORDINGS_DIR"
+mkdir -p "$TEMP_DIR"
+
+# Function to send notifications
+notify() {
+    notify-send -t 3000 "Screen Recording" "$1"
+}
+
+# Function to stop recording
+stop_recording() {
+    if [ -f "$PIDFILE" ]; then
+        PID=$(cat "$PIDFILE")
+        if kill -0 "$PID" 2>/dev/null; then
+            kill -INT "$PID"
+            rm -f "$PIDFILE" "$MODE_FILE"
+            
+            # Wait a moment for the file to be written
+            sleep 1
+            
+            # Get the latest recording file
+            LATEST_FILE=$(ls -t "$RECORDINGS_DIR"/*.{mp4,gif} 2>/dev/null | head -1)
+            if [ -n "$LATEST_FILE" ]; then
+                # Copy to clipboard for easy sharing
+                echo -n "$LATEST_FILE" | wl-copy
+                notify "Recording saved to:\n$LATEST_FILE\n(Path copied to clipboard)"
+            else
+                notify "Recording stopped"
+            fi
+        else
+            notify "No recording process found"
+            rm -f "$PIDFILE" "$MODE_FILE"
+        fi
+    else
+        notify "No recording in progress"
+    fi
+}
+
+# Function to start recording
+start_recording() {
+    local mode="$1"
+    local geometry="$2"
+    
+    # Check if already recording
+    if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+        notify "Recording already in progress. Stop it first."
+        exit 1
+    fi
+    
+    # Generate filename with timestamp
+    TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+    
+    case "$mode" in
+        video)
+            FILENAME="$RECORDINGS_DIR/recording_${TIMESTAMP}.mp4"
+            if [ "$geometry" = "fullscreen" ]; then
+                wf-recorder -f "$FILENAME" -c libx264 -p preset=fast &
+            else
+                wf-recorder -g "$geometry" -f "$FILENAME" -c libx264 -p preset=fast &
+            fi
+            ;;
+        gif)
+            FILENAME="$RECORDINGS_DIR/recording_${TIMESTAMP}.gif"
+            if [ "$geometry" = "fullscreen" ]; then
+                wf-recorder -f "$FILENAME" -c gif -r 15 &
+            else
+                wf-recorder -g "$geometry" -f "$FILENAME" -c gif -r 15 &
+            fi
+            ;;
+        *)
+            notify "Invalid mode: $mode"
+            exit 1
+            ;;
+    esac
+    
+    # Save PID and mode
+    echo $! > "$PIDFILE"
+    echo "$mode" > "$MODE_FILE"
+    
+    notify "Started $mode recording${geometry:+ of selected area}"
+}
+
+# Function to select area using slurp
+select_area() {
+    slurp -d -c 33ccffaa -b 33ccff44 -w 3
+}
+
+# Main logic
+case "$1" in
+    stop)
+        stop_recording
+        ;;
+    video)
+        if [ "$2" = "area" ]; then
+            AREA=$(select_area)
+            if [ -n "$AREA" ]; then
+                start_recording "video" "$AREA"
+            else
+                notify "Area selection cancelled"
+            fi
+        else
+            start_recording "video" "fullscreen"
+        fi
+        ;;
+    gif)
+        if [ "$2" = "area" ]; then
+            AREA=$(select_area)
+            if [ -n "$AREA" ]; then
+                start_recording "gif" "$AREA"
+            else
+                notify "Area selection cancelled"
+            fi
+        else
+            start_recording "gif" "fullscreen"
+        fi
+        ;;
+    toggle-video)
+        if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+            stop_recording
+        else
+            if [ "$2" = "area" ]; then
+                AREA=$(select_area)
+                if [ -n "$AREA" ]; then
+                    start_recording "video" "$AREA"
+                else
+                    notify "Area selection cancelled"
+                fi
+            else
+                start_recording "video" "fullscreen"
+            fi
+        fi
+        ;;
+    toggle-gif)
+        if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+            stop_recording
+        else
+            if [ "$2" = "area" ]; then
+                AREA=$(select_area)
+                if [ -n "$AREA" ]; then
+                    start_recording "gif" "$AREA"
+                else
+                    notify "Area selection cancelled"
+                fi
+            else
+                start_recording "gif" "fullscreen"
+            fi
+        fi
+        ;;
+    *)
+        echo "Usage: $0 {stop|video [area]|gif [area]|toggle-video [area]|toggle-gif [area]}"
+        echo ""
+        echo "Commands:"
+        echo "  stop         - Stop current recording"
+        echo "  video        - Start video recording (fullscreen)"
+        echo "  video area   - Start video recording (select area)"
+        echo "  gif          - Start GIF recording (fullscreen)"
+        echo "  gif area     - Start GIF recording (select area)"
+        echo "  toggle-video - Toggle video recording on/off"
+        echo "  toggle-gif   - Toggle GIF recording on/off"
+        exit 1
+        ;;
+esac

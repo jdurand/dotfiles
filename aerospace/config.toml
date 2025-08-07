@@ -241,12 +241,6 @@ run = 'layout floating'
 if.app-name-regex-substring = 'password|keychain'
 run = 'layout floating'
 
-# if a window without title is detected
-[[on-window-detected]]
-# if.app-name-regex-substring = '.*'
-if.window-title-regex-substring = '^$'
-run = 'layout floating'
-
 # # Any window opened from the 'T' workspace should have floating behavior
 # [[on-window-detected]]
 # if.workspace = 'T'
@@ -277,14 +271,19 @@ if.app-id = 'app.zen-browser.zen'
 run = ['layout tiling', 'move-node-to-workspace Z']
 
 [[on-window-detected]]
-if.app-id = 'net.kovidgoyal.kitty'
-run = ['layout tiling', 'move-node-to-workspace T']
-[[on-window-detected]]
 if.app-id = 'com.mitchellh.ghostty'
 run = ['layout tiling', 'move-node-to-workspace T']
 [[on-window-detected]]
+if.app-id = 'net.kovidgoyal.kitty'
+run = ['layout tiling', 'move-node-to-workspace 1']
+[[on-window-detected]]
 if.app-id = 'com.github.wez.wezterm'
-run = ['layout tiling', 'move-node-to-workspace T']
+run = ['layout tiling', 'move-node-to-workspace 1']
+
+# if a window without title is detected
+[[on-window-detected]]
+if.window-title-regex-substring = '^$'
+run = 'layout floating'
 
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome'

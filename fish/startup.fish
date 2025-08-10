@@ -1,2 +1,4 @@
-echo "New Fish session... Starting Tmux now..."
-tmux attach-session -t main || tmux new-session -s main
+if not test "$TERM_PROGRAM" = "WarpTerminal"
+  echo "New Fish session... Starting Tmux now..."
+  tmux attach-session -t main || tmux new-session -s main
+end

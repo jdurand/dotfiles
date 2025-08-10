@@ -20,6 +20,23 @@ return {
       vim.g.floaterm_height = 0.8
 
       nnoremap('<leader>tt', ':FloatermToggle<CR>', { desc = 'Show [T]erminal' })
+      nnoremap('<leader>tT', function()
+        -- Check if we're inside tmux
+        if vim.env.TMUX then
+          -- Check if a popup already exists
+          local popup_exists = vim.fn.system('tmux list-panes -F "#{pane_id}" -f "#{popup_pane}"'):match('%S')
+
+          if not popup_exists then
+            -- No popup exists, create one
+            local cwd = vim.fn.getcwd()
+            local session_name = 'scratch-terminal-popup'
+            vim.fn.system('tmux display-popup -w 90% -h 90% -d "' .. cwd .. '" -E "tmux new-session -A -s ' .. session_name .. '"')
+          end
+        else
+          -- Fallback to floaterm if not in tmux
+          vim.cmd('FloatermToggle')
+        end
+      end, { desc = 'Show [T]erminal' })
       tnoremap('<leader>tt', '<C-\\><C-n>:FloatermToggle<CR>', { desc = 'Hide [T]erminal' })
 
       nnoremap('<leader>tg', function()

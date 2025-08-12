@@ -87,10 +87,10 @@ return {
             name = 'CodeGPT4o',
             disable = true,
           },
-          {
-            name = 'CodeGPT4o-mini',
-            disable = true,
-          },
+          -- {
+          --   name = 'CodeGPT4o-mini',
+          --   disable = true,
+          -- },
           {
             name = 'CodeGPT-o3-mini',
             disable = true,
@@ -107,16 +107,17 @@ return {
       })
 
       -- Visual mode mappings
+      vim.keymap.set('v', '<leader>aa', ":<C-u>'<,'>GpRewrite<cr>", { desc = 'gp: rewrite selection' })
       vim.keymap.set('v', '<leader>ar', ":<C-u>'<,'>GpRewrite<cr>", { desc = 'gp: rewrite selection' })
-      vim.keymap.set('v', '<leader>aa', ":<C-u>'<,'>GpAppend<cr>", { desc = 'gp: append after selection' })
-      vim.keymap.set('v', '<leader>ab', ":<C-u>'<,'>GpPrepend<cr>", { desc = 'gp: prepend before selection' })
+      vim.keymap.set('v', '<leader>ao', ":<C-u>'<,'>GpAppend<cr>", { desc = 'gp: append after selection' })
+      vim.keymap.set('v', '<leader>aO', ":<C-u>'<,'>GpPrepend<cr>", { desc = 'gp: prepend before selection' })
       vim.keymap.set('v', '<leader>ai', ":<C-u>'<,'>GpImplement<cr>", { desc = 'gp: implement from selection' })
       vim.keymap.set('v', '<leader>ax', ":<C-u>'<,'>GpContext<cr>", { desc = 'gp: show context' })
       vim.keymap.set('v', '<leader>ac', '<cmd>GpStop<cr>', { desc = 'gp: stop current process' })
       vim.keymap.set('v', '<leader>an', '<cmd>GpNextAgent<cr>', { desc = 'gp: next AI agent' })
 
       -- Normal and Insert mode mappings
-      vim.keymap.set({ 'n', 'i' }, '<leader>aa', '<cmd>GpAppend<cr>', { desc = 'gp: append after' })
+      vim.keymap.set({ 'n', 'i' }, '<leader>ao', '<cmd>GpAppend<cr>', { desc = 'gp: append after' })
       vim.keymap.set({ 'n', 'i' }, '<leader>an', '<cmd>GpNextAgent<cr>', { desc = 'gp: next AI agent' })
     end,
   },
@@ -254,43 +255,21 @@ return {
     'coder/claudecode.nvim',
     dependencies = { 'folke/snacks.nvim' },
     config = function()
-      -- Get the native terminal provider and extend it
-      local provider = require('claudecode.terminal.native')
+      -- default claude to resume last session
+      local claude_options = ' --continue --allowedTools "Edit Bash(git:*) Bash(grep:*) Bash(find:*) Bash(ls:*) Bash(cat:*) Bash(head:*) Bash(tail:*) Bash(wc:*) Bash(sort:*) Bash(uniq:*)"'
 
       ---@diagnostic disable: missing-fields
       require('claudecode').setup({
-        -- prevents opening a new pane in the terminal if a Claude instance is already connected (e.g., from an external terminal)
         terminal = {
-          provider = setmetatable({
-            ensure_visible = function()
-              local active_bufnr = provider.get_active_bufnr()
-
-              if active_bufnr and vim.api.nvim_buf_is_valid(active_bufnr) then
-                -- Check if buffer is visible in any window
-                local windows = vim.api.nvim_list_wins()
-
-                for _, win in ipairs(windows) do
-                  if vim.api.nvim_win_get_buf(win) == active_bufnr then
-                    -- Already visible
-                    return
-                  end
-                end
-
-                -- Buffer exists but not visible, open it without focus
-                provider.open('claude',
-                  { ENABLE_IDE_INTEGRATION = 'true' },
-                  { split_side = 'right', split_width_percentage = 0.30 },
-                  false
-                )
-              else
-                -- No active buffer
-                -- Prevent opening a new window, as the default behavior does
-              end
-            end,
-          }, {
-            -- Delegate all other methods to native provider
-            __index = provider
-          }),
+          provider = 'external',
+          provider_opts = {
+            external_terminal_cmd = "tmux-run --width 30 %s" .. claude_options, -- Managed tmux horizontal split (30% width)
+            -- external_terminal_cmd = "tmux-run --height 40 %s" .. claude_options, -- Managed tmux vertical split (40% height)
+            -- external_terminal_cmd = "tmux-run --popup --size 150x50 %s" .. claude_options, -- Managed tmux popup (100x50)
+            -- external_terminal_cmd = "tmux-run --popup %s" .. claude_options, -- Managed tmux popup (default 90x40)
+            -- external_terminal_cmd = "kitty -e %s",
+            -- external_terminal_cmd = "ghostty-run %s",
+          },
         },
 
         diff_opts = {
@@ -323,10 +302,14 @@ return {
     end,
     keys = {
       { '<leader>a', nil, desc = 'AI/Claude Code' },
+      { '<leader>aa', '<cmd>ClaudeCode<cr>', desc = 'claude: toggle' },
       { '<leader>ac', '<cmd>ClaudeCode<cr>', desc = 'claude: toggle' },
-      { '<leader>af', '<cmd>ClaudeCodeFocus<cr>', desc = 'claude: focus' },
-      { '<leader>aR', '<cmd>ClaudeCode --resume<cr>', desc = 'claude: resume' },
-      { '<leader>aC', '<cmd>ClaudeCode --continue<cr>', desc = 'claude: continue' },
+
+      -- Current external terminal setup is causing keybinding issues
+      -- { '<leader>af', '<cmd>ClaudeCodeFocus<cr>', desc = 'claude: focus' },
+      -- { '<leader>aR', '<cmd>ClaudeCode --resume<cr>', desc = 'claude: resume' },
+      -- { '<leader>aC', '<cmd>ClaudeCode --continue<cr>', desc = 'claude: continue' },
+
       { '<leader>am', '<cmd>ClaudeCodeSelectModel<cr>', desc = 'claude: select model' },
       { '<leader>ab', '<cmd>ClaudeCodeAdd %<cr>', desc = 'claude: add current buffer' },
       { '<leader>as', '<cmd>ClaudeCodeSend<cr>', mode = 'v', desc = 'claude: send current selection' },

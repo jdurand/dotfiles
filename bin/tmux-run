@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+# Tmux wrapper that manages persistent panes/popups
+# Usage: tmux-run [--width N] [--height N] [--popup [--size WxH]] <command>
+
+# Parse arguments
+popup_mode=false
+size_arg=""
+width_arg=""
+height_arg=""
+command_cmd=""
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --popup)
+      popup_mode=true
+      shift
+      ;;
+    --size)
+      size_arg="$2"
+      shift 2
+      ;;
+    --width)
+      width_arg="$2"
+      shift 2
+      ;;
+    --height)
+      height_arg="$2"
+      shift 2
+      ;;
+    --percent)
+      # Legacy support - same as --width
+      width_arg="$2"
+      shift 2
+      ;;
+    *)
+      command_cmd="$*"
+      break
+      ;;
+  esac
+done
+
+# Create a unique identifier based on CWD and mode
+mode_suffix=""
+if [[ "$popup_mode" == "true" ]]; then
+  mode_suffix="_popup"
+fi
+pane_id_file="/tmp/tmux-command-$(echo "$(pwd)" | sed 's|/|_|g')-$(echo "$command_cmd" | sed 's|[^a-zA-Z0-9]|_|g' | cut -c1-50)$mode_suffix"
+
+# Function to cleanup on exit - kill the pane/popup
+cleanup() {
+  if [[ -f "$pane_id_file" ]]; then
+    pane_id=$(cat "$pane_id_file")
+    echo "Killing tmux pane/popup $pane_id"
+    # Kill the pane and clean up
+    if tmux list-panes -F "#{pane_id}" 2>/dev/null | grep -q "^$pane_id$"; then
+      tmux kill-pane -t "$pane_id" 2>/dev/null
+    fi
+    rm -f "$pane_id_file"
+  fi
+}
+
+# Set up signal handlers
+trap cleanup EXIT INT TERM
+
+# Check if we already have a running command pane for this directory
+if [[ -f "$pane_id_file" ]]; then
+  existing_pane=$(cat "$pane_id_file")
+  # Check if the pane still exists and has command running
+  if tmux list-panes -F "#{pane_id}" 2>/dev/null | grep -q "^$existing_pane$"; then
+    echo "Found existing command pane $existing_pane, focusing it"
+    tmux select-pane -t "$existing_pane" 2>/dev/null
+    # Keep wrapper alive - when this exits, it will kill the pane
+    while [[ -f "$pane_id_file" ]]; do
+      # Check if pane still exists
+      if ! tmux list-panes -F "#{pane_id}" 2>/dev/null | grep -q "^$existing_pane$"; then
+        echo "Command pane $existing_pane no longer exists"
+        rm -f "$pane_id_file"
+        break
+      fi
+      sleep 1
+    done
+    exit 0
+  else
+    # Stale pane file, remove it
+    rm -f "$pane_id_file"
+  fi
+fi
+
+if [[ -n "$TMUX" ]]; then
+  # Build tmux command and execute based on mode
+  if [[ "$popup_mode" == "true" ]]; then
+    # Popup mode - display-popup doesn't support -P flag, so create detached pane in popup
+    if [[ -n "$size_arg" ]]; then
+      # Parse WxH format (e.g., "90x40")
+      width=$(echo "$size_arg" | cut -d'x' -f1)
+      height=$(echo "$size_arg" | cut -d'x' -f2)
+      echo "Creating new popup ($width x $height) in $(pwd)..."
+      tmux display-popup -w "$width" -h "$height" "cd '$(pwd)' && $command_cmd"
+      # For popup, we can't get pane ID, so just use a dummy value
+      pane_id="popup"
+    else
+      # Default popup size
+      echo "Creating new popup (90x40) in $(pwd)..."
+      tmux display-popup -w 90 -h 40 "cd '$(pwd)' && $command_cmd"
+      pane_id="popup"
+    fi
+  else
+    # Split window mode
+    if [[ -n "$height_arg" ]]; then
+      # Vertical split (top/bottom)
+      echo "Creating new vertical split pane ($height_arg% height) in $(pwd)..."
+      pane_id=$(tmux split-window -v -p "$height_arg" -P -F "#{pane_id}" "cd '$(pwd)' && $command_cmd")
+    else
+      # Horizontal split (left/right) - default
+      if [[ -n "$width_arg" ]]; then
+        echo "Creating new horizontal split pane ($width_arg% width) in $(pwd)..."
+        pane_id=$(tmux split-window -h -p "$width_arg" -P -F "#{pane_id}" "cd '$(pwd)' && $command_cmd")
+      else
+        # Default split percentage
+        echo "Creating new horizontal split pane (30% width) in $(pwd)..."
+        pane_id=$(tmux split-window -h -p 30 -P -F "#{pane_id}" "cd '$(pwd)' && $command_cmd")
+      fi
+    fi
+  fi
+
+  # Store the pane ID persistently
+  echo "$pane_id" > "$pane_id_file"
+  echo "Created pane $pane_id"
+
+  # Keep this script alive and monitor the pane
+  while [[ -f "$pane_id_file" ]]; do
+    # For popup mode, we can't monitor pane existence, so just wait for interrupt
+    if [[ "$pane_id" == "popup" ]]; then
+      sleep 1
+      continue
+    fi
+    # Check if pane still exists
+    if ! tmux list-panes -F "#{pane_id}" 2>/dev/null | grep -q "^$pane_id$"; then
+      echo "Command pane $pane_id ended naturally"
+      rm -f "$pane_id_file"
+      break
+    fi
+    sleep 1
+  done
+else
+  echo "Not in tmux - running command directly"
+  exec $command_cmd
+fi

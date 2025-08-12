@@ -254,7 +254,7 @@ run = 'layout floating'
 # 5 = '^built-in retina display$'  # Case insensitive regex match
 # 6 = ['secondary', 'dell']        # You can specify multiple patterns. The first matching pattern will be used
 T = ['secondary', '^VP27', '^LC27']
-Q = 'built-in'
+# Q = 'built-in'
 
 #
 # Workspace-App assignment
@@ -273,12 +273,12 @@ run = ['layout tiling', 'move-node-to-workspace Z']
 [[on-window-detected]]
 if.app-id = 'com.mitchellh.ghostty'
 run = ['layout tiling', 'move-node-to-workspace T']
-[[on-window-detected]]
-if.app-id = 'net.kovidgoyal.kitty'
-run = ['layout tiling', 'move-node-to-workspace 1']
-[[on-window-detected]]
-if.app-id = 'com.github.wez.wezterm'
-run = ['layout tiling', 'move-node-to-workspace 1']
+# [[on-window-detected]]
+# if.app-id = 'net.kovidgoyal.kitty'
+# run = ['layout tiling', 'move-node-to-workspace 1']
+# [[on-window-detected]]
+# if.app-id = 'com.github.wez.wezterm'
+# run = ['layout tiling', 'move-node-to-workspace 1']
 
 # if a window without title is detected
 [[on-window-detected]]

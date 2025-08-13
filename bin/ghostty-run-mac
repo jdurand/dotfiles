@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Ghostty runner that preserves CWD
+# Usage: ghostty-run <command>
+
+# Get the command to run
+cmd="$*"
+
+/usr/bin/open -na "Ghostty.app" --args --working-directory="$(pwd)" -e "$cmd"

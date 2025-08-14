@@ -335,19 +335,36 @@ return {
     dependencies = { 'folke/snacks.nvim' },
     config = function()
       -- default claude to resume last session
-      local claude_options = ' --continue --allowedTools "Edit Bash(git:*) Bash(grep:*) Bash(find:*) Bash(ls:*) Bash(cat:*) Bash(head:*) Bash(tail:*) Bash(wc:*) Bash(sort:*) Bash(uniq:*)"'
+      local claude_options = ' --allowedTools "Edit Bash(git:*) Bash(grep:*) Bash(find:*) Bash(ls:*) Bash(cat:*) Bash(head:*) Bash(tail:*) Bash(wc:*) Bash(sort:*) Bash(uniq:*)"'
 
       ---@diagnostic disable: missing-fields
       require('claudecode').setup({
         terminal = {
           provider = 'external',
           provider_opts = {
-            external_terminal_cmd = "tmux-run --width 30 %s" .. claude_options, -- Managed tmux horizontal split (30% width)
+            -- external_terminal_cmd = "tmux-run --width 30 %s" .. claude_options, -- Managed tmux horizontal split (30% width)
             -- external_terminal_cmd = "tmux-run --height 40 %s" .. claude_options, -- Managed tmux vertical split (40% height)
             -- external_terminal_cmd = "tmux-run --popup --size 150x50 %s" .. claude_options, -- Managed tmux popup (100x50)
             -- external_terminal_cmd = "tmux-run --popup %s" .. claude_options, -- Managed tmux popup (default 90x40)
             -- external_terminal_cmd = "kitty -e %s",
             -- external_terminal_cmd = "ghostty-run %s",
+            external_terminal_cmd = function(cmd)
+              -- Get current Neovim window dimensions
+              local width = vim.api.nvim_win_get_width(0)
+              local height = vim.api.nvim_win_get_height(0)
+
+              -- Debug: Show dimensions and aspect ratio
+              local aspect_ratio = width / height
+              vim.notify(string.format("Neovim window: %d cols × %d rows (ratio: %.2f)", width, height, aspect_ratio), vim.log.levels.DEBUG)
+
+              -- Choose split direction based on window aspect ratio
+              -- Typical terminal is ~2:1 aspect ratio (80 cols × 40 rows)
+              if aspect_ratio > 2.4 then
+                return "tmux-run --width 30 " .. cmd .. claude_options -- Horizontal split for wider windows
+              else
+                return "tmux-run --height 40 " .. cmd .. claude_options -- Vertical split for taller windows
+              end
+            end
           },
         },
 

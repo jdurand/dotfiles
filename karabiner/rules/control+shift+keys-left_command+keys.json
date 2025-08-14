@@ -29,6 +29,22 @@
       "to": [
         {
           "key_code": "v",
+          "modifiers": ["left_command", "left_shift"]
+        }
+      ],
+      "type": "basic"
+    },
+    {
+      "from": {
+        "key_code": "v",
+        "modifiers": {
+          "mandatory": ["left_control"],
+          "optional": ["any"]
+        }
+      },
+      "to": [
+        {
+          "key_code": "v",
           "modifiers": ["left_command"]
         }
       ],

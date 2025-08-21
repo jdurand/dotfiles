@@ -8,11 +8,17 @@
 # - Rename sessions with Ctrl-r
 # - Start tmuxinator configs in background with Ctrl-s
 # - Create new session with Ctrl-n
+# - Toggle preview pane with Ctrl-p
 # - Built-in help with ? key
 # - Popup interface within tmux, regular fzf outside tmux
 # - Color-coded indicators: green dots for active, grey dots for tmuxinator configs
+# - Preview pane showing session details (windows, panes, working directory)
 
 set -e
+
+# Configuration
+readonly CONFIG_DIR="$HOME/.config/tmux-session-manager"
+readonly CONFIG_FILE="$CONFIG_DIR/config"
 
 # Colors for output
 readonly RED=$'\033[0;31m'
@@ -21,6 +27,76 @@ readonly YELLOW=$'\033[1;33m'
 readonly BLUE=$'\033[0;34m'
 readonly DARK_GREY=$'\033[0;90m'
 readonly NC=$'\033[0m' # No Color
+
+# Load/save preview preference
+load_preview_preference() {
+  if [[ -f "$CONFIG_FILE" ]]; then
+    source "$CONFIG_FILE" 2>/dev/null || true
+  fi
+  # Default to enabled if not set
+  echo "${PREVIEW_ENABLED:-true}"
+}
+
+save_preview_preference() {
+  local enabled="$1"
+  mkdir -p "$CONFIG_DIR"
+  echo "PREVIEW_ENABLED=$enabled" > "$CONFIG_FILE"
+}
+
+# Generate preview content for a session
+generate_preview() {
+  local session_name="$1"
+  local selection="$2"
+
+  # Check if it's a tmuxinator config
+  if echo "$selection" | grep -q "(tmuxinator)"; then
+    echo "${BLUE}Tmuxinator Configuration: $session_name${NC}"
+    echo ""
+    if [[ -f "$HOME/.dotfiles/tmuxinator/$session_name.yml" ]]; then
+      echo "${YELLOW}Configuration file:${NC}"
+      echo "$HOME/.dotfiles/tmuxinator/$session_name.yml"
+      echo ""
+      echo "${YELLOW}Config preview:${NC}"
+      head -20 "$HOME/.dotfiles/tmuxinator/$session_name.yml" 2>/dev/null | sed 's/^/  /' || echo "  Could not read config file"
+    else
+      echo "Configuration file not found"
+    fi
+    return
+  fi
+
+  # Check if session is active
+  if ! tmux has-session -t "$session_name" 2>/dev/null; then
+    echo "${RED}Session '$session_name' is not active${NC}"
+    echo ""
+    echo "This session will be created when selected."
+    return
+  fi
+
+  # Show live session content using tmux capture-pane
+  # Get the active window and pane
+  local active_window active_pane
+  active_window=$(tmux list-windows -t "$session_name" -f '#{window_active}' -F "#{window_index}" 2>/dev/null | head -1)
+
+  if [[ -n "$active_window" ]]; then
+    active_pane=$(tmux list-panes -t "$session_name:$active_window" -f '#{pane_active}' -F "#{pane_index}" 2>/dev/null | head -1)
+
+    if [[ -n "$active_pane" ]]; then
+      # Show session header info
+      echo "${GREEN}● $session_name${NC} (${YELLOW}$(tmux list-windows -t "$session_name" | wc -l | tr -d ' ') windows${NC})"
+      echo "${DARK_GREY}────────────────────────────────────────${NC}"
+
+      # Capture live pane content
+      tmux capture-pane -ep -t "$session_name:$active_window.$active_pane" 2>/dev/null || {
+        echo "${RED}Could not capture session content${NC}"
+        echo "Session may be busy or inaccessible"
+      }
+    else
+      echo "${RED}No active pane found in session${NC}"
+    fi
+  else
+    echo "${RED}No active window found in session${NC}"
+  fi
+}
 
 # Check dependencies
 check_dependencies() {
@@ -42,6 +118,14 @@ check_dependencies() {
 # Get active tmux sessions sorted by activity (most recent first)
 get_active_sessions() {
   tmux list-sessions -F "#{session_last_attached}:#{session_name}" 2>/dev/null | \
+    grep -v ":.*scratch.*$" | \
+    sort -rn | cut -d: -f2 || true
+}
+
+# Get scratch sessions
+get_scratch_sessions() {
+  tmux list-sessions -F "#{session_last_attached}:#{session_name}" 2>/dev/null | \
+    grep ":.*scratch.*$" | \
     sort -rn | cut -d: -f2 || true
 }
 
@@ -55,6 +139,7 @@ get_tmuxinator_configs() {
 # Build selection list with status indicators
 build_session_list() {
   local active_sessions
+  local scratch_sessions
   local tmuxinator_configs
   local session_list=()
   local current_session=""
@@ -66,6 +151,7 @@ build_session_list() {
 
   # Get data
   active_sessions=$(get_active_sessions)
+  scratch_sessions=$(get_scratch_sessions)
   tmuxinator_configs=$(get_tmuxinator_configs)
 
   # Add active sessions with indicator, excluding current session
@@ -75,17 +161,28 @@ build_session_list() {
     fi
   done <<< "$active_sessions"
 
-  # Add current session at the end of active sessions if it exists
-  if [[ -n "$current_session" ]]; then
+  # Add current session at the end of active sessions if it exists and not scratch
+  if [[ -n "$current_session" ]] && ! echo "$current_session" | grep -q "scratch"; then
     session_list+=("${GREEN}→${NC} $current_session")
   fi
 
   # Add tmuxinator configs, excluding those already active
   while IFS= read -r config; do
-    if [[ -n "$config" ]] && ! echo "$active_sessions" | grep -q "^$config$"; then
+    if [[ -n "$config" ]] && ! echo "$active_sessions" | grep -q "^$config$" && ! echo "$scratch_sessions" | grep -q "^$config$"; then
       session_list+=("${DARK_GREY}●${NC} $config (tmuxinator)")
     fi
   done <<< "$tmuxinator_configs"
+
+  # Add scratch sessions at the bottom with special hidden icon
+  while IFS= read -r session; do
+    if [[ -n "$session" ]]; then
+      if [[ "$session" == "$current_session" ]]; then
+        session_list+=("${GREEN}→${NC} $session (scratch)")
+      else
+        session_list+=("${GREEN}󱗽${NC} $session (scratch)")
+      fi
+    fi
+  done <<< "$scratch_sessions"
 
   printf '%s\n' "${session_list[@]}"
 }
@@ -93,7 +190,7 @@ build_session_list() {
 # Extract session name from selection
 extract_session_name() {
   local selection="$1"
-  echo "$selection" | sed -E 's/^[^●→]*[●→][^[:space:]]* ([^[:space:]]+).*/\1/'
+  echo "$selection" | sed -E 's/^[^●→󱗽]*[●→󱗽][^[:space:]]* ([^[:space:]]+).*/\1/'
 }
 
 # Check if session is active
@@ -131,6 +228,34 @@ create_new_session() {
   fi
 }
 
+# Show help in preview area
+show_help_preview() {
+  cat << 'EOF'
+Session Switcher Help
+
+Keybindings:
+  Enter    - Switch to session
+  Ctrl-x   - Kill session
+  Ctrl-r   - Rename session
+  Ctrl-s   - Start in background
+  Ctrl-n   - Create new session
+  Ctrl-p   - Toggle preview
+  Ctrl-d   - Page down in preview
+  Ctrl-u   - Page up in preview
+  ?        - Show help
+
+Session Icons:
+  ● - Active session
+  → - Current session
+  ● - Tmuxinator config (grey)
+  󱗽 - Scratch session
+
+Navigation:
+  ↑/↓ or j/k  - Move selection
+  Esc         - Exit without selection
+EOF
+}
+
 # Show help
 show_help() {
   local help_text="Session Switcher Help:
@@ -140,8 +265,9 @@ Ctrl-x   - Kill session
 Ctrl-r   - Rename session
 Ctrl-s   - Start in background
 Ctrl-n   - Create new session
-?        - Show this help
+Ctrl-p   - Toggle preview
 Esc      - Exit"
+?        - Show this help
 
   if [[ -n "${TMUX:-}" ]]; then
     tmux display-popup -E -w 50% -h 40% "echo '$help_text'; echo ''; echo 'Press any key to continue...'; read -n1" 2>/dev/null || true
@@ -203,30 +329,73 @@ main() {
     exit 0
   fi
 
+  # Load preview preference
+  local preview_enabled
+  preview_enabled=$(load_preview_preference)
+
+  # Set preview window options based on preference
+  local preview_window_option="right:50%"
+  if [[ "$preview_enabled" == "false" ]]; then
+    preview_window_option="hidden"
+  fi
+
   # Use fzf for selection (with tmux popup if inside tmux)
   local result
   if [[ -n "${TMUX:-}" ]]; then
     # Inside tmux - use popup with temporary files for input/output
-    local input_file output_file
+    local input_file output_file preview_script
     input_file=$(mktemp)
     output_file=$(mktemp)
+    preview_script=$(mktemp)
     echo "$session_list" > "$input_file"
 
+    # Create preview script
+    cat > "$preview_script" << 'EOF'
+#!/bin/bash
+source_script="$1"
+selection="$2"
+mode="$3"
+
+source "$source_script"
+
+# Handle different modes
+case "$mode" in
+  "HELP")
+    show_help_preview
+    ;;
+  "PREVIEW")
+    session_name=$(echo "$selection" | sed -E 's/^[^●→󱗽]*[●→󱗽][^[:space:]]* ([^[:space:]]+).*/\1/')
+    generate_preview "$session_name" "$selection"
+    ;;
+  *)
+    # Default to help
+    show_help_preview
+    ;;
+esac
+EOF
+    chmod +x "$preview_script"
+
+    # Determine initial preview state
+    local initial_preview_visible="right:50%:wrap"
+    if [[ "$preview_enabled" == "false" ]]; then
+      initial_preview_visible="hidden"
+    fi
+
     tmux display-popup -E -w 60% -h 40% \
-      "cat '$input_file' | fzf --prompt='Select session (? for help): ' --ansi --reverse --border --expect=ctrl-x,ctrl-r,ctrl-s,ctrl-n --preview='echo \"Session Switcher Help:\"; echo \"\"; echo \"Enter    - Switch to session\"; echo \"Ctrl-x   - Kill session\"; echo \"Ctrl-r   - Rename session\"; echo \"Ctrl-s   - Start in background\"; echo \"Ctrl-n   - Create new session\"; echo \"?        - Show this help\"; echo \"Esc      - Exit\"' --preview-window=hidden --bind='?:toggle-preview' > '$output_file'" 2>/dev/null || true
+      "cat '$input_file' | fzf --prompt='Select session (?: help): ' --ansi --reverse --border --expect=ctrl-x,ctrl-r,ctrl-s,ctrl-n,ctrl-p --preview='$preview_script \"$0\" {} PREVIEW' --preview-window=$initial_preview_visible --bind='ctrl-p:toggle-preview+change-preview($preview_script \"$0\" {} PREVIEW)+change-preview-window(right:50%:wrap)' --bind='?:change-preview($preview_script \"$0\" {} HELP)+change-preview-window(right:50%:wrap)' --bind='ctrl-d:preview-page-down' --bind='ctrl-u:preview-page-up' > '$output_file'" 2>/dev/null || true
 
     result=$(cat "$output_file" 2>/dev/null || true)
-    rm -f "$input_file" "$output_file"
+    rm -f "$input_file" "$output_file" "$preview_script"
   else
-    # Outside tmux - regular fzf
+    # Outside tmux - regular fzf (no preview, only help)
     result=$(echo "$session_list" | fzf \
       --height=40% \
       --border \
-      --prompt="Select session (? for help): " \
-      --preview='echo "Session Switcher Help:"; echo ""; echo "Enter    - Switch to session"; echo "Ctrl-x   - Kill session"; echo "Ctrl-r   - Rename session"; echo "Ctrl-s   - Start in background"; echo "Ctrl-n   - Create new session"; echo "?        - Show this help"; echo "Esc      - Exit"' \
-      --preview-window=hidden \
+      --prompt="Select session (?: help): " \
+      --preview='echo -e "Session Switcher Help\n\nKeybindings:\n  Enter    - Switch to session\n  Ctrl-x   - Kill session\n  Ctrl-r   - Rename session\n  Ctrl-s   - Start in background\n  Ctrl-n   - Create new session\n  ?        - Toggle help\n\nSession Icons:\n  ● - Active session\n  → - Current session\n  ● - Tmuxinator config (grey)\n  󱗽 - Scratch session\n\nNavigation:\n  ↑/↓ or j/k  - Move selection\n  Esc         - Exit without selection"' \
+      --preview-window="hidden" \
       --ansi \
-      --expect=ctrl-x,ctrl-r,ctrl-s,ctrl-n \
+      --expect=ctrl-x,ctrl-r,ctrl-s,ctrl-n,ctrl-p \
       --bind='?:toggle-preview' 2>/dev/null || true)
   fi
 
@@ -259,6 +428,16 @@ main() {
         "ctrl-n")
           create_new_session
           ;;
+        "ctrl-p")
+          # Toggle preview preference
+          if [[ "$preview_enabled" == "true" ]]; then
+            save_preview_preference "false"
+          else
+            save_preview_preference "true"
+          fi
+          # Restart the switcher with new preview setting
+          exec "$0" "$@"
+          ;;
         "")
           # Enter key - normal switch
           switch_to_session "$session_name" "$selection"
@@ -267,6 +446,19 @@ main() {
     fi
   fi
 }
+
+# Handle command line arguments
+if [[ "$1" == "--preview" ]]; then
+  # Called as preview function
+  selection="$2"
+  session_name=$(extract_session_name "$selection")
+  generate_preview "$session_name" "$selection"
+  exit 0
+elif [[ "$1" == "--help-preview" ]]; then
+  # Called to show help in preview
+  show_help_preview
+  exit 0
+fi
 
 # Run if script is executed directly
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

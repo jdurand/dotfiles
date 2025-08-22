@@ -1,0 +1,12 @@
+
+name: frank-cli
+root: ~/Code/libro/frank-cli
+
+startup_window: editor
+
+windows:
+  - editor:
+      root: ~/Code/libro/frank-cli
+      layout: main-horizontal
+      panes:
+        - nvim

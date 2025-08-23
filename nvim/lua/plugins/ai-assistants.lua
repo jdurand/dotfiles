@@ -31,6 +31,9 @@ return {
             endpoint = "https://api.anthropic.com/v1/messages",
             secret = os.getenv("ANTHROPIC_API_KEY"),
           },
+          ollama = {
+            endpoint = "http://localhost:11434/api/chat",
+          },
         },
         agents = {
           -- {
@@ -103,6 +106,25 @@ return {
             name = 'CodeClaude-3-5-Haiku',
             disable = true,
           },
+          -- {
+          --   name = "CodeOllamaLlama3.1-8B", -- standard agent name to disable
+          --   disable = true,
+          -- },
+          {
+            provider = 'ollama',
+            name = 'CodeOllamaGemma3-4B', -- obv not required to call it that
+            chat = false,
+            command = true,
+            model = {
+              model = 'gemma3',
+              -- temperature = 0.7,
+              -- top_p = 0.9,
+              -- min_p = 0.05,
+            },
+            system_prompt = require('gp.defaults').code_system_prompt,
+            -- system prompt (use this to specify the persona/role of the AI)
+            -- system_prompt = "You are a general AI assistant.",
+          },
         }
       })
 
@@ -114,11 +136,12 @@ return {
       vim.keymap.set('v', '<leader>ai', ":<C-u>'<,'>GpImplement<cr>", { desc = 'gp: implement from selection' })
       vim.keymap.set('v', '<leader>ax', ":<C-u>'<,'>GpContext<cr>", { desc = 'gp: show context' })
       vim.keymap.set('v', '<leader>ac', '<cmd>GpStop<cr>', { desc = 'gp: stop current process' })
-      vim.keymap.set('v', '<leader>an', '<cmd>GpNextAgent<cr>', { desc = 'gp: next AI agent' })
 
       -- Normal and Insert mode mappings
       vim.keymap.set({ 'n', 'i' }, '<leader>ao', '<cmd>GpAppend<cr>', { desc = 'gp: append after' })
-      vim.keymap.set({ 'n', 'i' }, '<leader>an', '<cmd>GpNextAgent<cr>', { desc = 'gp: next AI agent' })
+
+      vim.keymap.set('n', '<leader>an', '<cmd>GpSelectAgent<cr>', { desc = 'gp: select AI agent' })
+      vim.keymap.set({ 'v', 'i' }, '<leader>an', '<cmd>GpNextAgent<cr>', { desc = 'gp: next AI agent' })
     end,
   },
   -- {

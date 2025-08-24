@@ -15,7 +15,9 @@ end
 
 return {
   {
-    'robitx/gp.nvim',
+    -- 'robitx/gp.nvim',
+    'jdurand/gp.nvim',
+    branch = 'fix/ollama',
     config = function()
       require('gp').setup({
         providers = {

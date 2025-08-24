@@ -1,0 +1,318 @@
+#!/bin/bash
+
+# tmux-scratch-terminal - A comprehensive scratch terminal manager for tmux
+#
+# Usage:
+# - toggle: Open/close scratch terminal (maintains session between toggles)
+# - open: Explicitly open scratch terminal popup
+# - close: Close popup (session remains alive)
+# - embed: Move all scratch windows to last active session
+# - kill: Completely destroy scratch session
+# - resize [W] [H]: Change popup dimensions
+# - send <keys>: Send keystrokes to scratch terminal
+# - status: Show current scratch terminal state
+
+set -euo pipefail
+
+readonly SESSION_NAME="scratch-terminal"
+readonly DEFAULT_WIDTH="90%"
+readonly DEFAULT_HEIGHT="90%"
+readonly BORDER_COLOR="#33ccff"
+readonly TEXT_COLOR="#fffff"
+
+# Configuration
+SCRATCH_WIDTH="${TMUX_SCRATCH_WIDTH:-$DEFAULT_WIDTH}"
+SCRATCH_HEIGHT="${TMUX_SCRATCH_HEIGHT:-$DEFAULT_HEIGHT}"
+SCRATCH_BORDER="${TMUX_SCRATCH_BORDER:-rounded}"
+
+# Helper functions
+log() {
+  echo "[tmux-scratch] $*" >&2
+}
+
+is_tmux_session() {
+  [[ -n "${TMUX:-}" ]]
+}
+
+session_exists() {
+  tmux list-sessions -F "#{session_name}" 2>/dev/null | grep -q "^${SESSION_NAME}$"
+}
+
+popup_exists() {
+  # Check if scratch session exists and we're not in it (means it's running as popup)
+  session_exists && ! is_in_scratch_session
+}
+
+is_in_scratch_session() {
+  [[ "$(tmux display-message -p '#{session_name}')" == "${SESSION_NAME}" ]]
+}
+
+get_current_path() {
+  tmux display-message -p '#{pane_current_path}'
+}
+
+# Core functionality
+open_scratch() {
+  if ! is_tmux_session; then
+    log "Error: Not running inside tmux session"
+    exit 1
+  fi
+
+  if is_in_scratch_session; then
+    log "Already in scratch terminal session"
+    return 0
+  fi
+
+  local current_path
+  current_path=$(get_current_path)
+  
+  tmux display-popup \
+    -d "${current_path}" \
+    -w "${SCRATCH_WIDTH}" \
+    -h "${SCRATCH_HEIGHT}" \
+    -S "fg=${BORDER_COLOR}" \
+    -s "fg=${TEXT_COLOR}" \
+    -b "${SCRATCH_BORDER}" \
+    -E "tmux new-session -A -s ${SESSION_NAME}"
+  
+  log "Opened scratch terminal"
+}
+
+close_scratch() {
+  local quiet="${1:-false}"
+  
+  if is_in_scratch_session; then
+    # We're inside the scratch session, just detach to close popup
+    tmux detach-client
+    [[ "$quiet" != "true" ]] && log "Closed scratch terminal"
+  else
+    # We're outside the session, so there's no visible popup to close
+    [[ "$quiet" != "true" ]] && log "No scratch terminal popup to close"
+  fi
+}
+
+toggle_scratch() {
+  if is_in_scratch_session; then
+    # We're inside the scratch session, detach to close popup
+    close_scratch
+  elif session_exists; then
+    # Session exists but we're not in it, reopen as popup
+    open_scratch
+  else
+    # No session exists, create and open it
+    open_scratch
+  fi
+}
+
+embed_scratch() {
+  if ! is_in_scratch_session; then
+    log "Error: Not currently in scratch session"
+    exit 1
+  fi
+  
+  # Get the most recently active session (excluding scratch session)
+  local last_session
+  last_session=$(tmux list-sessions -F "#{session_last_attached}:#{session_name}" 2>/dev/null | \
+    grep -v ":${SESSION_NAME}$" | \
+    sort -rn | \
+    head -1 | \
+    cut -d: -f2)
+  
+  if [[ -z "$last_session" ]]; then
+    log "Error: No target session found to embed into"
+    exit 1
+  fi
+  
+  # Get all windows from scratch session
+  local windows
+  windows=$(tmux list-windows -t "${SESSION_NAME}" -F "#{window_index}")
+  
+  # Move each window to the target session
+  for window in $windows; do
+    # Move window to target session (this automatically renumbers)
+    tmux move-window -s "${SESSION_NAME}:${window}" -t "${last_session}:"
+  done
+  
+  # Switch to the target session (the scratch session is now empty and will be killed)
+  tmux switch-client -t "$last_session"
+  
+  # Kill the now-empty scratch session
+  tmux kill-session -t "${SESSION_NAME}" 2>/dev/null || true
+  
+  log "Embedded scratch terminal windows into session: $last_session"
+}
+
+kill_scratch_session() {
+  if session_exists; then
+    tmux kill-session -t "${SESSION_NAME}"
+    log "Killed scratch terminal session"
+  else
+    log "No scratch terminal session to kill"
+  fi
+}
+
+show_status() {
+  local in_scratch=$(is_in_scratch_session && echo "Yes" || echo "No")
+  local exists=$(session_exists && echo "Yes" || echo "No")
+  local popup_active="No"
+  
+  if [[ "$exists" == "Yes" && "$in_scratch" == "No" ]]; then
+    popup_active="Yes"
+  elif [[ "$exists" == "Yes" && "$in_scratch" == "Yes" ]]; then
+    popup_active="Currently inside"
+  fi
+  
+  echo "Scratch Terminal Status:"
+  echo "  Session exists: $exists"
+  echo "  Popup active: $popup_active"
+  echo "  In scratch session: $in_scratch"
+  echo "  Session name: ${SESSION_NAME}"
+  echo "  Dimensions: ${SCRATCH_WIDTH} x ${SCRATCH_HEIGHT}"
+  
+  if session_exists; then
+    echo "  Session info:"
+    tmux list-sessions -f "#{==:#{session_name},${SESSION_NAME}}" -F "    Created: #{session_created_string}"
+    tmux list-panes -t "${SESSION_NAME}" -F "    Panes: #{pane_id} (#{pane_current_command})"
+  fi
+}
+
+resize_scratch() {
+  local new_width="${1:-$SCRATCH_WIDTH}"
+  local new_height="${2:-$SCRATCH_HEIGHT}"
+  
+  if ! session_exists; then
+    log "Error: No scratch terminal session to resize"
+    exit 1
+  fi
+  
+  if is_in_scratch_session; then
+    # We're inside the scratch session - schedule the resize to happen after detach
+    local current_path
+    current_path=$(get_current_path)
+    
+    # Create a temporary script that will run the resize
+    local temp_script
+    temp_script=$(mktemp)
+    cat > "$temp_script" << EOF
+#!/bin/bash
+sleep 0.2  # Wait for detach to complete
+tmux display-popup \\
+  -d "${current_path}" \\
+  -w "${new_width}" \\
+  -h "${new_height}" \\
+  -S "fg=${BORDER_COLOR}" \\
+  -s "fg=${TEXT_COLOR}" \\
+  -b "${SCRATCH_BORDER}" \\
+  -E "tmux attach-session -t ${SESSION_NAME}"
+rm -f "$temp_script"
+EOF
+    chmod +x "$temp_script"
+    
+    # Run the resize script in background and detach
+    "$temp_script" &
+    tmux detach-client
+    log "Resized scratch terminal to ${new_width} x ${new_height}"
+  else
+    # We're outside the session - reopen with new dimensions if it exists
+    local current_path
+    current_path=$(get_current_path)
+    
+    tmux display-popup \
+      -d "${current_path}" \
+      -w "${new_width}" \
+      -h "${new_height}" \
+      -S "fg=${BORDER_COLOR}" \
+      -s "fg=${TEXT_COLOR}" \
+      -b "${SCRATCH_BORDER}" \
+      -E "tmux attach-session -t ${SESSION_NAME}"
+    
+    log "Resized scratch terminal to ${new_width} x ${new_height}"
+  fi
+}
+
+send_keys() {
+  local keys="$*"
+  
+  if ! session_exists; then
+    log "Error: Scratch session does not exist"
+    exit 1
+  fi
+  
+  tmux send-keys -t "${SESSION_NAME}" "$keys"
+  log "Sent keys to scratch terminal: $keys"
+}
+
+show_help() {
+  cat << EOF
+tmux-scratch-terminal - Comprehensive scratch terminal manager
+
+Usage: $(basename "$0") <command> [options]
+
+Commands:
+  open             Open scratch terminal popup
+  close            Close scratch terminal popup or detach if inside
+  toggle           Toggle scratch terminal (open if closed, close if open)
+  embed            Convert scratch session to regular pane in current session
+  kill             Kill the scratch terminal session entirely
+  status           Show current scratch terminal status
+  resize [W] [H]   Resize popup (default: ${DEFAULT_WIDTH} x ${DEFAULT_HEIGHT})
+  send <keys>      Send keys to scratch terminal session
+  help             Show this help message
+
+Environment Variables:
+  TMUX_SCRATCH_WIDTH    Popup width (default: ${DEFAULT_WIDTH})
+  TMUX_SCRATCH_HEIGHT   Popup height (default: ${DEFAULT_HEIGHT})
+  TMUX_SCRATCH_BORDER   Border style (default: rounded)
+
+Examples:
+  $(basename "$0") toggle               # Toggle scratch terminal
+  $(basename "$0") resize 80% 70%       # Resize to 80% width, 70% height
+  $(basename "$0") send "cd ~/Code"     # Change directory in scratch
+  $(basename "$0") embed                # Convert popup to regular windows
+
+Note: This script requires tmux 3.3+ and must be run from within a tmux session.
+EOF
+}
+
+# Main command dispatcher
+main() {
+  local command="${1:-toggle}"
+
+  case "$command" in
+    open)
+      open_scratch
+      ;;
+    close)
+      close_scratch
+      ;;
+    toggle)
+      toggle_scratch
+      ;;
+    embed)
+      embed_scratch
+      ;;
+    kill)
+      kill_scratch_session
+      ;;
+    status)
+      show_status
+      ;;
+    resize)
+      resize_scratch "${2:-}" "${3:-}"
+      ;;
+    send)
+      shift
+      send_keys "$@"
+      ;;
+    help|--help|-h)
+      show_help
+      ;;
+    *)
+      log "Error: Unknown command '$command'"
+      echo "Use '$(basename "$0") help' for usage information"
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"

@@ -19,102 +19,153 @@ return {
     config = function()
       require('gp').setup({
         providers = {
-          openai = {
-            endpoint = "https://api.openai.com/v1/chat/completions",
-            secret = os.getenv("OPENAI_API_KEY"),
-          },
-          -- googleai = {
-          --   endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{{model}}:streamGenerateContent?key={{secret}}",
-          --   secret = os.getenv("GOOGLEAI_API_KEY"),
-          -- },
           anthropic = {
             endpoint = "https://api.anthropic.com/v1/messages",
             secret = os.getenv("ANTHROPIC_API_KEY"),
+          },
+          googleai = {
+            endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{{model}}:streamGenerateContent?key={{secret}}",
+            secret = os.getenv("GEMINI_API_KEY"),
+          },
+          openai = {
+            endpoint = "https://api.openai.com/v1/chat/completions",
+            secret = os.getenv("OPENAI_API_KEY"),
           },
           ollama = {
             endpoint = "http://localhost:11434/api/chat",
           },
         },
         agents = {
-          -- {
-          --   provider = 'openai',
-          --   name = 'CodeGPT5',
-          --   chat = false,
-          --   command = true,
-          --   model = { model = 'gpt-5', temperature = 1.0 },
-          --   system_prompt = require('gp.defaults').code_system_prompt,
-          -- },
+          --
+          -- Anthropic Models
+          --
           {
-            provider = 'openai',
-            name = 'CodeGPT5-mini',
+            provider = "anthropic",
+            name = "CodeClaude-3-5-Haiku",
+            -- $1/1M input, $5/1M output | fast, low cost, basic tasks
             chat = false,
             command = true,
-            model = { model = 'gpt-5-mini', temperature = 1.0 },
-            system_prompt = table.concat({
-              "Always remove any trailing spaces or tabs at the ends of lines.",
-              "Preserve necessary indentation but ensure no trailing whitespace.",
-              require("gp.defaults").code_system_prompt,
-            }, "\n"),
+            -- string with model name or table with model name and parameters
+            model = { model = "claude-3-5-haiku-latest", temperature = 0.8, top_p = 1 },
+            system_prompt = require("gp.defaults").code_system_prompt,
           },
+          { -- default
+            name = 'CodeClaude-3-7-Sonnet',
+            disable = true,
+            -- $3/1M input, $15/1M output | high quality, moderate speed
+          },
+          -- {
+          --   provider = "anthropic",
+          --   name = "CodeClaude-4-0-Sonnet",
+          --   chat = false,
+          --   command = true,
+          --   -- $3/1M input, $15/1M output | high quality, moderate speed, 1M context
+          --   model = {
+          --     model = 'claude-sonnet-4-20250514',
+          --     temperature = 0.8,
+          --     top_p = 0.9
+          --   },
+          --   system_prompt = require('gp.defaults').code_system_prompt,
+          -- },
+
+          --
+          -- Google AI Models
+          --
+          {
+            provider = 'googleai',
+            name = 'CodeGemini-flash',
+            chat = false,
+            command = true,
+            -- $0.075/1M input, $0.30/1M output | ultra low cost, high volume, low latency
+            model = {
+              model = 'gemini-1.5-flash',
+              -- Alternative models you could use:
+              -- - gemini-1.5-pro (more capable but slower)
+              -- - gemini-1.5-flash-8b (smaller, faster variant)
+              temperature = 0.8,
+              top_p = 0.9
+            },
+            system_prompt = require('gp.defaults').code_system_prompt,
+          },
+          {
+            name = 'CodeGemini',
+            disable = true,
+            -- TODO: Is this pro or flash?
+            -- Pro: $7/1M input, $21/1M output | multimodal, 2M context
+          },
+
+          --
+          -- OpenAI Models
+          --
           {
             provider = 'openai',
             name = 'CodeGPT5-nano',
             chat = false,
             command = true,
-            model = { model = 'gpt-5-nano', temperature = 1.0 },
+            -- $0.05/1M input, $0.40/1M output | ultra low cost, 4 reasoning levels, 272k context
+            model = {
+              model = 'gpt-5-nano',
+              temperature = 1.0
+            },
             system_prompt = table.concat({
               "Always remove any trailing spaces or tabs at the ends of lines.",
               "Preserve necessary indentation but ensure no trailing whitespace.",
               require("gp.defaults").code_system_prompt,
             }, "\n"),
           },
-          {
-            provider = "anthropic",
-            name = "CodeClaude-4-0-Sonnet",
-            chat = false,
-            command = true,
-            -- string with model name or table with model name and parameters
-            model = { model = "claude-4-0-sonnet-latest", temperature = 0.8, top_p = 1 },
-            system_prompt = require("gp.defaults").code_system_prompt,
-          },
-          -- {
-          --   provider = "anthropic",
-          --   name = "CodeClaude-4-1-Opus",
-          --   chat = false,
-          --   command = true,
-          --   -- string with model name or table with model name and parameters
-          --   model = { model = "claude-4-1-opus-latest", temperature = 0.8, top_p = 1 },
-          --   system_prompt = require("gp.defaults").code_system_prompt,
-          -- },
-          {
-            name = 'CodeGPT4o',
-            disable = true,
-          },
-          -- {
+          -- { -- default
           --   name = 'CodeGPT4o-mini',
           --   disable = true,
+          --   -- $0.15/1M input, $0.60/1M output | very low cost, low latency, 128k context
+          -- },
+          -- {
+          --   provider = 'openai',
+          --   name = 'CodeGPT5-mini',
+          --   chat = false,
+          --   command = true,
+          --   -- $0.25/1M input, $2/1M output | very low cost, 4 reasoning levels, 272k context
+          --   model = {
+          --     model = 'gpt-5-mini',
+          --     temperature = 1.0
+          --   },
+          --   system_prompt = table.concat({
+          --     "Always remove any trailing spaces or tabs at the ends of lines.",
+          --     "Preserve necessary indentation but ensure no trailing whitespace.",
+          --     require("gp.defaults").code_system_prompt,
+          --   }, "\n"),
           -- },
           {
             name = 'CodeGPT-o3-mini',
             disable = true,
-          },
-          {
-            name = 'CodeClaude-3-7-Sonnet',
-            disable = true,
-          },
-          {
-            name = 'CodeClaude-3-5-Haiku',
-            disable = true,
+            -- pricing TBD | reasoning model, optimized for coding/math/science
           },
           -- {
-          --   name = "CodeOllamaLlama3.1-8B", -- standard agent name to disable
-          --   disable = true,
+          --   provider = 'openai',
+          --   name = 'CodeGPT5',
+          --   chat = false,
+          --   command = true,
+          --   -- $1.25/1M input, $10/1M output | flagship model, competitive pricing
+          --   model = {
+          --     model = 'gpt-5',
+          --     temperature = 1.0
+          --   },
+          --   system_prompt = require('gp.defaults').code_system_prompt,
           -- },
+          { -- default
+            name = 'CodeGPT4o',
+            disable = true,
+            -- $2.50/1M input, $10/1M output | multimodal, vision, 128k context
+          },
+
+          --
+          -- Open Source Models
+          --
           {
             provider = 'ollama',
-            name = 'CodeOllamaGemma3-4B', -- obv not required to call it that
+            name = 'CodeOllamaGemma3-4B',
             chat = false,
             command = true,
+            -- FREE local inference | ~134 tokens/s, ~4GB VRAM/RAM, multimodal, 128k context
             model = {
               model = 'gemma3',
               -- temperature = 0.7,
@@ -125,6 +176,11 @@ return {
             -- system prompt (use this to specify the persona/role of the AI)
             -- system_prompt = "You are a general AI assistant.",
           },
+          -- { -- default
+          --   name = "CodeOllamaLlama3.1-8B", -- standard agent name to disable
+          --   disable = true,
+          --   -- FREE local inference | ~33 tokens/s, ~16GB VRAM, multilingual, 128k context, GQA architecture
+          -- },
         }
       })
 

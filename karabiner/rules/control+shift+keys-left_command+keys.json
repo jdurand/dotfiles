@@ -48,6 +48,24 @@
           "modifiers": ["left_command"]
         }
       ],
+      "conditions": [
+        {
+          "type": "frontmost_application_unless",
+          "bundle_identifiers": [
+            "^com\\.apple\\.Terminal$",
+            "^com\\.googlecode\\.iterm2$",
+            "^co\\.zeit\\.hyperterm$",
+            "^co\\.zeit\\.hyper$",
+            "^io\\.alacritty$",
+            "^org\\.alacritty$",
+            "^com\\.mitchellh\\.ghostty$",
+            "^net\\.kovidgoyal\\.kitty$",
+            "^com\\.mitchellh\\.ghostty$",
+            "^org\\.vim\\.",
+            "^com\\.qvacua\\.VimR$"
+          ]
+        }
+      ],
       "type": "basic"
     }
   ]

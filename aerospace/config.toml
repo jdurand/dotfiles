@@ -280,6 +280,13 @@ run = ['layout tiling', 'move-node-to-workspace T']
 # if.app-id = 'com.github.wez.wezterm'
 # run = ['layout tiling', 'move-node-to-workspace 1']
 
+[[on-window-detected]]
+if.app-id = 'com.openai.chat'
+run = ['layout tiling', 'move-node-to-workspace A']
+[[on-window-detected]]
+if.app-name-regex-substring = 'Gemini'
+run = ['layout tiling', 'move-node-to-workspace A']
+
 # if a window without title is detected
 [[on-window-detected]]
 if.window-title-regex-substring = '^$'
@@ -304,13 +311,6 @@ run = ['layout tiling', 'move-node-to-workspace E']
 [[on-window-detected]]
 if.app-id = 'io.readwise.read'
 run = ['layout tiling', 'move-node-to-workspace R']
-
-[[on-window-detected]]
-if.app-id = 'com.openai.chat'
-run = ['layout tiling', 'move-node-to-workspace A']
-[[on-window-detected]]
-if.app-name-regex-substring = 'Gemini'
-run = ['layout tiling', 'move-node-to-workspace A']
 
 [[on-window-detected]]
 if.app-id = 'md.obsidian'

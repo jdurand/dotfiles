@@ -64,6 +64,34 @@ generate_preview() {
     return
   fi
 
+  # Check if it's a git worktree
+  if echo "$selection" | grep -q "(worktree)"; then
+    local worktree_path
+    worktree_path=$(get_worktree_path "$session_name")
+    echo "${BLUE}Git Worktree: $session_name${NC}"
+    echo ""
+    if [[ -n "$worktree_path" && -d "$worktree_path" ]]; then
+      echo "${YELLOW}Worktree path:${NC}"
+      echo "$worktree_path"
+      echo ""
+      if cd "$worktree_path" 2>/dev/null; then
+        echo "${YELLOW}Branch info:${NC}"
+        git branch --show-current 2>/dev/null || echo "  Could not determine branch"
+        echo ""
+        echo "${YELLOW}Recent commits:${NC}"
+        git log --oneline -5 2>/dev/null | sed 's/^/  /' || echo "  Could not read git log"
+        echo ""
+        echo "${YELLOW}Working directory status:${NC}"
+        git status --porcelain 2>/dev/null | head -10 | sed 's/^/  /' || echo "  Clean working directory"
+      else
+        echo "Could not access worktree directory"
+      fi
+    else
+      echo "Worktree path not found"
+    fi
+    return
+  fi
+
   # Check if session is active
   if ! tmux has-session -t "$session_name" 2>/dev/null; then
     echo "${RED}Session '$session_name' is not active${NC}"
@@ -136,11 +164,188 @@ get_tmuxinator_configs() {
   fi
 }
 
+# Get git worktrees from current repository
+get_git_worktrees() {
+  local worktrees=""
+
+  # Try current directory first
+  if git rev-parse --git-dir &>/dev/null; then
+    worktrees=$(git worktree list --porcelain 2>/dev/null | \
+      awk '/^worktree/ {path = $2} /^branch/ {gsub(/^refs\/heads\//, "", $2); print path ":" $2}' | \
+      while IFS=: read -r path branch; do
+        # Skip the main worktree (current repo)
+        if [[ "$path" != "$(git rev-parse --show-toplevel)" ]]; then
+          # Use the basename of the path as session name
+          basename "$path"
+        fi
+      done)
+  fi
+
+  # Also check from active session directories for additional worktrees
+  if [[ -z "$worktrees" ]]; then
+    local active_sessions
+    active_sessions=$(get_active_sessions)
+    while IFS= read -r session; do
+      if [[ -n "$session" ]]; then
+        local session_dir
+        session_dir=$(get_session_working_directory "$session")
+        if [[ -n "$session_dir" && -d "$session_dir" ]]; then
+          # Try to get worktrees from this session's directory
+          local session_worktrees
+          session_worktrees=$(cd "$session_dir" 2>/dev/null && git worktree list --porcelain 2>/dev/null | \
+            awk '/^worktree/ {path = $2} /^branch/ {gsub(/^refs\/heads\//, "", $2); print path ":" $2}' | \
+            while IFS=: read -r path branch; do
+              # Skip the main worktree
+              if [[ "$path" != "$session_dir" ]]; then
+                basename "$path"
+              fi
+            done)
+          if [[ -n "$session_worktrees" ]]; then
+            worktrees="$session_worktrees"
+            break
+          fi
+        fi
+      fi
+    done <<< "$active_sessions"
+  fi
+
+  echo "$worktrees"
+}
+
+# Get worktree path by session name
+get_worktree_path() {
+  local session_name="$1"
+  local worktree_path=""
+
+  # Try current directory first
+  if git rev-parse --git-dir &>/dev/null; then
+    worktree_path=$(git worktree list --porcelain 2>/dev/null | \
+      awk '/^worktree/ {path = $2} /^branch/ {gsub(/^refs\/heads\//, "", $2); print path ":" $2}' | \
+      while IFS=: read -r path branch; do
+        if [[ "$(basename "$path")" == "$session_name" ]]; then
+          echo "$path"
+          break
+        fi
+      done)
+  fi
+
+  # If not found, check from active session directories
+  if [[ -z "$worktree_path" ]]; then
+    local active_sessions
+    active_sessions=$(get_active_sessions)
+    while IFS= read -r session; do
+      if [[ -n "$session" ]]; then
+        local session_dir
+        session_dir=$(get_session_working_directory "$session")
+        if [[ -n "$session_dir" && -d "$session_dir" ]]; then
+          # Try to find worktree from this session's git repository
+          worktree_path=$(cd "$session_dir" 2>/dev/null && git worktree list --porcelain 2>/dev/null | \
+            awk '/^worktree/ {path = $2} /^branch/ {gsub(/^refs\/heads\//, "", $2); print path ":" $2}' | \
+            while IFS=: read -r path branch; do
+              if [[ "$(basename "$path")" == "$session_name" ]]; then
+                echo "$path"
+                break
+              fi
+            done)
+          if [[ -n "$worktree_path" ]]; then
+            break
+          fi
+        fi
+      fi
+    done <<< "$active_sessions"
+  fi
+
+  echo "$worktree_path"
+}
+
+# Get session working directory (from active tmux session)
+get_session_working_directory() {
+  local session_name="$1"
+  if tmux has-session -t "$session_name" 2>/dev/null; then
+    # Get the working directory from the first window's first pane
+    tmux display-message -t "$session_name" -p "#{pane_current_path}" 2>/dev/null
+  fi
+}
+
+# Check if a worktree path matches any active session's working directory
+is_worktree_path_active() {
+  local worktree_path="$1"
+  local active_sessions="$2"
+
+  while IFS= read -r session; do
+    if [[ -n "$session" ]]; then
+      local session_dir
+      session_dir=$(get_session_working_directory "$session")
+      if [[ -n "$session_dir" && "$session_dir" == "$worktree_path" ]]; then
+        return 0  # Found matching session
+      fi
+    fi
+  done <<< "$active_sessions"
+  return 1  # No matching session found
+}
+
+# Get tmuxinator config root path
+get_tmuxinator_root() {
+  local config_name="$1"
+  local config_file="$HOME/.dotfiles/tmuxinator/$config_name.yml"
+
+  if [[ -f "$config_file" ]]; then
+    # Extract root path from tmuxinator config and expand tilde
+    local root_path
+    root_path=$(grep "^root:" "$config_file" 2>/dev/null | sed 's/^root: *//' | tr -d '"' | head -1)
+    # Expand tilde to home directory
+    root_path="${root_path/#\~/$HOME}"
+    echo "$root_path"
+  fi
+}
+
+# Check if a tmuxinator config exists for this worktree
+get_tmuxinator_for_worktree() {
+  local worktree_path="$1"
+  local tmuxinator_configs="$2"
+
+  # Convert to array to avoid potential issues with while loops
+  local -a config_array
+  IFS=$'\n' read -r -d '' -a config_array <<< "$tmuxinator_configs" || true
+
+  for config in "${config_array[@]}"; do
+    if [[ -n "$config" ]]; then
+      local config_root
+      config_root=$(get_tmuxinator_root "$config")
+      if [[ -n "$config_root" && "$config_root" == "$worktree_path" ]]; then
+        echo "$config"
+        return 0
+      fi
+    fi
+  done
+  return 1
+}
+
+# Check if session is running in a worktree directory
+is_session_in_worktree() {
+  local session_name="$1"
+  local session_dir
+  session_dir=$(get_session_working_directory "$session_name")
+
+  # Only check if we have a session directory
+  if [[ -n "$session_dir" && -d "$session_dir" ]]; then
+    # Check if this directory is a git worktree by looking for .git file (not directory)
+    if [[ -f "$session_dir/.git" ]]; then
+      # Additional verification: check if it's actually a worktree reference
+      if grep -q "gitdir:" "$session_dir/.git" 2>/dev/null; then
+        return 0
+      fi
+    fi
+  fi
+  return 1
+}
+
 # Build selection list with status indicators
 build_session_list() {
   local active_sessions
   local scratch_sessions
   local tmuxinator_configs
+  local git_worktrees
   local session_list=()
   local current_session=""
 
@@ -153,18 +358,67 @@ build_session_list() {
   active_sessions=$(get_active_sessions)
   scratch_sessions=$(get_scratch_sessions)
   tmuxinator_configs=$(get_tmuxinator_configs)
+  git_worktrees=$(get_git_worktrees)
 
   # Add active sessions with indicator, excluding current session
   while IFS= read -r session; do
     if [[ -n "$session" && "$session" != "$current_session" ]]; then
-      session_list+=("${GREEN}●${NC} $session")
+      # Check if this session is in a worktree
+      if is_session_in_worktree "$session"; then
+        # Check if it has a matching tmuxinator config
+        local session_dir
+        session_dir=$(get_session_working_directory "$session")
+        local matching_config
+        matching_config=$(get_tmuxinator_for_worktree "$session_dir" "$tmuxinator_configs")
+
+        if [[ -n "$matching_config" ]]; then
+          # Green dot for tmuxinator session in worktree
+          session_list+=("${GREEN}●${NC} $session")
+        else
+          # Blue dot for worktree session
+          session_list+=("${BLUE}●${NC} $session")
+        fi
+      else
+        # Regular green dot for non-worktree session
+        session_list+=("${GREEN}●${NC} $session")
+      fi
     fi
   done <<< "$active_sessions"
 
   # Add current session at the end of active sessions if it exists and not scratch
   if [[ -n "$current_session" ]] && ! echo "$current_session" | grep -q "scratch"; then
-    session_list+=("${GREEN}→${NC} $current_session")
+    # Check if current session is in a worktree
+    if is_session_in_worktree "$current_session"; then
+      local session_dir
+      session_dir=$(get_session_working_directory "$current_session")
+      local matching_config
+      matching_config=$(get_tmuxinator_for_worktree "$session_dir" "$tmuxinator_configs")
+
+      if [[ -n "$matching_config" ]]; then
+        # Green arrow for current tmuxinator session in worktree
+        session_list+=("${GREEN}→${NC} $current_session")
+      else
+        # Blue arrow for current worktree session
+        session_list+=("${BLUE}→${NC} $current_session")
+      fi
+    else
+      # Regular green arrow for current non-worktree session
+      session_list+=("${GREEN}→${NC} $current_session")
+    fi
   fi
+
+  # Add git worktrees, excluding those already active or with matching working directories
+  while IFS= read -r worktree; do
+    if [[ -n "$worktree" ]] && ! echo "$active_sessions" | grep -q "^$worktree$" && ! echo "$scratch_sessions" | grep -q "^$worktree$"; then
+      # Check if any active session is already running in this worktree's directory
+      local worktree_path
+      worktree_path=$(get_worktree_path "$worktree")
+      if [[ -n "$worktree_path" ]] && ! is_worktree_path_active "$worktree_path" "$active_sessions"; then
+        # Use empty blue circle for inactive worktree sessions
+        session_list+=("${BLUE}○${NC} $worktree (worktree)")
+      fi
+    fi
+  done <<< "$git_worktrees"
 
   # Add tmuxinator configs, excluding those already active
   while IFS= read -r config; do
@@ -190,7 +444,7 @@ build_session_list() {
 # Extract session name from selection
 extract_session_name() {
   local selection="$1"
-  echo "$selection" | sed -E 's/^[^●→󱗽]*[●→󱗽][^[:space:]]* ([^[:space:]]+).*/\1/'
+  echo "$selection" | sed -E 's/^[^●→○󱗽]*[●→○󱗽][^[:space:]]* ([^[:space:]]+).*/\1/'
 }
 
 # Check if session is active
@@ -245,9 +499,11 @@ Keybindings:
   ?        - Show help
 
 Session Icons:
-  ● - Active session
+  ● - Active session (green)
+  ● - Active worktree session (blue)
   → - Current session
   ● - Tmuxinator config (grey)
+  ○ - Inactive worktree (blue outline)
   󱗽 - Scratch session
 
 Navigation:
@@ -310,6 +566,35 @@ switch_to_session() {
       fi
     else
       echo "${RED}tmuxinator not found${NC}" >&2
+      exit 1
+    fi
+  elif echo "$selection" | grep -q "(worktree)"; then
+    local worktree_path
+    worktree_path=$(get_worktree_path "$session_name")
+    if [[ -n "$worktree_path" && -d "$worktree_path" ]]; then
+      # Check if there's a matching tmuxinator config for this worktree
+      local tmuxinator_configs
+      tmuxinator_configs=$(get_tmuxinator_configs)
+      local matching_config
+      matching_config=$(get_tmuxinator_for_worktree "$worktree_path" "$tmuxinator_configs") || true
+
+      if [[ -n "$matching_config" ]] && command -v tmuxinator &> /dev/null; then
+        # Use tmuxinator if available
+        tmuxinator start "$matching_config"
+        if [[ -n "${TMUX:-}" ]]; then
+          tmux switch-client -t "$matching_config" 2>/dev/null || true
+        fi
+      else
+        # Create new session in the worktree directory
+        if [[ -n "${TMUX:-}" ]]; then
+          tmux new-session -d -s "$session_name" -c "$worktree_path"
+          tmux switch-client -t "$session_name"
+        else
+          tmux new-session -s "$session_name" -c "$worktree_path"
+        fi
+      fi
+    else
+      echo "${RED}Worktree path not found for $session_name${NC}" >&2
       exit 1
     fi
   else
@@ -392,7 +677,7 @@ EOF
       --height=40% \
       --border \
       --prompt="Select session (?: help): " \
-      --preview='echo -e "Session Switcher Help\n\nKeybindings:\n  Enter    - Switch to session\n  Ctrl-x   - Kill session\n  Ctrl-r   - Rename session\n  Ctrl-s   - Start in background\n  Ctrl-n   - Create new session\n  ?        - Toggle help\n\nSession Icons:\n  ● - Active session\n  → - Current session\n  ● - Tmuxinator config (grey)\n  󱗽 - Scratch session\n\nNavigation:\n  ↑/↓ or j/k  - Move selection\n  Esc         - Exit without selection"' \
+      --preview='echo -e "Session Switcher Help\n\nKeybindings:\n  Enter    - Switch to session\n  Ctrl-x   - Kill session\n  Ctrl-r   - Rename session\n  Ctrl-s   - Start in background\n  Ctrl-n   - Create new session\n  ?        - Toggle help\n\nSession Icons:\n  ● - Active session\n  → - Current session\n  ● - Tmuxinator config (grey)\n  ● - Git worktree (blue)\n  󱗽 - Scratch session\n\nNavigation:\n  ↑/↓ or j/k  - Move selection\n  Esc         - Exit without selection"' \
       --preview-window="hidden" \
       --ansi \
       --expect=ctrl-x,ctrl-r,ctrl-s,ctrl-n,ctrl-p \
@@ -408,7 +693,7 @@ EOF
     if [[ -n "$selection" ]]; then
       local session_name
       session_name=$(extract_session_name "$selection")
-  
+
       case "$key" in
         "ctrl-x")
           kill_session "$session_name"

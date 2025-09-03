@@ -1,5 +1,12 @@
 # docs: https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md
 
+keybinding:
+  universal:
+    toggleRangeSelect: 'V'
+  commits:
+    cherryPickCopy: 'c'
+    pasteCommits: 'v'
+
 promptToReturnFromSubprocess: false
 
 git:

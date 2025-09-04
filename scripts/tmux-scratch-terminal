@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # tmux-scratch-terminal - A comprehensive scratch terminal manager for tmux
 #

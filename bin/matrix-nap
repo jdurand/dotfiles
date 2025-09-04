@@ -1,0 +1,183 @@
+#!/usr/bin/env bash
+# matrix-nap — Matrix-style “screensaver” that prevents sleep.
+#
+# USAGE
+#   matrix-nap                     # cyan, bold, screensaver (-b -s), until keypress
+#   matrix-nap 10                  # 10 seconds (or 10s), cyan/bold/saver
+#   matrix-nap 5m -C red           # 5 minutes, red
+#   matrix-nap 1h --lock           # 1 hour, then lock screen
+#   matrix-nap --lock              # lock immediately when terminal loses focus
+#   matrix-nap -C green -B         # green, bold OFF (your -B overrides)
+#
+# NOTES
+# - Defaults added unless you override:  -b  -s  -C cyan
+#   (-s = exit on any key; pass -n to disable that, or your own -C/-B/-b)
+# - Duration accepts plain seconds or units: s/m/h/d (e.g., 5s, 5m, 1h).
+# - Keeps the machine awake while running:
+#     macOS:    caffeinate (background)
+#     Linux:    systemd-inhibit (background) if available
+# - No GNU `timeout` required. Foreground `cmatrix` stays interactive.
+# - On timeout, sends TERM, then KILL (0.5s later) to end cleanly.
+#
+# Tested on: macOS, Arch Linux (Hyprland)
+
+set -u
+
+# --- parse duration ---
+parse_duration() {
+  local arg="$1"
+  [[ "$arg" =~ ^([0-9]+)([smhdSMHD]?)$ ]] || return 1
+  local n="${BASH_REMATCH[1]}" u="${BASH_REMATCH[2],,}"
+  case "$u" in
+    ""|"s") printf '%s\n' "$n" ;;
+    "m")    printf '%s\n' $(( n * 60 )) ;;
+    "h")    printf '%s\n' $(( n * 3600 )) ;;
+    "d")    printf '%s\n' $(( n * 86400 )) ;;
+    *) return 1 ;;
+  esac
+}
+
+DURATION=""
+LOCK=false
+CM_ARGS=()
+
+# --- CLI parsing: [<duration>] [--lock] [cmatrix args...] ---
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --lock) LOCK=true; shift ;;
+    *)
+      if [[ -z "$DURATION" ]] && parse_duration "$1" >/dev/null 2>&1; then
+        DURATION="$(parse_duration "$1")"; shift
+      else
+        CM_ARGS+=( "$1" ); shift
+      fi
+      ;;
+  esac
+done
+
+# --- defaults: add -C cyan, -s, -b unless user provided equivalents ---
+if [[ ! " ${CM_ARGS[*]} " =~ " -C " ]]; then
+  CM_ARGS=( -C cyan "${CM_ARGS[@]}" )
+fi
+if [[ ! " ${CM_ARGS[*]} " =~ " -s " ]]; then
+  CM_ARGS=( -s "${CM_ARGS[@]}" )
+fi
+# respect user toggling bold with -B
+if [[ ! " ${CM_ARGS[*]} " =~ " -b " && ! " ${CM_ARGS[*]} " =~ " -B " ]]; then
+  CM_ARGS=( -b "${CM_ARGS[@]}" )
+fi
+
+# --- sleep inhibitor (background only; never wraps your TTY) ---
+INHIB_PID=""
+start_inhibitor() {
+  if command -v caffeinate >/dev/null 2>&1; then
+    if [[ -n "$DURATION" ]]; then
+      caffeinate -dimsu -t "$DURATION" &
+    else
+      caffeinate -dimsu &
+    fi
+    INHIB_PID=$!
+  elif command -v systemd-inhibit >/dev/null 2>&1; then
+    if [[ -n "$DURATION" ]]; then
+      systemd-inhibit --what=idle:sleep --why="matrix-nap" sleep "$DURATION" &
+    else
+      systemd-inhibit --what=idle:sleep --why="matrix-nap" tail -f /dev/null &
+    fi
+    INHIB_PID=$!
+  fi
+}
+stop_inhibitor() { [[ -n "${INHIB_PID}" ]] && kill "${INHIB_PID}" 2>/dev/null || true; }
+
+# Focus monitoring for lock behavior
+start_focus_monitor() {
+  if ! $LOCK; then
+    return 0
+  fi
+
+  # Enable focus reporting
+  printf '\e[?1004h'
+
+  # Start focus monitor in background
+  {
+    while IFS= read -r -n1 char; do
+      if [[ "$char" == $'\e' ]]; then
+        read -r -n2 -t 0.1 seq 2>/dev/null || continue
+        if [[ "$seq" == "[O" ]]; then
+          # Focus lost - trigger lock immediately
+          trigger_lock
+          break
+        fi
+      fi
+    done
+  } &
+  FOCUS_PID=$!
+}
+
+stop_focus_monitor() {
+  # Disable focus reporting
+  printf '\e[?1004l'
+  [[ -n "${FOCUS_PID:-}" ]] && kill "${FOCUS_PID}" 2>/dev/null || true
+}
+
+trigger_lock() {
+  if [[ "$(uname)" == "Darwin" ]]; then
+    pmset displaysleepnow
+  elif [[ -x /System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession ]]; then
+    /System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend
+  elif command -v swaylock >/dev/null 2>&1; then
+    swaylock -f -c 2f2f2f
+  elif command -v hyprlock >/dev/null 2>&1 && [[ -f ~/.config/hypr/hyprlock.conf ]]; then
+    hyprlock
+  elif command -v loginctl >/dev/null 2>&1; then
+    loginctl lock-session
+  elif command -v xdg-screensaver >/dev/null 2>&1; then
+    xdg-screensaver lock
+  else
+    echo "Lock requested but no locker found." >&2
+  fi
+}
+
+# Always restore terminal and stop inhibitor
+cleanup() {
+  stty sane 2>/dev/null || true
+  stop_focus_monitor
+  stop_inhibitor
+}
+trap cleanup EXIT INT TERM
+
+start_inhibitor
+start_focus_monitor
+
+# --- run cmatrix in FOREGROUND; if timed, use timeout approach ---
+STATUS=0
+if [[ -z "$DURATION" ]]; then
+  cmatrix "${CM_ARGS[@]}"
+  STATUS=$?
+else
+  # Start cmatrix in background and track its PID
+  cmatrix "${CM_ARGS[@]}" &
+  CMATRIX_PID=$!
+
+  # Start timeout killer in background
+  (
+    sleep "$DURATION"
+    kill -TERM "$CMATRIX_PID" 2>/dev/null || true
+    sleep 0.5
+    kill -KILL "$CMATRIX_PID" 2>/dev/null || true
+  ) &
+  KILLER_PID=$!
+
+  # Wait for cmatrix to finish (either by user input or timeout)
+  wait "$CMATRIX_PID" 2>/dev/null
+  STATUS=$?
+
+  # Clean up the killer if cmatrix exited early
+  kill "$KILLER_PID" 2>/dev/null || true
+fi
+
+# --- optional lock after exit (if focus monitor didn't trigger it) ---
+if $LOCK; then
+  trigger_lock
+fi
+
+exit "$STATUS"

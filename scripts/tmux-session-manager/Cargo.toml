@@ -1,0 +1,41 @@
+[package]
+name = "tmux-session-manager"
+version = "0.1.0"
+edition = "2021"
+authors = ["Jim Durand <hello@jdurand.com>"]
+description = "High-performance tmux session manager with plugin system"
+
+[[bin]]
+name = "tmux-session-manager"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+thiserror = "1.0"
+clap = { version = "4.0", features = ["derive"] }
+regex = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+dirs = "5.0"
+colored = "2.0"
+libloading = "0.8"
+lazy_static = "1.4"
+async-trait = "0.1"
+tempfile = "3.0"
+
+[dependencies.uuid]
+version = "1.0"
+features = ["v4", "serde"]
+
+[build-dependencies]
+cc = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

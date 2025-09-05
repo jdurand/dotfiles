@@ -1,57 +1,103 @@
-# tmux-session-manager
+# Tmux Session Manager - Rust Rewrite
 
-A plugin-based tmux session manager with fast performance and modular architecture.
+High-performance tmux session manager with a hybrid plugin system combining built-in plugins (for speed) with dynamic plugin loading (for extensibility).
 
-## Structure
+## Features
 
-```
-tmux-session-manager/
-├── tmux-session-manager  # Main script
-├── tests                 # Test suite  
-├── core/                 # Core plugin directory
-│   ├── active.sh         # Active tmux sessions (core functionality)
-│   └── recent.sh         # Most recent session (priority 1)
-├── plugins/              # Regular plugin directory
-│   ├── scratch.sh        # Scratch/temporary sessions  
-│   ├── tmuxinator.sh     # Tmuxinator configurations
-│   └── worktree.sh       # Git worktree sessions
-└── README.md             # This file
-```
+- **Lightning Fast**: Single binary, minimal tmux calls, concurrent operations  
+- **Plugin System**: Built-in plugins for core functionality + dynamic loading for extensibility  
+- **Session Types**: Active sessions, Git worktrees, Tmuxinator configs, scratch sessions
+- **FZF Integration**: Interactive selection with preview and keyboard shortcuts
+- **Cross-Platform**: Works inside tmux (popup) or outside tmux (regular fzf)
 
-## Usage
+## Performance Improvements
+
+Compared to the bash version:
+
+- **Single tmux call** instead of multiple subprocess calls per session
+- **Concurrent plugin discovery** using Rust's async/await  
+- **Structured data** instead of string parsing
+- **Compiled efficiency** vs interpreted bash
+- **Smart caching** of session metadata
+
+Expected performance: **~5-10x faster** than bash implementation
+
+## Quick Start
+
+### 1. Install Rust
 
 ```bash
-# Run the session manager
-./scripts/tmux-session-manager/tmux-session-manager
-
-# Run tests
-./scripts/tmux-session-manager/tests
-
-# Check plugin health
-./scripts/tmux-session-manager/tmux-session-manager --doctor
-
-# Show session info and troubleshooting
-./scripts/tmux-session-manager/tmux-session-manager --info
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source ~/.cargo/env
 ```
 
-## Plugin Priority
+### 2. Build
 
-Plugins load and display sessions in priority order (lower number = higher priority):
+```bash
+make
+# OR
+cargo build --release && cp target/release/tmux-session-manager bin/
+```
 
-1. **recent** (1) - Most recently active session (core)
-2. **worktree** (5) - Git worktree sessions
-3. **active** (10) - Currently active tmux sessions (core)
-4. **tmuxinator** (50) - Tmuxinator configuration files
-5. **scratch** (999) - Scratch/temporary sessions
+### 3. Run
 
-## Core vs Regular Plugins
+```bash
+# Interactive session selector
+./bin/tmux-session-manager
 
-**Core Plugins** (`core/` directory):
-- Essential functionality that behaves like plugins but is always loaded
-- `active.sh` - Manages active tmux sessions with standard priority (10)
-- `recent.sh` - Handles most recent session with highest priority (1)
+# Check system health  
+./bin/tmux-session-manager --doctor
 
-**Regular Plugins** (`plugins/` directory):
-- Optional functionality that can be added/removed
-- Loaded after core plugins but follow same priority system
-- Can override core plugins with priorities 0-4 if needed
+# Show debug info
+./bin/tmux-session-manager --info
+```
+
+## Build System
+
+The project includes a comprehensive Makefile for easy building:
+
+```bash
+make                # Build optimized release version
+make build-debug    # Build debug version (faster compilation)  
+make run            # Build and run interactively
+make doctor         # Run health check
+make info           # Show session manager info
+make test           # Run test suite
+make clean          # Clean build artifacts
+make install        # Install to /usr/local/bin (requires sudo)
+make watch          # Watch for changes and rebuild
+```
+
+## Architecture
+
+### Core Components
+
+- **`core/tmux.rs`**: Async tmux API wrapper
+- **`core/session.rs`**: Session data structures  
+- **`core/ui.rs`**: FZF integration and interface
+- **`plugins/`**: Plugin system and implementations
+- **`config.rs`**: Configuration management
+
+### Plugin System
+
+**Built-in Plugins** (compile-time, maximum performance):
+- `active`: Currently active tmux sessions
+- `worktree`: Git worktree sessions  
+- `scratch`: Temporary/scratch sessions
+- `tmuxinator`: Tmuxinator configuration sessions
+
+**Dynamic Plugins** (runtime loading):
+- Drop `.so`/`.dylib` files in `~/.config/tmux-session-manager/plugins/`
+- No recompilation needed for new plugins
+- Example template: `make plugin-template`
+
+### Session Priority System
+
+Sessions are ordered by plugin priority (lower number = higher priority):
+
+- **Priority 5**: Worktree sessions (highest priority)
+- **Priority 10**: Active tmux sessions  
+- **Priority 50**: Tmuxinator configuration sessions
+- **Priority 999**: Scratch/temporary sessions (lowest priority)
+
+Within each priority level, sessions are sorted by last-attached timestamp (most recent first).

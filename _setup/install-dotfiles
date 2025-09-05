@@ -84,7 +84,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 fi
 
 # Install other dependencies
-for package in tmuxinator fish fisher; do
+for package in tmuxinator fish fisher rust; do
   install_package_if_needed "${package}"
 done
 
@@ -152,6 +152,13 @@ fish -c '
     fisher install $plugin
   end
 '
+
+# Install custom tools
+# tmux-session-manager
+if [ -d "scripts/tmux-session-manager" ]; then
+  info "$(command -v tmux-session-manager >/dev/null 2>&1 && echo 'Updating' || echo 'Installing') tmux-session-manager..."
+  cd scripts/tmux-session-manager && cargo install --path . && cd - || { echo "Failed to install tmux-session-manager"; exit 1; }
+fi
 
 # Check for +sketchybar option
 if [[ "$1" == "+aerospace" ]]; then

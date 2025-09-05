@@ -106,10 +106,14 @@ alias mux='tmuxinator'
 # FZF keybindings
 #
 # fzf.fish
-fzf_configure_bindings --history=\cr --directory=\cf --variables=\cv --processes=\cp
+if type -q fzf_configure_bindings
+  fzf_configure_bindings --history=\cr --directory=\cf --variables=\cv --processes=\cp
+end
 
 # git.fzf.fish
-setup_git_fzf_key_bindings
+if type -q setup_git_fzf_key_bindings
+  setup_git_fzf_key_bindings
+end
 
 # Vim mode
 # -----------------------
@@ -135,6 +139,17 @@ set fish_greeting
 
 # set the fish history pager mode to 'prefix' for better history navigation
 set -U fish_history_pager_mode prefix
+
+# Add fzf functions to fish function path based on Homebrew installation location
+if status is-interactive
+  if test -e /opt/homebrew/bin/brew
+    set -gx fish_function_path /opt/homebrew/share/fish/vendor_functions.d $fish_function_path
+  else if test -e /home/linuxbrew/.linuxbrew/bin/brew
+    set -gx fish_function_path /home/linuxbrew/.linuxbrew/share/fish/vendor_functions.d $fish_function_path
+  else if test -e /usr/local/bin/brew
+    set -gx fish_function_path /usr/local/share/fish/vendor_functions.d $fish_function_path
+  end
+end
 
 # Load local config if exists
 if test -e "$HOME/.config/fish/config.local.fish"

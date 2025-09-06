@@ -7,30 +7,53 @@ SketchyBar.add("event", "spotify_change", "com.spotify.client.PlaybackStateChang
 -- Constants
 local IDLE_DELAY = 300 -- 5 minutes (300 seconds)
 
--- Debug configuration - set to false to disable all debug logging
-local DEBUG_ENABLED = true
-local DEBUG_FILE = "/tmp/spotify_debug.log"
+-- Logger configuration
+local Logger = {
+  -- Log levels (higher number = more verbose)
+  LEVELS = {
+    ERROR = 1,
+    WARN = 2,
+    INFO = 3,
+    DEBUG = 4
+  },
 
-local function debug_log(message)
-  if DEBUG_ENABLED then
-    os.execute("echo '" .. message .. "' >> " .. DEBUG_FILE)
-  end
-end
+  -- Current log level - change this to control verbosity
+  current_level = 4, -- DEBUG level (shows all logs)
 
-local function debug_log_table(title, tbl)
-  if DEBUG_ENABLED then
-    local debug_file = io.open(DEBUG_FILE, "a")
-    if debug_file then
-      debug_file:write("=== " .. title .. " ===\n")
-      debug_file:write("Timestamp: " .. os.date("%Y-%m-%d %H:%M:%S") .. "\n")
-      for k, v in pairs(tbl) do
-        debug_file:write(tostring(k) .. " = " .. tostring(v) .. "\n")
+  -- Log file location  
+  file = "/tmp/spotify_debug.log", -- tail -f /tmp/spotify_debug.log
+
+  -- Internal logging function
+  _log = function(self, level, level_name, message)
+    if level <= self.current_level then
+      local timestamp = os.date("%Y-%m-%d %H:%M:%S")
+      local formatted = "[" .. timestamp .. "] " .. level_name .. ": " .. message
+      os.execute("echo '" .. formatted .. "' >> " .. self.file)
+    end
+  end,
+
+  -- Log level methods
+  error = function(self, message) self:_log(self.LEVELS.ERROR, "ERROR", message) end,
+  warn = function(self, message) self:_log(self.LEVELS.WARN, "WARN", message) end,
+  info = function(self, message) self:_log(self.LEVELS.INFO, "INFO", message) end,
+  debug = function(self, message) self:_log(self.LEVELS.DEBUG, "DEBUG", message) end,
+
+  -- Table logging function
+  debug_table = function(self, title, tbl)
+    if self.LEVELS.DEBUG <= self.current_level then
+      local debug_file = io.open(self.file, "a")
+      if debug_file then
+        debug_file:write("=== " .. title .. " ===\n")
+        debug_file:write("Timestamp: " .. os.date("%Y-%m-%d %H:%M:%S") .. "\n")
+        for k, v in pairs(tbl) do
+          debug_file:write(tostring(k) .. " = " .. tostring(v) .. "\n")
+        end
+        debug_file:write("========================\n\n")
+        debug_file:close()
       end
-      debug_file:write("========================\n\n")
-      debug_file:close()
     end
   end
-end
+}
 
 -- State tracking for delayed hide
 local last_pause_time = nil
@@ -90,7 +113,7 @@ local function hide_widgets()
   media_title:set({ label = { string = "" } })
   media_artist:set({ label = { string = "" } })
   media_cover:set({ drawing = false })
-  debug_log('Widgets hidden after idle time')
+  Logger:info('Widgets hidden after idle time')
 end
 
 local function schedule_delayed_hide()
@@ -101,7 +124,7 @@ local function schedule_delayed_hide()
   hide_timer_running = true
   last_pause_time = os.time()
 
-  debug_log('Scheduled hide timer for idle time')
+  Logger:debug('Scheduled hide timer for idle time')
 
   -- Use SketchyBar's delay function to schedule hide after hide delay has passed
   SketchyBar.delay(IDLE_DELAY, function()
@@ -117,14 +140,14 @@ local function update_media(env)
   -- Wrap entire function in pcall to prevent crashes
   local success, err = pcall(function()
     -- Debug: Always log that function was called - use >> to append, not overwrite
-    debug_log('Function called at ' .. os.date('%H:%M:%S'))
+    Logger:debug('Function called at ' .. os.date('%H:%M:%S'))
 
     -- Debug: Log all event data
-    debug_log_table("Spotify Event Received", env)
+    Logger:debug_table("Spotify Event Received", env)
     if env.INFO then
-      debug_log_table("INFO Contents", env.INFO)
+      Logger:debug_table("INFO Contents", env.INFO)
     else
-      debug_log("INFO is nil or empty")
+      Logger:warn("INFO is nil or empty")
     end
 
   if env.INFO then
@@ -136,11 +159,11 @@ local function update_media(env)
 
     -- Debug: Log the parsed state and decision
     local spotify_artwork = env.INFO["Artwork URL"] or env.INFO["artwork"] or env.INFO["Artwork"] or "not found"
-    debug_log("Player State: '" .. tostring(player_state) .. "'")
-    debug_log("Track: " .. tostring(track_name))
-    debug_log("Artist: " .. tostring(artist_name))
-    debug_log("Has Artwork: " .. tostring(has_artwork))
-    debug_log("Spotify Event Artwork: " .. tostring(spotify_artwork))
+    Logger:debug("Player State: '" .. tostring(player_state) .. "'")
+    Logger:debug("Track: " .. tostring(track_name))
+    Logger:debug("Artist: " .. tostring(artist_name))
+    Logger:debug("Has Artwork: " .. tostring(has_artwork))
+    Logger:debug("Spotify Event Artwork: " .. tostring(spotify_artwork))
 
     local is_playing = (player_state == "Playing")
 
@@ -151,7 +174,7 @@ local function update_media(env)
 
       -- Wrap in pcall to catch any errors
       local success, err = pcall(function()
-        debug_log('SHOWING widgets - state is: ' .. tostring(player_state))
+        Logger:info('SHOWING widgets - state is: ' .. tostring(player_state))
         media_title:set({
           drawing = true,
           label = {
@@ -176,7 +199,7 @@ local function update_media(env)
           handle:close()
 
           -- Debug: Log what AppleScript returned
-          debug_log('AppleScript artwork result: ' .. tostring(artwork_url))
+          Logger:debug('AppleScript artwork result: ' .. tostring(artwork_url))
 
           if artwork_url and artwork_url ~= "" and artwork_url ~= "missing value" then
             -- Create cache directory and generate cache filename from track ID
@@ -195,7 +218,7 @@ local function update_media(env)
 
             if cache_info ~= "" then
               -- Use cached image
-              debug_log('Using cached artwork: ' .. cached_image)
+          Logger:info('Using cached artwork: ' .. cached_image)
               artwork_success = true
             else
               -- Download and resize image
@@ -218,12 +241,12 @@ local function update_media(env)
                   -- Clean up original download
                   os.execute("rm -f '" .. temp_download .. "'")
                   artwork_success = true
-                  debug_log('Downloaded and resized artwork: ' .. cached_image)
+                  Logger:info('Downloaded and resized artwork: ' .. cached_image)
                 else
-                  debug_log('Failed to resize artwork')
+                  Logger:error('Failed to resize artwork')
                 end
               else
-                debug_log('Download failed or file too small')
+                Logger:error('Download failed or file too small')
               end
             end
 
@@ -258,19 +281,19 @@ local function update_media(env)
             width = 24,
             height = 24,
           })
-          debug_log('Using fallback - AppleScript failed to get artwork')
+          Logger:warn('Using fallback - AppleScript failed to get artwork')
         end
 
-        debug_log('Successfully showed all widgets')
+        Logger:debug('Successfully showed all widgets')
       end)
 
       if not success then
-        debug_log('Error in playing section: ' .. tostring(err))
+        Logger:error('Error in playing section: ' .. tostring(err))
       end
     else
       -- Keep widget visible when paused, schedule delayed hide
       local success, err = pcall(function()
-        debug_log('Paused - keeping widget visible, scheduling delayed hide')
+        Logger:info('Paused - keeping widget visible, scheduling delayed hide')
 
         -- Keep showing the track info when paused, but dimmed
         media_title:set({
@@ -298,11 +321,11 @@ local function update_media(env)
       end)
 
       if not success then
-        debug_log('Error in pause section: ' .. tostring(err))
+        Logger:error('Error in pause section: ' .. tostring(err))
       end
     end
   else
-    debug_log('No INFO - hiding widgets')
+    Logger:warn('No INFO - hiding widgets')
     media_title:set({ label = { string = "" } })
     media_artist:set({ label = { string = "" } })
     media_cover:set({ drawing = false })
@@ -311,7 +334,7 @@ local function update_media(env)
 
   -- Log any errors from the pcall
   if not success then
-    debug_log('ERROR in update_media: ' .. tostring(err))
+    Logger:error('ERROR in update_media: ' .. tostring(err))
   end
 end
 

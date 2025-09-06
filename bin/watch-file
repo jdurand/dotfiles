@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Usage:
+#   watch-file [--debounce-ms N] [--run-on-start] <path...> -- <command> [args...]
+# Examples:
+#   watch-file ./file.txt -- echo "changed"
+#   watch-file --debounce-ms 250 ./src ./config -- make build
+#   watch-file --run-on-start ./app.js -- ./reload.sh
+
+DEBOUNCE_MS=0
+RUN_ON_START=0
+
+# --- parse flags ---
+while (( "$#" )); do
+  case "${1:-}" in
+    --debounce-ms)
+      [ "${2:-}" ] || { echo "Error: --debounce-ms needs a value"; exit 1; }
+      DEBOUNCE_MS="$2"; shift 2;;
+    --run-on-start|--immediate)
+      RUN_ON_START=1; shift;;
+    --) break;;
+    --*) echo "Unknown flag: $1"; exit 1;;
+    *) break;;
+  esac
+done
+
+# --- collect paths until -- ---
+PATHS=()
+while (( "$#" )) && [ "${1:-}" != "--" ]; do
+  PATHS+=("$1"); shift
+done
+[ "${1:-}" = "--" ] || { echo "Error: missing -- before command"; exit 1; }
+shift
+[ "${#PATHS[@]}" -gt 0 ] || { echo "Error: need at least one path"; exit 1; }
+[ "$#" -gt 0 ] || { echo "Error: need a command after --"; exit 1; }
+COMMAND=("$@")
+
+# Convert debounce to seconds (string, supports decimals for sleep/fswatch -l)
+if [ "$DEBOUNCE_MS" -gt 0 ]; then
+  DEBOUNCE_SEC=$(awk "BEGIN { printf \"%.3f\", $DEBOUNCE_MS/1000 }")
+else
+  DEBOUNCE_SEC="0"
+fi
+
+echo "Watching:"
+for p in "${PATHS[@]}"; do echo "  - $p"; done
+echo "Command on change: ${COMMAND[*]}"
+[ "$DEBOUNCE_MS" -gt 0 ] && echo "Debounce: ${DEBOUNCE_MS} ms"
+[ "$RUN_ON_START" -eq 1 ] && echo "Will run once on start."
+
+run_cmd() { "${COMMAND[@]}"; }
+
+# --- backends ---
+if command -v fswatch >/dev/null 2>&1; then
+  echo "(backend: fswatch)"
+  # Use fswatch's own latency for coalescing; one line per burst via -o.
+  [ "$RUN_ON_START" -eq 1 ] && run_cmd
+  # -r recursive, -o emit a count per event burst, -l latency (seconds)
+  # If no debounce requested, use a tiny latency to be responsive.
+  LAT="${DEBOUNCE_SEC}"
+  if [ "$DEBOUNCE_MS" -eq 0 ]; then LAT="0.05"; fi
+  fswatch -r -o -l "$LAT" "${PATHS[@]}" | while read -r _; do
+    run_cmd
+  done
+
+elif command -v inotifywait >/dev/null 2>&1; then
+  echo "(backend: inotifywait)"
+  [ "$RUN_ON_START" -eq 1 ] && run_cmd
+
+  # Start event stream
+  inotifywait -m -r -e close_write,create,move,delete "${PATHS[@]}" 2>/dev/null | {
+    pending_pid=""
+    schedule_run() {
+      if [ -n "${pending_pid:-}" ] && kill -0 "$pending_pid" 2>/dev/null; then
+        kill "$pending_pid" 2>/dev/null || true
+      fi
+      if [ "$DEBOUNCE_MS" -eq 0 ]; then
+        run_cmd
+      else
+        ( sleep "$DEBOUNCE_SEC"; run_cmd ) &
+        pending_pid=$!
+      fi
+    }
+    while read -r _; do
+      schedule_run
+    done
+  }
+
+else
+  echo "Error: no watcher found."
+  echo "  macOS: brew install fswatch"
+  echo "  Linux: sudo apt-get install fswatch  (or)  sudo apt-get install inotify-tools"
+  exit 1
+fi

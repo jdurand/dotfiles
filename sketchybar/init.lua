@@ -1,5 +1,6 @@
 -- Require the sketchybar module
 SketchyBar = require("sketchybar")
+Logger = require("logger")
 
 -- Set the bar name, if you are using another bar instance than sketchybar
 -- SketchyBar.set_bar_name("bottom_bar")

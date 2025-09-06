@@ -12,6 +12,9 @@ require("default")
 require("items")
 SketchyBar.end_config()
 
+-- Initialize services after all items are loaded
+require("services")
+
 -- Run the event loop of the sketchybar module (without this there will be no
 -- callback functions executed in the lua module)
 SketchyBar.event_loop()

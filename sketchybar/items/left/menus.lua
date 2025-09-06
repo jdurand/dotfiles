@@ -3,10 +3,6 @@ local settings = require("settings")
 
 MenuVisible = false
 
--------------------------
--- Menu
--------------------------
-
 local function initializeMenu()
   local menu_watcher = SketchyBar.add("item", {
     drawing = false,
@@ -80,9 +76,4 @@ local function initializeMenu()
   end)
 end
 
-
------------------------
--- Main Initialization
------------------------
 initializeMenu()
-

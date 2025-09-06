@@ -151,7 +151,7 @@ local router = SketchyBar.add("item", {
   },
 })
 
-SketchyBar.add("item", { position = "right", width = 4 })
+SketchyBar.add("item", { position = "right", width = 2 })
 
 wifi_up:subscribe("network_update", function(env)
   local up_color = (env.upload == "000 Bps") and colors.grey or colors.magenta

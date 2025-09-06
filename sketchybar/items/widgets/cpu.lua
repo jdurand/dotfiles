@@ -59,5 +59,5 @@ end)
 
 SketchyBar.add("item", "widgets.cpu.padding", {
   position = "right",
-  width = 4
+  width = 2
 })

@@ -47,7 +47,7 @@ local volume_bracket = SketchyBar.add("bracket", "widgets.volume.bracket", {
 
 SketchyBar.add("item", "widgets.volume.padding", {
   position = "right",
-  width = 4
+  width = 2
 })
 
 local volume_slider = SketchyBar.add("slider", popup_width, {

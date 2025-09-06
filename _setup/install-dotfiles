@@ -84,7 +84,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 fi
 
 # Install other dependencies
-for package in tmuxinator fish fisher rust; do
+for package in tmuxinator fish fisher rust spotify_player; do
   install_package_if_needed "${package}"
 done
 

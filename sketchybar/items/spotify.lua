@@ -11,9 +11,59 @@ local IDLE_DELAY = 300 -- 5 minutes (300 seconds)
 local last_pause_time = nil
 local hide_timer_running = false
 
+-- Cache for widget position (screen resolution doesn't change often)
+local position_cache = {
+  position = nil,
+  last_check = 0,
+  cache_duration = 300  -- 5 minutes cache
+}
+
 local widget_position = function()
-  -- TODO: center on 27" monitors, right-align on laptops
-  return 'right'
+  local current_time = os.time()
+
+  -- Return cached position if still valid
+  if position_cache.position and
+     (current_time - position_cache.last_check) < position_cache.cache_duration then
+
+    Logger:debug('Using cached position: ' .. position_cache.position)
+    return position_cache.position
+  end
+
+  Logger:debug('Detecting screen resolution...')
+
+  -- Get screen resolution to determine monitor size
+  local handle = io.popen("system_profiler SPDisplaysDataType | grep Resolution | head -1")
+  local resolution = handle:read("*a")
+  handle:close()
+
+  -- Extract width from resolution string (e.g., "Resolution: 2560 x 1440" or "Resolution: 3024 x 1964 Retina")
+  local width = resolution:match("Resolution: (%d+)")
+  local is_retina = resolution:match("Retina") ~= nil
+  local position = 'right'  -- Default
+
+  if width then
+    local screen_width = tonumber(width)
+
+    -- If it's a Retina display, divide by 2 to get logical resolution
+    if is_retina then
+      screen_width = screen_width / 2
+      Logger:debug('Retina detected, logical width: ' .. screen_width)
+    end
+
+    -- 27" monitors typically have logical width >= 2560 (QHD) or >= 1920 (4K scaled)
+    -- Laptops are usually 1440 (MacBook Pro) or lower
+    if screen_width >= 1920 then
+      Logger:info('Large monitor detected, using center position')
+      position = 'center'
+    end
+  end
+
+  -- Cache the result
+  position_cache.position = position
+  position_cache.last_check = current_time
+  Logger:info('Position detected and cached: ' .. position)
+
+  return position
 end
 
 -- Setup bar widget

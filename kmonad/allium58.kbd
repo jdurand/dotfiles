@@ -53,3 +53,32 @@
 ;; [Install]
 ;; WantedBy=multi-user.target
 
+
+;; 2025-09-06 Backup: /etc/systemd/system/allium58_keyboard.service
+;;
+;; [Unit]
+;; Description=KMonad Allium58
+;; ; After=graphical.target
+;; ; After=multi-user.target
+;; ; Requires=dev-input-by\x2dpath-pci\x2d0000:09:00.3\x2dusb\x2d0:2.3.1.1:1.0\x2devent\x2dkbd.device
+;; ; After=dev-input-by\x2dpath-pci\x2d0000:09:00.3\x2dusb\x2d0:2.3.1.1:1.0\x2devent\x2dkbd.device
+;; ; ConditionPathExists=/dev/input/by-path/pci-0000:09:00.3-usb-0:2.3.1.1:1.0-event-kbd
+;; ; StartLimitIntervalSec=30
+;; ; StartLimitBurst=5
+;;
+;; [Service]
+;; Type=simple
+;; ExecStartPre=/usr/bin/test -e /dev/input/by-path/pci-0000:09:00.3-usb-0:2.3.1.1:1.0-event-kbd
+;; ExecStart=/usr/bin/kmonad /home/jdurand/.config/kmonad/allium58.kbd
+;; Restart=on-failure
+;; RestartSec=2
+;; ; User=jdurand
+;; ; Group=input
+;; CapabilityBoundingSet=CAP_SYS_ADMIN CAP_SYS_NICE
+;; AmbientCapabilities=CAP_SYS_ADMIN CAP_SYS_NICE
+;; NoNewPrivileges=true
+;; StandardOutput=journal
+;; StandardError=journal
+;;
+;; [Install]
+;; WantedBy=multi-user.target

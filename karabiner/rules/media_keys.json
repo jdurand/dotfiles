@@ -1,0 +1,29 @@
+{
+  "description": "Right⌥ + , . / → media: prev / next / play-pause",
+  "manipulators": [
+    {
+      "type": "basic",
+      "from": {
+        "key_code": "slash",
+        "modifiers": { "mandatory": ["right_command"], "optional": ["any"] }
+      },
+      "to": [ { "shell_command": "/usr/bin/env PATH=/opt/homebrew/bin:/usr/local/bin:$PATH spotify_player playback play-pause" } ]
+    },
+    {
+      "type": "basic",
+      "from": {
+        "key_code": "comma",
+        "modifiers": { "mandatory": ["right_command"], "optional": ["any"] }
+      },
+      "to": [ { "shell_command": "/usr/bin/env PATH=/opt/homebrew/bin:/usr/local/bin:$PATH spotify_player playback previous" } ]
+    },
+    {
+      "type": "basic",
+      "from": {
+        "key_code": "period",
+        "modifiers": { "mandatory": ["right_command"], "optional": ["any"] }
+      },
+      "to": [ { "shell_command": "/usr/bin/env PATH=/opt/homebrew/bin:/usr/local/bin:$PATH spotify_player playback next" } ]
+    }
+  ]
+}

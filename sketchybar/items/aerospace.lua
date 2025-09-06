@@ -26,9 +26,18 @@ local function highlightFocusedWorkspace()
 
     if focused_name and Workspaces[focused_name] then
       Workspaces[focused_name]:set({
-        icon = { highlight = true },
-        label = { highlight = true },
-        background = { border_width = 2 },
+        icon = {
+          highlight = true,
+          color = colors.magenta
+        },
+        label = {
+          highlight = true,
+          color = colors.white
+        },
+        background = {
+          drawing = true,
+          color = colors.magenta
+        }
       })
 
       logDebug("Focused Workspace Highlighted", focused_name)
@@ -74,9 +83,8 @@ local function refreshWorkspaceWindows(workspace_name)
     Workspaces[workspace_name]:set({
       icon = { drawing = has_apps },
       label = { drawing = has_apps, string = table.concat(window_icons, " ") },
-      background = { drawing = has_apps },
-      padding_right = has_apps and 1 or 0,
-      padding_left = has_apps and 1 or 0,
+      padding_right = has_apps and 2 or 0,
+      padding_left = has_apps and 2 or 0,
     })
 
     logDebug("Workspace Windows Refreshed", workspace_name)
@@ -128,27 +136,29 @@ local function initializeWorkspaces(specified_order)
     if not Workspaces[workspace_name] then
       local workspace_item = SketchyBar.add("item", "workspace." .. workspace_name, {
         icon = {
-          color = colors.white,
+          color = colors.with_alpha(colors.white, 0.6),
           highlight_color = colors.magenta,
           drawing = false,
-          font = { family = settings.font.numbers },
+          font = { family = settings.font.numbers, size = 12.0 },
           string = workspace_name,
-          padding_left = 10,
-          padding_right = 5,
+          padding_left = 6,
+          padding_right = 3,
         },
         label = {
-          color = colors.grey,
+          color = colors.with_alpha(colors.grey, 0.8),
           highlight_color = colors.white,
-          font = "sketchybar-app-font:Regular:16.0",
+          font = "sketchybar-app-font:Regular:14.0",
           y_offset = -1,
-          padding_right = 12,
+          padding_right = 6,
         },
         background = {
-          color = colors.bg1,
-          border_width = 1,
-          height = 24,
-          border_color = colors.bg2,
+          drawing = false,
+          height = 2,
+          y_offset = -12,
+          color = colors.transparent,
         },
+        padding_right = 1,
+        padding_left = 1,
         click_script = "aerospace workspace " .. workspace_name,
       })
 
@@ -168,9 +178,18 @@ local function initializeWorkspaces(specified_order)
         local is_focused = env.FOCUSED_WORKSPACE == workspace_name
 
         workspace_item:set({
-          icon = { highlight = is_focused },
-          label = { highlight = is_focused },
-          background = { border_width = is_focused and 2 or 0 },
+          icon = {
+            highlight = is_focused,
+            color = is_focused and colors.magenta or colors.with_alpha(colors.white, 0.6)
+          },
+          label = {
+            highlight = is_focused,
+            color = is_focused and colors.white or colors.with_alpha(colors.grey, 0.8)
+          },
+          background = {
+            drawing = is_focused,
+            color = is_focused and colors.magenta or colors.transparent
+          }
         })
         refreshWorkspaceWindows(workspace_name)
         reassignWorkspaces()

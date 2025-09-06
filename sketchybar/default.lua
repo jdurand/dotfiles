@@ -1,51 +1,45 @@
 local settings = require("settings")
 local colors = require("colors")
 
--- Equivalent to the --default domain
 SketchyBar.default({
   updates = "when_shown",
   icon = {
     font = {
       family = settings.font.text,
-      style = settings.font.style_map["Bold"],
-      size = 14.0
+      style = settings.font.style_map["Medium"],
+      size = 13.0
     },
     color = colors.white,
-    padding_left = settings.paddings,
-    padding_right = settings.paddings,
+    padding_left = 4,
+    padding_right = 4,
     background = {
-      image = {
-        corner_radius = 5
-      }
+      drawing = false,
     },
   },
   label = {
     font = {
       family = settings.font.text,
-      style = settings.font.style_map["Semibold"],
+      style = settings.font.style_map["Medium"],
       size = 13.0
     },
     color = colors.white,
-    padding_left = settings.paddings,
-    padding_right = settings.paddings,
+    padding_left = 4,
+    padding_right = 4,
   },
   background = {
-    height = 22,
-    corner_radius = 5,
-    border_width = 1,
-    border_color = colors.bg2
+    drawing = false,
   },
   popup = {
     background = {
-      border_width = 1,
-      corner_radius = 5,
-      border_color = colors.popup.border,
-      color = colors.popup.bg,
+      border_width = 0,
+      corner_radius = 8,
+      border_color = colors.transparent,
+      color = colors.with_alpha(colors.bar.bg, 0.9),
       shadow = { drawing = true },
     },
     blur_radius = 50,
   },
-  padding_left = 5,
-  padding_right = 5,
+  padding_left = 6,
+  padding_right = 6,
   scroll_texts = true,
 })

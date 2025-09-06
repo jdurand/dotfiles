@@ -90,11 +90,13 @@ battery:subscribe("mouse.clicked", function(env)
   end
 end)
 
-SketchyBar.add("bracket", "widgets.battery.bracket", { battery.name }, {
-  background = { color = colors.bg1 }
-})
+-- Remove heavy bracket styling for cleaner look
+-- SketchyBar.add("bracket", "widgets.battery.bracket", { battery.name }, {
+--   background = { color = colors.bg1 }
+-- })
 
+-- Minimal padding between widgets
 SketchyBar.add("item", "widgets.battery.padding", {
   position = "right",
-  width = settings.group_paddings
+  width = 4  -- Minimal padding instead of heavy group padding
 })

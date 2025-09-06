@@ -1,6 +1,8 @@
 local colors = require("colors")
 local settings = require("settings")
 
+MenuVisible = false
+
 -------------------------
 -- Menu
 -------------------------
@@ -27,12 +29,12 @@ local function initializeMenu()
       icon = { drawing = false },
       label = {
         font = {
-          style = settings.font.style_map[i == 1 and "Heavy" or "Semibold"]
+          style = settings.font.style_map["Semibold"]
         },
         padding_left = 6,
         padding_right = 6,
       },
-      click_script = "$CONFIG_DIR/helpers/menus/bin/menus -s " .. i,
+      click_script = "$CONFIG_DIR/helpers/menus/bin/menus -s " .. i + 1,
     })
 
     menu_items[i] = menu
@@ -52,11 +54,14 @@ local function initializeMenu()
       SketchyBar.set('/menu\\..*/', { drawing = false })
       menu_padding:set({ drawing = true })
       id = 1
+      local skip_first = true
       for menu in string.gmatch(menus, '[^\r\n]+') do
-        if id < max_items then
+        if skip_first then
+          skip_first = false
+        elseif id < max_items then
           menu_items[id]:set( { label = menu, drawing = true } )
+          id = id + 1
         else break end
-        id = id + 1
       end
     end)
   end
@@ -64,14 +69,14 @@ local function initializeMenu()
   menu_watcher:subscribe("front_app_switched", update_menus)
 
   menu_placeholder:subscribe("toggle_menu", function(env)
-    local menu_visible = env.visible == 'on'
+    MenuVisible = not MenuVisible
 
-    menu_watcher:set( { updates = menu_visible })
-    SketchyBar.set("/menu\\..*/", { drawing = menu_visible })
-    SketchyBar.set("/space\\..*/", { drawing = not menu_visible })
-    SketchyBar.set("front_app", { drawing = not menu_visible })
+    menu_watcher:set( { updates = MenuVisible })
+    SketchyBar.set("/menu\\..*/", { drawing = MenuVisible })
+    SketchyBar.set("/space\\..*/", { drawing = not MenuVisible })
+    SketchyBar.set("/workspace\\..*/", { drawing = not MenuVisible })
 
-    if menu_visible then update_menus() end
+    if MenuVisible then update_menus() end
   end)
 end
 

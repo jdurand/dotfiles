@@ -8,7 +8,7 @@ SketchyBar.exec("killall cpu_load >/dev/null; $CONFIG_DIR/helpers/event_provider
 
 local cpu = SketchyBar.add("graph", "widgets.cpu" , 42, {
   position = "right",
-  graph = { color = colors.blue },
+  graph = { color = colors.cyan },
   background = {
     height = 22,
     color = { alpha = 0 },
@@ -36,7 +36,7 @@ cpu:subscribe("cpu_update", function(env)
   local load = tonumber(env.total_load)
   cpu:push({ load / 100. })
 
-  local color = colors.blue
+  local color = colors.cyan
   if load > 30 then
     if load < 60 then
       color = colors.yellow
@@ -57,13 +57,7 @@ cpu:subscribe("mouse.clicked", function(env)
   SketchyBar.exec("open -a 'Activity Monitor'")
 end)
 
--- Background around the cpu item
-SketchyBar.add("bracket", "widgets.cpu.bracket", { cpu.name }, {
-  background = { color = colors.bg1 }
-})
-
--- Background around the cpu item
 SketchyBar.add("item", "widgets.cpu.padding", {
   position = "right",
-  width = settings.group_paddings
+  width = 4
 })

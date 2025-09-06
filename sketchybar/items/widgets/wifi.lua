@@ -26,7 +26,7 @@ local wifi_up = SketchyBar.add("item", "widgets.wifi1", {
       style = settings.font.style_map["Bold"],
       size = 9.0,
     },
-    color = colors.red,
+    color = colors.magenta,
     string = "??? Bps",
   },
   y_offset = 4,
@@ -49,7 +49,7 @@ local wifi_down = SketchyBar.add("item", "widgets.wifi2", {
       style = settings.font.style_map["Bold"],
       size = 9.0,
     },
-    color = colors.blue,
+    color = colors.cyan,
     string = "??? Bps",
   },
   y_offset = -4,
@@ -60,13 +60,12 @@ local wifi = SketchyBar.add("item", "widgets.wifi.padding", {
   label = { drawing = false },
 })
 
--- Background around the item
 local wifi_bracket = SketchyBar.add("bracket", "widgets.wifi.bracket", {
   wifi.name,
   wifi_up.name,
   wifi_down.name
 }, {
-  background = { color = colors.bg1 },
+  background = { drawing = false },
   popup = { align = "center", height = 30 }
 })
 
@@ -152,11 +151,11 @@ local router = SketchyBar.add("item", {
   },
 })
 
-SketchyBar.add("item", { position = "right", width = settings.group_paddings })
+SketchyBar.add("item", { position = "right", width = 4 })
 
 wifi_up:subscribe("network_update", function(env)
-  local up_color = (env.upload == "000 Bps") and colors.grey or colors.red
-  local down_color = (env.download == "000 Bps") and colors.grey or colors.blue
+  local up_color = (env.upload == "000 Bps") and colors.grey or colors.magenta
+  local down_color = (env.download == "000 Bps") and colors.grey or colors.cyan
   wifi_up:set({
     icon = { color = up_color },
     label = {

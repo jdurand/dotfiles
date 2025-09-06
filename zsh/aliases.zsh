@@ -35,6 +35,9 @@ alias ggit=lazygit
 # use Ag instead of Ack
 alias ack=ag
 
+# Alias 'top' to 'btop' for 💅🏾
+alias top="btop"
+
 # MacOS aliases
 if [[ "$OSTYPE" == "darwin"* ]]; then
   # Use meld as git mergetool if not already defined

@@ -1,0 +1,24 @@
+# Tokyo Night for btop
+theme[main_bg]="#24283b"
+theme[main_fg]="#c0caf5"
+theme[title]="#7aa2f7"
+theme[hi_fg]="#7dcfff"
+theme[selected_bg]="#414868"
+theme[selected_fg]="#c0caf5"
+theme[inactive_fg]="#545c7e"
+theme[graph_text]="#c0caf5"
+
+# CPU
+theme[cpu_box]="#7aa2f7"
+theme[cpu_color]="#7dcfff"
+theme[cpu_temp]="#ff9e64"
+
+# Mem / Swap
+theme[mem_box]="#bb9af7"
+theme[mem_color]="#9ece6a"
+theme[swap_color]="#e0af68"
+
+# Net / Proc
+theme[net_box]="#e0af68"
+theme[proc_box]="#9ece6a"
+theme[proc_misc]="#73daca"

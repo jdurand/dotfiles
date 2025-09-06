@@ -84,7 +84,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 fi
 
 # Install other dependencies
-for package in tmuxinator fish fisher rust spotify_player; do
+for package in tmuxinator fish fisher rust spotify_player btop; do
   install_package_if_needed "${package}"
 done
 
@@ -123,7 +123,7 @@ mkdir -p ~/.config
 
 # Symlink directories inside ~/.dotfiles to ~/.config
 cd ~/.dotfiles
-for dir in alacritty kitty ghostty tmuxinator nvim bat lazygit karabiner yazi; do
+for dir in alacritty kitty ghostty tmuxinator nvim bat lazygit karabiner yazi btop; do
   if [ -d "$dir" ]; then
     create_symlink "$HOME/.dotfiles/$dir" "$HOME/.config/$dir"
   else

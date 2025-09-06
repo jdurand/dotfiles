@@ -99,6 +99,7 @@ alias ack='ag'
 alias ls='eza --icons=always'
 alias cat='bat --paging=never'
 alias mux='tmuxinator'
+alias top='btop'
 
 # Keybindings
 # ------------------------------------------------------------------------------

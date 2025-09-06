@@ -18,6 +18,60 @@ local position_cache = {
   cache_duration = 300  -- 5 minutes cache
 }
 
+-- Widget visibility management for space-constrained screens
+local function manage_widget_visibility(screen_width)
+  -- Thresholds for hiding widgets (logical pixels)
+  local hide_wifi_threshold = 1600
+  local hide_volume_threshold = 1500
+  local hide_battery_threshold = 1400
+
+  if screen_width <= hide_battery_threshold then
+    -- Hide wifi, volume, and battery
+    Logger:info('Hiding wifi, volume, and battery widgets due to screen width: ' .. screen_width)
+    SketchyBar.set("widgets.wifi1", { drawing = false })
+    SketchyBar.set("widgets.wifi2", { drawing = false })
+    SketchyBar.set("widgets.wifi.padding", { drawing = false })
+    SketchyBar.set("widgets.volume1", { drawing = false })
+    SketchyBar.set("widgets.volume2", { drawing = false })
+    SketchyBar.set("widgets.volume.padding", { drawing = false })
+    SketchyBar.set("widgets.battery", { drawing = false })
+    SketchyBar.set("widgets.battery.padding", { drawing = false })
+  elseif screen_width <= hide_volume_threshold then
+    -- Hide wifi and volume only
+    Logger:info('Hiding wifi and volume widgets due to screen width: ' .. screen_width)
+    SketchyBar.set("widgets.wifi1", { drawing = false })
+    SketchyBar.set("widgets.wifi2", { drawing = false })
+    SketchyBar.set("widgets.wifi.padding", { drawing = false })
+    SketchyBar.set("widgets.volume1", { drawing = false })
+    SketchyBar.set("widgets.volume2", { drawing = false })
+    SketchyBar.set("widgets.volume.padding", { drawing = false })
+    SketchyBar.set("widgets.battery", { drawing = true })
+    SketchyBar.set("widgets.battery.padding", { drawing = true })
+  elseif screen_width <= hide_wifi_threshold then
+    -- Hide only wifi
+    Logger:info('Hiding wifi widgets due to screen width: ' .. screen_width)
+    SketchyBar.set("widgets.wifi1", { drawing = false })
+    SketchyBar.set("widgets.wifi2", { drawing = false })
+    SketchyBar.set("widgets.wifi.padding", { drawing = false })
+    SketchyBar.set("widgets.volume1", { drawing = true })
+    SketchyBar.set("widgets.volume2", { drawing = true })
+    SketchyBar.set("widgets.volume.padding", { drawing = true })
+    SketchyBar.set("widgets.battery", { drawing = true })
+    SketchyBar.set("widgets.battery.padding", { drawing = true })
+  else
+    -- Show all widgets
+    Logger:info('Showing all widgets for screen width: ' .. screen_width)
+    SketchyBar.set("widgets.wifi1", { drawing = true })
+    SketchyBar.set("widgets.wifi2", { drawing = true })
+    SketchyBar.set("widgets.wifi.padding", { drawing = true })
+    SketchyBar.set("widgets.volume1", { drawing = true })
+    SketchyBar.set("widgets.volume2", { drawing = true })
+    SketchyBar.set("widgets.volume.padding", { drawing = true })
+    SketchyBar.set("widgets.battery", { drawing = true })
+    SketchyBar.set("widgets.battery.padding", { drawing = true })
+  end
+end
+
 local widget_position = function()
   local current_time = os.time()
 
@@ -56,6 +110,9 @@ local widget_position = function()
       Logger:info('Large monitor detected, using center position')
       position = 'center'
     end
+
+    -- Also manage widget visibility based on screen width
+    manage_widget_visibility(screen_width)
   end
 
   -- Cache the result
@@ -372,3 +429,6 @@ end)
 media_cover:subscribe("mouse.exited.global", function()
   media_cover:set({ popup = { drawing = false }})
 end)
+
+-- Initialize widget visibility on startup
+widget_position()

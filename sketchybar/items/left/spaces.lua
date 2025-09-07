@@ -11,46 +11,35 @@ for i = 1, 10, 1 do
     icon = {
       font = { family = settings.font.numbers },
       string = i,
-      padding_left = 15,
-      padding_right = 8,
-      color = colors.white,
-      highlight_color = colors.red,
+      padding_left = 8,
+      padding_right = 4,
+      color = colors.with_alpha(colors.white, 0.6),
+      highlight_color = colors.magenta,
     },
     label = {
-      padding_right = 20,
-      color = colors.grey,
+      padding_right = 8,
+      color = colors.with_alpha(colors.grey, 0.8),
       highlight_color = colors.white,
-      font = "sketchybar-app-font:Regular:16.0",
+      font = "sketchybar-app-font:Regular:14.0",
       y_offset = -1,
     },
-    padding_right = 1,
-    padding_left = 1,
+    padding_right = 2,
+    padding_left = 2,
     background = {
-      color = colors.bg1,
-      border_width = 1,
-      height = 22,
-      border_color = colors.black,
+      drawing = false,
+      height = 2,
+      y_offset = -12,
+      color = colors.transparent,
     },
-    popup = { background = { border_width = 5, border_color = colors.black } }
+    popup = { background = { border_width = 0, border_color = colors.transparent } }
   })
 
   spaces[i] = space
 
-  -- Single item bracket for space items to achieve double border on highlight
-  local space_bracket = SketchyBar.add("bracket", { space.name }, {
-    background = {
-      color = colors.transparent,
-      border_color = colors.bg2,
-      height = 24,
-      border_width = 2
-    }
-  })
-
-  -- Padding space
   SketchyBar.add("space", "space.padding." .. i, {
     space = i,
     script = "",
-    width = settings.group_paddings,
+    width = 2,
   })
 
   local space_popup = SketchyBar.add("item", {
@@ -68,14 +57,19 @@ for i = 1, 10, 1 do
 
   space:subscribe("space_change", function(env)
     local selected = env.SELECTED == "true"
-    local color = selected and colors.grey or colors.bg2
     space:set({
-      icon = { highlight = selected, },
-      label = { highlight = selected },
-      background = { border_color = selected and colors.black or colors.bg2 }
-    })
-    space_bracket:set({
-      background = { border_color = selected and colors.grey or colors.bg2 }
+      icon = {
+        highlight = selected,
+        color = selected and colors.magenta or colors.with_alpha(colors.white, 0.6)
+      },
+      label = {
+        highlight = selected,
+        color = selected and colors.white or colors.with_alpha(colors.grey, 0.8)
+      },
+      background = {
+        drawing = selected,
+        color = selected and colors.magenta or colors.transparent
+      }
     })
   end)
 
@@ -100,25 +94,24 @@ local space_window_observer = SketchyBar.add("item", {
 })
 
 local spaces_indicator = SketchyBar.add("item", {
-  padding_left = -3,
+  padding_left = 0,
   padding_right = 0,
   icon = {
-    padding_left = 8,
-    padding_right = 9,
-    color = colors.grey,
+    padding_left = 6,
+    padding_right = 6,
+    color = colors.with_alpha(colors.grey, 0.8),
     string = icons.switch.on,
+    font = { size = 12.0 },
   },
   label = {
     width = 0,
     padding_left = 0,
-    padding_right = 8,
+    padding_right = 6,
     string = "Spaces",
-    color = colors.bg1,
+    color = colors.with_alpha(colors.grey, 0.8),
+    font = { size = 11.0 },
   },
-  background = {
-    color = colors.with_alpha(colors.grey, 0.0),
-    border_color = colors.with_alpha(colors.bg1, 0.0),
-  }
+  background = { drawing = false }
 })
 
 space_window_observer:subscribe("space_windows_change", function(env)
@@ -149,12 +142,11 @@ end)
 spaces_indicator:subscribe("mouse.entered", function(env)
   SketchyBar.animate("tanh", 30, function()
     spaces_indicator:set({
-      background = {
-        color = { alpha = 1.0 },
-        border_color = { alpha = 1.0 },
-      },
-      icon = { color = colors.bg1 },
-      label = { width = "dynamic" }
+      icon = { color = colors.white },
+      label = {
+        width = "dynamic",
+        color = colors.white
+      }
     })
   end)
 end)
@@ -162,12 +154,11 @@ end)
 spaces_indicator:subscribe("mouse.exited", function(env)
   SketchyBar.animate("tanh", 30, function()
     spaces_indicator:set({
-      background = {
-        color = { alpha = 0.0 },
-        border_color = { alpha = 0.0 },
-      },
-      icon = { color = colors.grey },
-      label = { width = 0, }
+      icon = { color = colors.with_alpha(colors.grey, 0.8) },
+      label = {
+        width = 0,
+        color = colors.with_alpha(colors.grey, 0.8)
+      }
     })
   end)
 end)

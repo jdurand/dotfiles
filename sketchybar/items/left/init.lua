@@ -1,0 +1,6 @@
+-- Left side items (Apple logo, front app, spaces/workspaces, menus)
+require("items.left.apple")
+require("items.left.front_app")
+require("items.left.menus")
+require("items.left.aerospace")
+-- require("items.left.spaces")

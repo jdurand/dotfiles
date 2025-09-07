@@ -41,13 +41,13 @@ local volume_bracket = SketchyBar.add("bracket", "widgets.volume.bracket", {
   volume_icon.name,
   volume_percent.name
 }, {
-  background = { color = colors.bg1 },
+  background = { drawing = false },
   popup = { align = "center" }
 })
 
 SketchyBar.add("item", "widgets.volume.padding", {
   position = "right",
-  width = settings.group_paddings
+  width = 2
 })
 
 local volume_slider = SketchyBar.add("slider", popup_width, {

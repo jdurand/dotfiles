@@ -1,6 +1,7 @@
 local icons = require("icons")
 local colors = require("colors")
 local settings = require("settings")
+local Terminal = require("helpers.terminal")
 
 -- Execute the event provider binary which provides the event "cpu_update" for
 -- the cpu load data, which is fired every 2.0 seconds.
@@ -53,9 +54,13 @@ cpu:subscribe("cpu_update", function(env)
   })
 end)
 
-cpu:subscribe("mouse.clicked", function(env)
-  SketchyBar.exec("open -a 'Activity Monitor'")
-end)
+-- Use the new Terminal helper to create a floating TUI launcher
+cpu:set({
+  click_script = Terminal.get_floating_tui_click_script("btop", {
+    width_cols = "130c",
+    height_rows = "35c",
+  })
+})
 
 SketchyBar.add("item", "widgets.cpu.padding", {
   position = "right",

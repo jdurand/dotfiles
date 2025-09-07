@@ -293,6 +293,11 @@ if.window-title-regex-substring = '^$'
 run = 'layout floating'
 
 [[on-window-detected]]
+if.app-id = 'net.kovidgoyal.kitty'
+if.window-title-regex-substring = 'floating-tui'
+run = ['layout floating']
+
+[[on-window-detected]]
 if.app-id = 'com.google.Chrome'
 run = ['layout tiling', 'move-node-to-workspace Q']
 

@@ -1,8 +1,4 @@
-require("items.apple")
-require("items.spaces_menu_toggle")
-require("items.menus")
-require("items.aerospace")
-require("items.front_app")
-require("items.calendar")
-require("items.widgets")
-require("items.media")
+-- Load items by position for better organization
+require("items.left")
+require("items.right")
+require("items.spotify")  -- Dynamically positioned

@@ -1,5 +1,6 @@
 -- Require the sketchybar module
 SketchyBar = require("sketchybar")
+Logger = require("logger")
 
 -- Set the bar name, if you are using another bar instance than sketchybar
 -- SketchyBar.set_bar_name("bottom_bar")
@@ -10,6 +11,9 @@ require("bar")
 require("default")
 require("items")
 SketchyBar.end_config()
+
+-- Initialize services after all items are loaded
+require("services")
 
 -- Run the event loop of the sketchybar module (without this there will be no
 -- callback functions executed in the lua module)

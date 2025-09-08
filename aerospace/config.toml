@@ -268,7 +268,7 @@ run = ['layout tiling', 'move-node-to-workspace W']
 [[on-window-detected]]
 if.during-aerospace-startup = true
 if.app-id = 'app.zen-browser.zen'
-run = ['layout tiling', 'move-node-to-workspace Z']
+run = ['layout tiling', 'move-node-to-workspace W']
 
 [[on-window-detected]]
 if.app-id = 'com.mitchellh.ghostty'

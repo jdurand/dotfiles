@@ -7,7 +7,7 @@ startup_window: editor
 windows:
   - console:
       panes:
-        - sleep 5; git pull; nvm use && yarn install && yarn start --ssl
+        - sleep 5; git pull; yarn install && yarn start --ssl
         - git status
   - editor:
       layout: main-horizontal

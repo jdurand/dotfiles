@@ -35,16 +35,24 @@ set -x QLTY_INSTALL "$HOME/.qlty"
 set -x PATH $QLTY_INSTALL/bin $PATH
 
 # Add homebrew bins to $PATH
-if test -e /opt/homebrew/bin/brew
-  /opt/homebrew/bin/brew shellenv | source
-else if test -e /home/linuxbrew/.linuxbrew/bin/brew
-  /home/linuxbrew/.linuxbrew/bin/brew shellenv | source
-else if test -e /usr/local/bin/brew
-  /usr/local/bin/brew shellenv | source
-else if test -e brew
-  brew shellenv | source
-else
-  return 1
+function get_brew_prefix
+  if test -e /opt/homebrew/bin/brew
+    echo /opt/homebrew
+  else if test -e /home/linuxbrew/.linuxbrew/bin/brew
+    echo /home/linuxbrew/.linuxbrew
+  else if test -e /usr/local/bin/brew
+    echo /usr/local
+  else if command -q brew
+    brew --prefix
+  else
+    return 1
+  end
+end
+
+set brew_prefix (get_brew_prefix)
+
+if test -n "$brew_prefix"
+  $brew_prefix/bin/brew shellenv | source
 end
 
 # Plugins
@@ -72,13 +80,11 @@ if type -q zoxide; zoxide init fish | source; end
 # # Initialize conda
 # eval $HOME/opt/anaconda3/bin/conda "shell.fish" "hook" $argv | source
 
-# Update node version based on local .nvmrc
-function nvm_auto_use --on-variable PWD
-  if test -e .nvmrc
-    set -l node_version (cat .nvmrc)
-    if test (nvm current) != "v$node_version"
-      nvm use
-    end
+# Ensure fisher is available and plugins are loaded in interactive mode
+if status is-interactive
+  # Load fisher if not already available
+  if not functions -q fisher; and test -f $brew_prefix/share/fish/vendor_functions.d/fisher.fish
+    source $brew_prefix/share/fish/vendor_functions.d/fisher.fish
   end
 end
 
@@ -103,13 +109,6 @@ alias top='btop'
 
 # Keybindings
 # ------------------------------------------------------------------------------
-
-# FZF keybindings
-#
-# fzf.fish
-if type -q fzf_configure_bindings
-  fzf_configure_bindings --history=\cr --directory=\cf --variables=\cv --processes=\cp
-end
 
 # git.fzf.fish
 if type -q setup_git_fzf_key_bindings
@@ -140,17 +139,6 @@ set fish_greeting
 
 # set the fish history pager mode to 'prefix' for better history navigation
 set -U fish_history_pager_mode prefix
-
-# Add fzf functions to fish function path based on Homebrew installation location
-if status is-interactive
-  if test -e /opt/homebrew/bin/brew
-    set -gx fish_function_path /opt/homebrew/share/fish/vendor_functions.d $fish_function_path
-  else if test -e /home/linuxbrew/.linuxbrew/bin/brew
-    set -gx fish_function_path /home/linuxbrew/.linuxbrew/share/fish/vendor_functions.d $fish_function_path
-  else if test -e /usr/local/bin/brew
-    set -gx fish_function_path /usr/local/share/fish/vendor_functions.d $fish_function_path
-  end
-end
 
 # Load local config if exists
 if test -e "$HOME/.config/fish/config.local.fish"

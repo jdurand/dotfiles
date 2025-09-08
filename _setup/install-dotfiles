@@ -84,7 +84,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 fi
 
 # Install other dependencies
-for package in tmuxinator fish fisher rust spotify_player lazydocker btop; do
+for package in tmuxinator fish fisher rust spotify_player lazydocker btop mise; do
   install_package_if_needed "${package}"
 done
 
@@ -123,7 +123,7 @@ mkdir -p ~/.config
 
 # Symlink directories inside ~/.dotfiles to ~/.config
 cd ~/.dotfiles
-for dir in alacritty kitty ghostty tmuxinator nvim bat lazygit karabiner yazi btop; do
+for dir in alacritty kitty ghostty tmuxinator nvim bat lazygit karabiner yazi btop mise; do
   if [ -d "$dir" ]; then
     create_symlink "$HOME/.dotfiles/$dir" "$HOME/.config/$dir"
   else
@@ -148,7 +148,18 @@ fi
 
 # Install fish plugins
 fish -c '
-  for plugin in jorgebucaran/nvm.fish direnv/direnv jethrokuan/z patrickf1/fzf.fish
+  # Ensure fisher is available by sourcing it explicitly if needed
+  if not functions -q fisher
+    set -l brew_prefix (brew --prefix 2>/dev/null)
+    if test -n "$brew_prefix"
+      set -l fisher_path "$brew_prefix/share/fish/vendor_functions.d/fisher.fish"
+      if test -f $fisher_path
+        source $fisher_path
+      end
+    end
+  end
+
+  for plugin in direnv/direnv
     fisher install $plugin
   end
 '

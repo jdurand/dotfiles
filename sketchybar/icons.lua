@@ -36,6 +36,7 @@ local icons = {
       disconnected = "􀙈",
       router = "􁓤",
     },
+    git_branch = "􀙠",
     media = {
       back = "􀊊",
       forward = "􀊌",
@@ -79,6 +80,7 @@ local icons = {
       disconnected = "󰖪",
       router = "Missing Icon"
     },
+    git_branch = "",
     media = {
       back = "",
       forward = "",

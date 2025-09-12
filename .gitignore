@@ -25,3 +25,4 @@ karabiner/karabiner.json
 
 # Ignore .env
 .env
+environment/*.env

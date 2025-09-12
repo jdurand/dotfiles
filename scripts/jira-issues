@@ -1,0 +1,126 @@
+#!/bin/bash
+
+# Jira Issues Script
+# Fetches and displays Jira issues based on provided arguments
+
+set -euo pipefail
+
+# Default values
+DEFAULT_STATUSES=("To Do" "In Progress" "Code Review" "To Merge")
+DEFAULT_JQL="sprint in openSprints()"
+DEFAULT_COLUMNS="key,summary,status,labels,updated"
+JIRA_EXECUTABLE="/opt/homebrew/bin/jira"
+COUNT_ONLY=false
+INTERACTIVE=false
+
+# Load Jira configuration
+CONFIG_FILE="$HOME/.dotfiles/environment/jira.env"
+
+if [ -f "$CONFIG_FILE" ]; then
+  source "$CONFIG_FILE"
+fi
+
+usage() {
+  echo "Usage: $0 [OPTIONS]"
+  echo "Options:"
+  echo "  -s, --status STATUS    Add status to filter (can be used multiple times)"
+  echo "  -q, --jql JQL          JQL filter (default: '$DEFAULT_JQL')"
+  echo "  -a, --assignee EMAIL   Assignee email"
+  echo "  --columns COLUMNS      Columns to display (default: '$DEFAULT_COLUMNS')"
+  echo "  -c, --count            Only output count of issues"
+  echo "  -i, --interactive      Interactive mode (wait for keypress)"
+  echo "  -h, --help             Show this help"
+  echo ""
+  echo "Examples:"
+  echo "  $0 --count                          # Get count only"
+  echo "  $0 --interactive                    # Show issues in an interactive TUI"
+  echo "  $0 -s 'In Progress' -s 'Done'       # Filter by specific statuses"
+  echo "  $0 --columns 'key,summary,status'   # Custom columns"
+}
+
+# Parse arguments
+STATUSES=()
+JQL="$DEFAULT_JQL"
+ASSIGNEE="$JIRA_EMAIL"
+COLUMNS="$DEFAULT_COLUMNS"
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -s|--status)
+      STATUSES+=("$2")
+      shift 2
+      ;;
+    -q|--jql)
+      JQL="$2"
+      shift 2
+      ;;
+    -a|--assignee)
+      ASSIGNEE="$2"
+      shift 2
+      ;;
+    --columns)
+      COLUMNS="$2"
+      shift 2
+      ;;
+    -c|--count)
+      COUNT_ONLY=true
+      shift
+      ;;
+    -i|--interactive)
+      INTERACTIVE=true
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+# Check required environment variables
+MISSING_VARS=()
+[ -z "$JIRA_BASE_URL" ] && MISSING_VARS+=("JIRA_BASE_URL")
+[ -z "$JIRA_EMAIL" ] && MISSING_VARS+=("JIRA_EMAIL")
+[ -z "$JIRA_API_TOKEN" ] && MISSING_VARS+=("JIRA_API_TOKEN")
+
+if [ ${#MISSING_VARS[@]} -gt 0 ]; then
+  echo "Error: Missing required environment variables: ${MISSING_VARS[*]}"
+  echo "Please check $CONFIG_FILE"
+  [ "$INTERACTIVE" = true ] && sleep 5
+  sleep 1
+  exit 1
+fi
+
+# Use default statuses if none provided
+if [ ${#STATUSES[@]} -eq 0 ]; then
+  STATUSES=("${DEFAULT_STATUSES[@]}")
+fi
+
+# Build status arguments
+STATUS_ARGS=()
+for status in "${STATUSES[@]}"; do
+  STATUS_ARGS+=("-s" "$status")
+done
+
+# Build the jira command
+JIRA_CMD=(
+  "$JIRA_EXECUTABLE" "issue" "list"
+  "-a" "$ASSIGNEE"
+  "${STATUS_ARGS[@]}"
+  "-q" "$JQL"
+  "--order-by" "updated"
+  "--columns" "$COLUMNS"
+  $( [ "$INTERACTIVE" = true ] || echo "--plain --no-headers" )
+)
+
+# Execute command
+if [ "$COUNT_ONLY" = true ]; then
+  "${JIRA_CMD[@]}" 2>/dev/null | wc -l | tr -d ' '
+else
+  "${JIRA_CMD[@]}"
+fi

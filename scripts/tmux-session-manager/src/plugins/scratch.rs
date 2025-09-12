@@ -124,7 +124,7 @@ impl SessionPlugin for ScratchPlugin {
 
     fn get_help_text(&self) -> Vec<String> {
         vec![
-            "\x1b[1;32m󱗽\x1b[0m - Scratch session (green when active)".to_string(),
+            "\x1b[1;32m󱗽\x1b[0m - Scratch session".to_string(),
         ]
     }
 }

@@ -142,7 +142,7 @@ impl<'a> FzfInterface<'a> {
                 &format!("--prompt={}: ", title),
                 "--ansi",
                 "--expect=ctrl-x,ctrl-r,ctrl-s,ctrl-n,ctrl-p",
-                "--preview=echo -e 'Session Switcher Help\\n\\nKeybindings:\\n  Enter    - Switch to session\\n  Ctrl-x   - Kill session\\n  Ctrl-r   - Rename session\\n  Ctrl-s   - Start in background\\n  Ctrl-n   - Create new session\\n  ?        - Toggle help\\n\\nSession Icons:\\n  ● - Active session\\n  → - Current session\\n  ● - Tmuxinator config (grey)\\n  ● - Git worktree (blue)\\n  󱗽 - Scratch session\\n\\nNavigation:\\n  ↑/↓ or j/k  - Move selection\\n  Esc         - Exit without selection'",
+                "--preview=echo -e 'Session Switcher Help\\n\\nKeybindings:\\n  Enter    - Switch to session\\n  Ctrl-x   - Kill session\\n  Ctrl-r   - Rename session\\n  Ctrl-n   - Create new session\\n  ?        - Toggle help\\n\\nSession Icons:\\n  ● - Active session\\n  → - Current session\\n  ● - Tmuxinator config (grey)\\n  ● - Git worktree (blue)\\n  󱗽 - Scratch session\\n\\nNavigation:\\n  Ctrl-j/k    - Move selection\\n  Esc         - Exit without selection'",
                 "--preview-window=hidden",
                 "--bind=?:toggle-preview"
             ])
@@ -298,5 +298,130 @@ esac
 
     pub async fn start_session(&self, session_name: &str, context: &SessionContext) -> Result<()> {
         self.plugin_manager.start_session(session_name, context).await
+    }
+
+    pub async fn create_new_session(&self, _context: &SessionContext) -> Result<()> {
+        // Prompt for new session name using fzf
+        let prompt_result = self.prompt_for_session_name().await?;
+        if let Some(session_name) = prompt_result {
+            // Create the new session
+            let tmux = TmuxClient::new();
+            tmux.new_session(&session_name, None).await?;
+        }
+        Ok(())
+    }
+
+    async fn prompt_for_session_name(&self) -> Result<Option<String>> {
+        if TmuxClient::is_inside_tmux() {
+            // Use tmux command-prompt for input
+            self.tmux_prompt("New session name:", "new-session -d -s '%%'").await
+        } else {
+            // Use read command for non-tmux environments
+            self.shell_prompt("Enter new session name").await
+        }
+    }
+
+    pub async fn rename_session(&self, old_session_name: &str, _context: &SessionContext) -> Result<()> {
+        // Prompt for new session name using fzf
+        let prompt_result = self.prompt_for_rename(old_session_name).await?;
+        if let Some(new_session_name) = prompt_result {
+            // Rename the session
+            let tmux = TmuxClient::new();
+            tmux.rename_session(old_session_name, &new_session_name).await?;
+        }
+        Ok(())
+    }
+
+    async fn prompt_for_rename(&self, current_name: &str) -> Result<Option<String>> {
+        if TmuxClient::is_inside_tmux() {
+            // Use tmux command-prompt for input with current name as default
+            self.tmux_prompt_with_default(&format!("Rename '{}' to:", current_name), &format!("rename-session -t '{}' '{{}}'", current_name), current_name).await
+        } else {
+            // Use read command for non-tmux environments
+            self.shell_prompt(&format!("Rename '{}' to", current_name)).await
+        }
+    }
+
+    async fn tmux_prompt(&self, prompt: &str, _command_template: &str) -> Result<Option<String>> {
+        // Use tmux display-popup with a simple input method
+        self.tmux_popup_prompt(prompt, None).await
+    }
+
+    async fn tmux_prompt_with_default(&self, prompt: &str, _command_template: &str, default: &str) -> Result<Option<String>> {
+        // Use tmux display-popup with default value
+        self.tmux_popup_prompt(prompt, Some(default)).await
+    }
+
+    async fn tmux_popup_prompt(&self, prompt: &str, _default: Option<&str>) -> Result<Option<String>> {
+        use std::process::Stdio;
+        use tokio::process::Command;
+        use tempfile::NamedTempFile;
+
+        // Create a temporary file to store the result
+        let result_file = NamedTempFile::new()?;
+        let result_path = result_file.path().to_string_lossy();
+
+        // Use tmux command-prompt instead of popup for better input handling
+        let tmux_command = format!(
+            "run-shell 'echo \"%%\" > \"{}\"'",
+            result_path
+        );
+
+        let mut tmux_cmd = Command::new("tmux");
+        tmux_cmd
+            .arg("command-prompt")
+            .arg("-p")
+            .arg(&format!("{}: ", prompt))
+            .arg(&tmux_command)
+            .stdout(Stdio::null())
+            .stderr(Stdio::null());
+
+        let output = tmux_cmd.output().await?;
+
+        // Small delay to allow file write to complete
+        tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+
+        // Read the result from the temporary file
+        if output.status.success() {
+            if let Ok(result) = std::fs::read_to_string(result_path.as_ref()) {
+                let input = result.trim();
+                if !input.is_empty() {
+                    return Ok(Some(input.to_string()));
+                }
+            }
+        }
+
+        Ok(None)
+    }
+
+    async fn shell_prompt(&self, prompt: &str) -> Result<Option<String>> {
+        use std::io::Write;
+        use std::process::{Command, Stdio};
+        use std::fs::OpenOptions;
+
+        // Try to open the controlling terminal directly
+        if let Ok(mut tty) = OpenOptions::new().read(true).write(true).open("/dev/tty") {
+            // Write prompt to tty
+            writeln!(tty, "{}: ", prompt).ok();
+            tty.flush().ok();
+
+            // Use /dev/tty for both input and output to bypass stdio redirection
+            let mut cmd = Command::new("bash");
+            cmd.arg("-c")
+               .arg("read input < /dev/tty && echo $input")
+               .stdout(Stdio::piped());
+
+            if let Ok(output) = cmd.output() {
+                if output.status.success() {
+                    let result = String::from_utf8_lossy(&output.stdout);
+                    let input = result.trim();
+                    if !input.is_empty() {
+                        return Ok(Some(input.to_string()));
+                    }
+                }
+            }
+        }
+
+        Ok(None)
     }
 }

@@ -120,8 +120,12 @@ async fn run_interactive_mode(
                     continue; // Restart the selector
                 }
                 Some("ctrl-r") => {
-                    eprintln!("Rename functionality not yet implemented");
-                    break;
+                    // Rename session
+                    if let Err(e) = ui.rename_session(&session_name, &context).await {
+                        eprintln!("Failed to rename session: {}", e);
+                        break;
+                    }
+                    continue; // Restart the selector to show the renamed session
                 }
                 Some("ctrl-s") => {
                     if let Err(e) = ui.start_session(&session_name, &context).await {
@@ -131,8 +135,12 @@ async fn run_interactive_mode(
                     continue; // Restart the selector to show the new session
                 }
                 Some("ctrl-n") => {
-                    eprintln!("New session creation not yet implemented");
-                    break;
+                    // Create new session
+                    if let Err(e) = ui.create_new_session(&context).await {
+                        eprintln!("Failed to create new session: {}", e);
+                        break;
+                    }
+                    continue; // Restart the selector to show the new session
                 }
                 Some("ctrl-p") => {
                     // Toggle preview and restart
@@ -278,7 +286,6 @@ Keybindings:
   Enter    - Switch to session
   Ctrl-x   - Kill session
   Ctrl-r   - Rename session
-  Ctrl-s   - Start in background
   Ctrl-n   - Create new session
   Ctrl-p   - Toggle preview
   Ctrl-d   - Page down in preview
@@ -294,7 +301,7 @@ Session Icons:"#);
 
     println!(r#"
 Navigation:
-  ↑/↓ or j/k  - Move selection
+  Ctrl+j/k    - Move selection
   Esc         - Exit without selection
 
 Additional Commands:

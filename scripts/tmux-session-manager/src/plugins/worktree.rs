@@ -358,8 +358,8 @@ impl SessionPlugin for WorktreePlugin {
 
     fn get_help_text(&self) -> Vec<String> {
         vec![
-            "\x1b[0;34m●\x1b[0m - Active worktree session (blue)".to_string(),
-            "\x1b[0;34m○\x1b[0m - Inactive worktree (blue outline)".to_string(),
+            "\x1b[0;34m●\x1b[0m - Active worktree session".to_string(),
+            "\x1b[0;34m○\x1b[0m - Inactive worktree".to_string(),
         ]
     }
 }

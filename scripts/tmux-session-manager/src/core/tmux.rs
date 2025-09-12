@@ -109,6 +109,11 @@ impl TmuxClient {
         Ok(())
     }
 
+    pub async fn rename_session(&self, old_name: &str, new_name: &str) -> Result<()> {
+        self.execute_tmux_command(&["rename-session", "-t", old_name, new_name])
+            .await?;
+        Ok(())
+    }
 
     pub async fn capture_pane(&self, session_name: &str) -> Result<String> {
         // Get the active window and pane

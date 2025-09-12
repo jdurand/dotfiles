@@ -272,7 +272,7 @@ impl SessionPlugin for TmuxinatorPlugin {
 
     fn get_help_text(&self) -> Vec<String> {
         vec![
-            "\x1b[0;90m●\x1b[0m - Tmuxinator config (grey)".to_string(),
+            "\x1b[0;90m●\x1b[0m - Tmuxinator config".to_string(),
         ]
     }
 }

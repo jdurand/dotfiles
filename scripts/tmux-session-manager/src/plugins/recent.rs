@@ -127,7 +127,7 @@ impl SessionPlugin for RecentPlugin {
 
     fn get_help_text(&self) -> Vec<String> {
         vec![
-            "\x1b[1;33m★\x1b[0m - Most recent session (yellow)".to_string(),
+            "\x1b[1;33m★\x1b[0m - Most recent session".to_string(),
         ]
     }
 }

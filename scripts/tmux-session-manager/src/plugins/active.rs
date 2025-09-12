@@ -176,7 +176,7 @@ impl SessionPlugin for ActivePlugin {
 
     fn get_help_text(&self) -> Vec<String> {
         vec![
-            "\x1b[1;32m●\x1b[0m - Active session (green)".to_string(),
+            "\x1b[1;32m●\x1b[0m - Active session".to_string(),
             "\x1b[1;32m→\x1b[0m - Current session".to_string(),
         ]
     }

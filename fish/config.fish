@@ -18,6 +18,25 @@ set -x HISTSIZE 1000000
 set -x SAVEHIST 1000000
 set -x TZ "America/Montreal"
 set -x LANG "en_US.UTF-8"
+
+# Load all environment configuration files
+if test -d ~/.dotfiles/environment
+  for env_file in ~/.dotfiles/environment/*.env
+    if test -f $env_file
+      for line in (cat $env_file | grep -v '^#' | grep -v '^$')
+        # Remove 'export ' prefix if present
+        set clean_line (echo $line | sed 's/^export //')
+        set var_name (echo $clean_line | cut -d= -f1)
+        set var_value (echo $clean_line | cut -d= -f2- | sed 's/^"//;s/"$//')
+        # Only set if var_name is valid (contains only letters, numbers, underscores)
+        if echo $var_name | grep -q '^[A-Za-z_][A-Za-z0-9_]*$'
+          set -x $var_name $var_value
+        end
+      end
+    end
+  end
+end
+
 set -x LC_ALL $LANG
 set -x MANPAGER "sh -c 'col -bx | bat -l man -p'"
 set -x EDITOR 'nvim'

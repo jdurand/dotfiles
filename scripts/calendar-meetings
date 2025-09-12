@@ -1,0 +1,159 @@
+#!/bin/bash
+
+# Calendar Meetings Script
+# Fetches and displays calendar meetings using gcalcli
+
+set -euo pipefail
+
+# Configuration
+GCALCLI_EXECUTABLE="/opt/homebrew/bin/gcalcli"
+COUNT_ONLY=false
+INTERACTIVE=false
+TODAY_ONLY=false
+UPCOMING_ONLY=false
+NEXT_HOURS=12
+
+usage() {
+  echo "Usage: $0 [OPTIONS]"
+  echo "Options:"
+  echo "  -c, --count            Only output count of upcoming meetings"
+  echo "  -t, --today            Show only today's meetings"
+  echo "  -u, --upcoming         Show only upcoming meetings (next 12 hours)"
+  echo "  -i, --interactive      Interactive mode for TUI"
+  echo "  --hours HOURS          Hours to look ahead (default: 12)"
+  echo "  -h, --help             Show this help"
+  echo ""
+  echo "Examples:"
+  echo "  $0 --count --upcoming                # Get count of upcoming meetings"
+  echo "  $0 --upcoming --interactive          # Show upcoming meetings in TUI"
+  echo "  $0 --upcoming --hours 24             # Show meetings in next 24 hours"
+}
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -c|--count)
+      COUNT_ONLY=true
+      shift
+      ;;
+    -t|--today)
+      TODAY_ONLY=true
+      shift
+      ;;
+    -u|--upcoming)
+      UPCOMING_ONLY=true
+      shift
+      ;;
+    -i|--interactive)
+      INTERACTIVE=true
+      shift
+      ;;
+    --hours)
+      NEXT_HOURS="$2"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+# Get current date and time
+CURRENT_DATE=$(date +%Y-%m-%d)
+CURRENT_TIME=$(date +%H:%M)
+CURRENT_DATETIME="$CURRENT_DATE $CURRENT_TIME"
+
+if [ "$UPCOMING_ONLY" = true ]; then
+  # Get meetings in the next N hours (default 12)
+  # For macOS, use date -v
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    END_DATETIME=$(date -v+${NEXT_HOURS}H "+%Y-%m-%d %H:%M")
+  else
+    # For Linux, use date -d
+    END_DATETIME=$(date -d "$CURRENT_DATETIME + $NEXT_HOURS hours" "+%Y-%m-%d %H:%M")
+  fi
+
+  GCALCLI_CMD=(
+    "$GCALCLI_EXECUTABLE" "agenda"
+    "--details" "url"
+    "--tsv"
+    "$CURRENT_DATETIME"
+    "$END_DATETIME"
+  )
+elif [ "$TODAY_ONLY" = true ]; then
+  # Get today's meetings (but filter past ones in post-processing)
+  TOMORROW_DATE=$(date -d "$CURRENT_DATE + 1 day" +%Y-%m-%d 2>/dev/null || date -v+1d +%Y-%m-%d)
+
+  GCALCLI_CMD=(
+    "$GCALCLI_EXECUTABLE" "agenda"
+    "--details" "url"
+    "--tsv"
+    "$CURRENT_DATE"
+    "$TOMORROW_DATE"
+  )
+else
+  # Default agenda (next few days)
+  GCALCLI_CMD=(
+    "$GCALCLI_EXECUTABLE" "agenda"
+  )
+
+  # Add appropriate formatting for interactive mode
+  if [ "$INTERACTIVE" = false ]; then
+    GCALCLI_CMD+=("--details" "url" "--tsv")
+  else
+    GCALCLI_CMD+=("--details" "url")
+  fi
+fi
+
+# Execute command and process output
+if [ "$COUNT_ONLY" = true ]; then
+  # Count actual meetings (filter out all-day events and past events beyond grace period)
+  "${GCALCLI_CMD[@]}" 2>/dev/null | awk -F'\t' -v current_time="$CURRENT_TIME" -v current_date="$CURRENT_DATE" '
+    function time_to_minutes(time) {
+      split(time, parts, ":")
+      return parts[1] * 60 + parts[2]
+    }
+    NR > 1 && NF >= 7 && $2 != "" && $6 != "" {
+      # Only count meetings with Google Meet links (hangout_link is not empty)
+      # For today, count upcoming meetings and recent meetings (within 10 minutes grace period)
+      if ($1 == current_date) {
+        time_diff = time_to_minutes($2) - time_to_minutes(current_time)
+        if (time_diff >= -10) {  # Include meetings up to 10 minutes in the past
+          count++
+        }
+      } else {
+        # Future dates, count all meetings with Google Meet links
+        count++
+      }
+    }
+    END { print count + 0 }'
+else
+  # Filter past events for today (but keep meetings within grace period)
+  "${GCALCLI_CMD[@]}" 2>/dev/null | awk -F'\t' -v current_time="$CURRENT_TIME" -v current_date="$CURRENT_DATE" '
+    function time_to_minutes(time) {
+      split(time, parts, ":")
+      return parts[1] * 60 + parts[2]
+    }
+    NR == 1 { print; next }
+    NF >= 7 {
+      # For today, show upcoming meetings and recent meetings (within 10 minutes grace period)
+      if ($1 == current_date && $2 != "") {
+        time_diff = time_to_minutes($2) - time_to_minutes(current_time)
+        if (time_diff >= -10) {  # Include meetings up to 10 minutes in the past
+          print
+        }
+      } else if ($1 != current_date) {
+        # Future dates, show all meetings
+        print
+      } else if ($2 == "") {
+        # All-day events, show them
+        print
+      }
+    }'
+fi

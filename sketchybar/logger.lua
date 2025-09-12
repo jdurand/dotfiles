@@ -9,7 +9,7 @@ return {
   },
 
   -- Current log level - change this to control verbosity
-  current_level = 3, -- DEBUG level (shows all logs)
+  current_level = 2, -- DEBUG level (shows all logs)
 
   -- Log file location
   file = "/tmp/sketchybar.log", -- tail -f /tmp/sketchybar.log

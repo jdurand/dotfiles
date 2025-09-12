@@ -21,6 +21,13 @@ load_theme
 # Load Extensions
 source ~/.zsh/extensions.zsh
 
+# Load all environment configuration files
+if [[ -d "${HOME}/.dotfiles/environment" ]]; then
+  for env_file in "${HOME}/.dotfiles/environment"/*.env; do
+    [[ -f "$env_file" ]] && source "$env_file"
+  done
+fi
+
 # Load local config
 test -e "${HOME}/.zshrc.local" && source "${HOME}/.zshrc.local"
 

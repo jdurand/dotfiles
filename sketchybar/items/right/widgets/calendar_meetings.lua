@@ -483,6 +483,11 @@ calendar_meetings:subscribe("mouse.clicked", function(env)
   end
 end)
 
+-- Hide popup when clicking elsewhere
+calendar_meetings:subscribe("mouse.exited.global", function()
+  calendar_meetings:set({ popup = { drawing = false } })
+end)
+
 -- Set up periodic updates with separate intervals
 -- Time-based warning updates (every 30 seconds)
 SketchyBar.add("event", "calendar_time_update")

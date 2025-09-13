@@ -168,6 +168,11 @@ pr_reviews:subscribe("mouse.clicked", function(env)
   pr_reviews:set({ popup = { drawing = "toggle" } })
 end)
 
+-- Hide popup when clicking elsewhere
+pr_reviews:subscribe("mouse.exited.global", function()
+  pr_reviews:set({ popup = { drawing = false } })
+end)
+
 -- Set up periodic updates
 SketchyBar.add("event", "pr_reviews_update")
 SketchyBar.exec(string.format("while true; do sleep %d; /opt/homebrew/bin/sketchybar --trigger pr_reviews_update; done &", CONFIG.REFRESH_INTERVAL))

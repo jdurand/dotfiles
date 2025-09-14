@@ -1,5 +1,6 @@
 local colors = require("colors")
 local settings = require("settings")
+local Timer = require("helpers.timer")
 
 -- Configuration constants
 local CONFIG = {
@@ -488,16 +489,20 @@ calendar_meetings:subscribe("mouse.exited.global", function()
   calendar_meetings:set({ popup = { drawing = false } })
 end)
 
--- Set up periodic updates with separate intervals
--- Time-based warning updates (every 30 seconds)
-SketchyBar.add("event", "calendar_time_update")
-SketchyBar.exec(string.format("while true; do sleep %d; /opt/homebrew/bin/sketchybar --trigger calendar_time_update; done &", CONFIG.TIME_REFRESH_INTERVAL))
+-- Set up managed timers with automatic sleep/wake handling
+Timer.create_group({
+  item = calendar_meetings,
+  timers = {
+    { name = "calendar_time_update", interval = CONFIG.TIME_REFRESH_INTERVAL },
+    { name = "calendar_fetch_update", interval = CONFIG.CALENDAR_FETCH_INTERVAL }
+  },
+  on_wake = function()
+    -- Trigger immediate update after wake
+    fetch_and_update_calendar()
+  end
+})
 
--- Calendar fetch updates (every 5 minutes)
-SketchyBar.add("event", "calendar_fetch_update")
-SketchyBar.exec(string.format("while true; do sleep %d; /opt/homebrew/bin/sketchybar --trigger calendar_fetch_update; done &", CONFIG.CALENDAR_FETCH_INTERVAL))
-
--- Subscribe to events
+-- Subscribe to timer events
 calendar_meetings:subscribe("calendar_time_update", update_warning_status)
 calendar_meetings:subscribe("calendar_fetch_update", fetch_and_update_calendar)
 

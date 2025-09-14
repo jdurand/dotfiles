@@ -1,6 +1,7 @@
 local icons = require("icons")
 local colors = require("colors")
 local settings = require("settings")
+local Timer = require("helpers.timer")
 
 -- Configuration constants
 local CONFIG = {
@@ -173,10 +174,18 @@ pr_reviews:subscribe("mouse.exited.global", function()
   pr_reviews:set({ popup = { drawing = false } })
 end)
 
--- Set up periodic updates
-SketchyBar.add("event", "pr_reviews_update")
-SketchyBar.exec(string.format("while true; do sleep %d; /opt/homebrew/bin/sketchybar --trigger pr_reviews_update; done &", CONFIG.REFRESH_INTERVAL))
+-- Set up managed timer with automatic sleep/wake handling
+Timer.create({
+  item = pr_reviews,
+  name = "pr_reviews_update",
+  interval = CONFIG.REFRESH_INTERVAL,
+  on_wake = function()
+    -- Trigger immediate update after wake
+    update_pr_reviews()
+  end
+})
 
+-- Subscribe to timer event
 pr_reviews:subscribe("pr_reviews_update", update_pr_reviews)
 
 -- Initial update

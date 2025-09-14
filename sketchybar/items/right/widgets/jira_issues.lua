@@ -1,5 +1,6 @@
 local colors = require("colors")
 local settings = require("settings")
+local Timer = require("helpers.timer")
 local Terminal = require("helpers.terminal")
 
 -- Configuration constants
@@ -76,10 +77,18 @@ jira_issues:set({
   click_script = click_script
 })
 
--- Set up periodic updates
-SketchyBar.add("event", "jira_issues_update")
-SketchyBar.exec(string.format("while true; do sleep %d; /opt/homebrew/bin/sketchybar --trigger jira_issues_update; done &", CONFIG.REFRESH_INTERVAL))
+-- Set up managed timer with automatic sleep/wake handling
+Timer.create({
+  item = jira_issues,
+  name = "jira_issues_update",
+  interval = CONFIG.REFRESH_INTERVAL,
+  on_wake = function()
+    -- Trigger immediate update after wake
+    update_jira_issues()
+  end
+})
 
+-- Subscribe to timer event
 jira_issues:subscribe("jira_issues_update", update_jira_issues)
 
 -- Initial update

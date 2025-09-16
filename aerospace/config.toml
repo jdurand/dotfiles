@@ -11,7 +11,7 @@ after-login-command = []
 # Available commands : https://nikitabobko.github.io/AeroSpace/commands
 after-startup-command = [
   'exec-and-forget brew services start sketchybar',
-  'exec-and-forget borders active_color=0xff00ffff inactive_color=0xff494d30 width=5.0'
+  'exec-and-forget borders active_color=0xffffffff inactive_color=0xff494d30 width=5.0'
 ]
 
 # Normalizations. See: https://nikitabobko.github.io/AeroSpace/guide#normalization
@@ -47,7 +47,7 @@ key-mapping.preset = 'qwerty'
 # Notify Sketchybar about workspace change
 exec-on-workspace-change = ['/bin/bash', '-c',
   'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE',
-  'exec-and-forget borders active_color=0xff00ffff inactive_color=0xff494d30 width=5.0'
+  'exec-and-forget borders active_color=0xffffffff inactive_color=0xff494d30 width=5.0'
 ]
 
 # Gaps between windows (inner-*) and between monitor edges (outer-*).
@@ -138,9 +138,14 @@ alt-shift-minus = 'resize smart -50'
 alt-shift-equal = 'resize smart +50'
 
 # Keybindings for workspace navigation
+cmd-1 = 'workspace 1'
+cmd-2 = 'workspace 2'
+cmd-3 = 'workspace 3'
+
 alt-1 = 'workspace 1'
 alt-2 = 'workspace 2'
 alt-3 = 'workspace 3'
+
 alt-a = 'workspace A' # In your config, you can drop workspace bindings that you don't need
 alt-c = 'workspace C'
 alt-d = 'workspace D'
@@ -154,9 +159,14 @@ alt-w = 'workspace W'
 alt-x = 'workspace X'
 alt-z = 'workspace Z'
 
+cmd-shift-1 = 'move-node-to-workspace --focus-follows-window 1'
+cmd-shift-2 = 'move-node-to-workspace --focus-follows-window 2'
+cmd-shift-3 = 'move-node-to-workspace --focus-follows-window 3'
+
 alt-shift-1 = 'move-node-to-workspace --focus-follows-window 1'
 alt-shift-2 = 'move-node-to-workspace --focus-follows-window 2'
 alt-shift-3 = 'move-node-to-workspace --focus-follows-window 3'
+
 alt-shift-a = 'move-node-to-workspace --focus-follows-window A'
 alt-shift-c = 'move-node-to-workspace --focus-follows-window C'
 alt-shift-d = 'move-node-to-workspace --focus-follows-window D'
@@ -176,6 +186,7 @@ alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
 alt-shift-f = 'fullscreen'
 alt-shift-semicolon = 'mode service'
 
+cmd-backtick = 'exec-and-forget open -a ghostty'
 alt-backtick = 'exec-and-forget open -a ghostty'
 # alt-backtick = 'exec-and-forget open -a WezTerm'
 
@@ -285,6 +296,9 @@ if.app-id = 'com.openai.chat'
 run = ['layout tiling', 'move-node-to-workspace A']
 [[on-window-detected]]
 if.app-name-regex-substring = 'Gemini'
+run = ['layout tiling', 'move-node-to-workspace A']
+[[on-window-detected]]
+if.app-id = 'com.anthropic.claudefordesktop'
 run = ['layout tiling', 'move-node-to-workspace A']
 
 # if a window without title is detected

@@ -11,7 +11,9 @@ CITY=${2:-"Montreal"}
 COUNTRY=${3:-"Canada"}
 DARK_DIR="$HOME/Pictures/wallpapers/Dynamic-Wallpapers/Dark"
 LIGHT_DIR="$HOME/Pictures/wallpapers/Dynamic-Wallpapers/Light"
-OUTPUT="DP-1"
+
+# Get the active monitor
+OUTPUT=$(~/.dotfiles/hypr/scripts/get-monitor)
 
 # FUNCTION: get coordinates using Nominatim
 fetch_coords() {

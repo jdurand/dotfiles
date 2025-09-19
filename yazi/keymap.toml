@@ -11,4 +11,4 @@ desc = "Cd to ~/Pictures"
 [[mgr.append_keymap]]
 on = "W"
 desc = "Set as wallpaper"
-run = "shell 'hyprctl hyprpaper reload DP-1,$0'"
+run = "shell '~/.dotfiles/hypr/scripts/set-wallpaper \"$0\"'"

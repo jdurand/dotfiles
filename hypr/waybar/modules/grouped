@@ -96,11 +96,11 @@
 		"orientation": "inherit",
 		"drawer": {
 			"transition-duration": 500,
-			"children-class": "custom/swaync",
+			"children-class": "custom/notifications",
 			"transition-left-to-right": false
 		},
 		"modules": [
-			"custom/swaync",
+			"custom/notifications",
 			"custom/dot_update"
 		]
 	},

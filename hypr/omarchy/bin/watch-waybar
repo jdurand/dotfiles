@@ -1,0 +1,24 @@
+#!/bin/bash
+CONFIG_DIR="$HOME/.config/waybar"
+
+start_waybar() {
+  setsid waybar >/dev/null 2>&1 &
+  WAYBAR_PID=$!
+}
+
+start_waybar
+
+echo "Watching all files under $CONFIG_DIR for changes..."
+
+inotifywait --monitor --quiet --recursive --event close_write "$CONFIG_DIR" | while read -r path event file; do
+  # Skip temp files like Vim’s 4913 or swap files
+  [[ "$file" =~ ^4913$ || "$file" =~ ^.*\.swp$ || "$file" =~ ^.*\.tmp$ ]] && continue
+
+  echo "Reloading Waybar due to $event in $path$file"
+
+  if kill "$WAYBAR_PID" 2>/dev/null; then
+    sleep 0.3
+  fi
+
+  start_waybar
+done

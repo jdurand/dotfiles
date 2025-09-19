@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Omarchy Theme Switcher
+# Usage: omarchy-theme-set <theme-name>
+
+THEMES_DIR="$HOME/.dotfiles/hypr/omarchy/themes"
+CURRENT_LINK="$THEMES_DIR/current"
+
+if [ $# -eq 0 ]; then
+    echo "Available themes:"
+    for theme in "$THEMES_DIR"/*/; do
+        [ -d "$theme" ] || continue
+        basename "$theme"
+    done | grep -v current
+    echo ""
+    echo "Current theme: $(basename "$(readlink -f "$CURRENT_LINK")")"
+    echo ""
+    echo "Usage: $(basename "$0") <theme-name>"
+    exit 0
+fi
+
+THEME_NAME="$1"
+THEME_PATH="$THEMES_DIR/$THEME_NAME"
+
+if [ ! -d "$THEME_PATH" ]; then
+    echo "Error: Theme '$THEME_NAME' not found"
+    echo "Available themes:"
+    ls -d "$THEMES_DIR"/*/ | xargs -n1 basename | grep -v current
+    exit 1
+fi
+
+# Update the symlink
+ln -sfn "$THEME_PATH" "$CURRENT_LINK"
+
+echo "Theme switched to: $THEME_NAME"
+echo "Reload Hyprland (Super + Shift + R) to apply changes"

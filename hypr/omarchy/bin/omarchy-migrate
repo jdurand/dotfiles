@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# Omarchy Migration System
+# Runs pending migration scripts
+
+OMARCHY_DIR="$HOME/.dotfiles/hypr/omarchy"
+MIGRATIONS_DIR="$OMARCHY_DIR/migrations"
+STATE_DIR="$HOME/.local/state/omarchy/migrations"
+
+# Create state directory if it doesn't exist
+mkdir -p "$STATE_DIR"
+
+echo "→ Checking for pending migrations..."
+
+if [ ! -d "$MIGRATIONS_DIR" ]; then
+    echo "  No migrations directory found"
+    exit 0
+fi
+
+# Get list of migration files
+migrations=($(ls "$MIGRATIONS_DIR"/*.sh 2>/dev/null | sort -n))
+
+if [ ${#migrations[@]} -eq 0 ]; then
+    echo "  No migrations found"
+    exit 0
+fi
+
+pending_count=0
+
+for migration in "${migrations[@]}"; do
+    migration_name=$(basename "$migration")
+    state_file="$STATE_DIR/$migration_name.done"
+    
+    # Check if migration has already been run
+    if [ ! -f "$state_file" ]; then
+        echo "  Running migration: $migration_name"
+        
+        if bash "$migration"; then
+            # Mark migration as complete
+            touch "$state_file"
+            echo "    ✓ Migration completed"
+            ((pending_count++))
+        else
+            echo "    ✗ Migration failed"
+            exit 1
+        fi
+    fi
+done
+
+if [ $pending_count -eq 0 ]; then
+    echo "  All migrations up to date"
+else
+    echo "  Applied $pending_count migration(s)"
+fi

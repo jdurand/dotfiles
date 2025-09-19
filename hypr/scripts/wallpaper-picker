@@ -5,8 +5,8 @@ export PATH="/home/linuxbrew/.linuxbrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
 # Wallpapers directory
 WALLPAPERS_DIR="$HOME/Pictures/wallpapers"
 
-# Default output display name
-OUTPUT="DP-1"
+# Get the active monitor
+OUTPUT=$(~/.dotfiles/hypr/scripts/get-monitor)
 
 # Check for 'bc' package
 if ! command -v bc &>/dev/null; then
@@ -74,15 +74,45 @@ menu() {
   done
 }
 
+# Ensure hyprpaper is running
+ensure_hyprpaper() {
+  if ! systemctl --user is-active --quiet hyprpaper.service; then
+    echo "[INFO] Starting hyprpaper service..."
+    systemctl --user start hyprpaper.service
+    sleep 1
+  fi
+}
+
 # Set the selected wallpaper
 set_wallpaper() {
   local image="$1"
 
-  hyprctl hyprpaper unload all >/dev/null
-  hyprctl hyprpaper preload "$image"
-  hyprctl hyprpaper wallpaper "$OUTPUT,$image"
+  # Ensure hyprpaper is running before attempting to set wallpaper
+  ensure_hyprpaper
 
-  echo "[LOG] Wallpaper set to: $image"
+  # Try to set wallpaper with retry logic
+  local retry_count=0
+  local max_retries=3
+
+  while [ $retry_count -lt $max_retries ]; do
+    if hyprctl hyprpaper unload all >/dev/null 2>&1 && \
+       hyprctl hyprpaper preload "$image" 2>&1 && \
+       hyprctl hyprpaper wallpaper "$OUTPUT,$image" 2>&1; then
+      echo "[LOG] Wallpaper set to: $image"
+      return 0
+    else
+      retry_count=$((retry_count + 1))
+      if [ $retry_count -lt $max_retries ]; then
+        echo "[WARN] Failed to set wallpaper, restarting hyprpaper (attempt $retry_count/$max_retries)..."
+        systemctl --user restart hyprpaper.service
+        sleep 2
+      fi
+    fi
+  done
+
+  echo "[ERROR] Failed to set wallpaper after $max_retries attempts"
+  notify-send "Wallpaper Error" "Failed to set wallpaper. Please check hyprpaper service."
+  return 1
 }
 
 # Main function to handle wallpaper selection

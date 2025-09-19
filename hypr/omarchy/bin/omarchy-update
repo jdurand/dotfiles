@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Omarchy Update System
+# Updates Omarchy configuration while preserving user customizations
+
+set -e
+
+OMARCHY_DIR="$HOME/.dotfiles/hypr/omarchy"
+BACKUP_DIR="$HOME/.dotfiles/hypr/omarchy-backups"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
+echo "╔═══════════════════════════════╗"
+echo "║     Omarchy Update System     ║"
+echo "╚═══════════════════════════════╝"
+echo ""
+
+# Create backup directory
+mkdir -p "$BACKUP_DIR"
+
+# Backup current configuration
+echo "→ Creating backup..."
+if [ -d "$OMARCHY_DIR/config" ]; then
+    cp -r "$OMARCHY_DIR/config" "$BACKUP_DIR/config_$TIMESTAMP"
+    echo "  Backup created: $BACKUP_DIR/config_$TIMESTAMP"
+fi
+
+# Run migrations
+echo "→ Running migrations..."
+"$OMARCHY_DIR/bin/omarchy-migrate"
+
+# Update from git if repository exists
+if [ -d "$OMARCHY_DIR/.git" ]; then
+    echo "→ Updating from repository..."
+    cd "$OMARCHY_DIR"
+    git pull --rebase
+fi
+
+echo ""
+echo "✓ Update complete!"
+echo ""
+echo "Your custom configurations are preserved in:"
+echo "  $OMARCHY_DIR/config/"
+echo ""
+echo "Reload Hyprland (Super + Shift + R) to apply any changes"

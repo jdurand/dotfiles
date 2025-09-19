@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Auto-detect primary monitor (focused monitor)
+OUTPUT=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .name')
+
+# Fallback if detection fails
+OUTPUT="${OUTPUT:-HDMI-A-1}"
+
+# Return the monitor name
+echo "$OUTPUT"

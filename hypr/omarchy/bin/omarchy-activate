@@ -1,0 +1,78 @@
+#!/bin/bash
+
+# Omarchy Activation Script
+# Switches your Hyprland configuration to use the Omarchy system
+
+set -e
+
+OMARCHY_DIR="$HOME/.dotfiles/hypr/omarchy"
+HYPR_CONFIG="$HOME/.config/hypr/hyprland.conf"
+BACKUP_DIR="$HOME/.dotfiles/hypr/omarchy-backups"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
+echo "╔════════════════════════════════════╗"
+echo "║   Omarchy Configuration Activator  ║"
+echo "╚════════════════════════════════════╝"
+echo ""
+
+# Check if Omarchy is already active
+if grep -q "omarchy/config/hyprland-omarchy.conf" "$HYPR_CONFIG" 2>/dev/null; then
+    echo "✓ Omarchy is already active!"
+    exit 0
+fi
+
+# Create backup of current configuration
+echo "→ Backing up current configuration..."
+mkdir -p "$BACKUP_DIR"
+cp "$HYPR_CONFIG" "$BACKUP_DIR/hyprland.conf.$TIMESTAMP"
+echo "  Backup saved to: $BACKUP_DIR/hyprland.conf.$TIMESTAMP"
+
+# Create new Hyprland configuration that sources Omarchy
+echo "→ Activating Omarchy configuration..."
+cat > "$HYPR_CONFIG" << 'EOF'
+####################################
+### OMARCHY-MANAGED CONFIGURATION ###
+####################################
+# This configuration is managed by Omarchy
+# Your customizations are in ~/.dotfiles/hypr/omarchy/config/
+
+# Load Omarchy configuration system
+source = ~/.dotfiles/hypr/omarchy/config/hyprland-omarchy.conf
+
+# You can add emergency overrides below if needed
+EOF
+
+# Ensure scripts are in PATH
+echo "→ Setting up Omarchy commands..."
+mkdir -p ~/.local/bin
+for script in "$OMARCHY_DIR"/bin/*; do
+    [ -f "$script" ] && ln -sf "$script" ~/.local/bin/
+done
+
+# Run initial migration
+echo "→ Running initial setup..."
+"$OMARCHY_DIR/bin/omarchy-migrate"
+
+echo ""
+echo "╔════════════════════════════════════╗"
+echo "║         ✓ Omarchy Activated!       ║"
+echo "╚════════════════════════════════════╝"
+echo ""
+echo "Your Hyprland configuration now uses the Omarchy system!"
+echo ""
+echo "Important locations:"
+echo "  • User configs:  $OMARCHY_DIR/config/"
+echo "  • Themes:        $OMARCHY_DIR/themes/"
+echo "  • Scripts:       $OMARCHY_DIR/bin/"
+echo ""
+echo "Available commands:"
+echo "  • omarchy-update      - Update Omarchy configuration"
+echo "  • omarchy-theme-set   - Switch themes"
+echo "  • omarchy-migrate     - Run pending migrations"
+echo ""
+echo "Next steps:"
+echo "  1. Review your settings in $OMARCHY_DIR/config/"
+echo "  2. Reload Hyprland with Super + Shift + R"
+echo "  3. Enjoy your Omarchy-powered setup!"
+echo ""
+echo "To revert, restore from: $BACKUP_DIR/hyprland.conf.$TIMESTAMP"

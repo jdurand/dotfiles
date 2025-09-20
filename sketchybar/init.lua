@@ -30,13 +30,17 @@ require("items.right.widgets.battery")
 require("items.right.widgets.wifi")
 require("items.right.widgets.cpu")
 
--- Low priority items (7-10): External service widgets
+-- Register delayed initialization for service widgets
+-- These make external API calls so we delay them to improve startup
 Startup.delayed_init("docker", function()
   require("items.right.widgets.docker_containers")
 end, 7)
 
-Startup.delayed_init("dev_widgets", function()
+Startup.delayed_init("pr_reviews", function()
   require("items.right.widgets.pr_reviews")
+end, 8)
+
+Startup.delayed_init("jira_issues", function()
   require("items.right.widgets.jira_issues")
 end, 8)
 
@@ -55,8 +59,11 @@ SketchyBar.exec("sleep 2", function()
   require("services")
   Logger:info("Services initialized")
 
-  -- Timers are initialized automatically by each widget
-  Logger:info("Services and widgets initialized")
+  -- Initialize all timers with the single manager process
+  local Timer = require("helpers.timer")
+  Timer.init_all()
+  Timer.setup_global_wake_handler()
+  Logger:info("Services, widgets and timer manager initialized")
 end)
 
 -- Set up global wake handler

@@ -337,7 +337,7 @@ return {
     dependencies = { 'folke/snacks.nvim' },
     config = function()
       -- default claude to resume last session
-      local claude_options = ' --allowedTools "Edit Bash(git:*) Bash(grep:*) Bash(find:*) Bash(ls:*) Bash(cat:*) Bash(head:*) Bash(tail:*) Bash(wc:*) Bash(sort:*) Bash(uniq:*)"'
+      local claude_options = ' --permission-mode "acceptEdits"  --allowed-tools "Edit Bash(git:*) Bash(grep:*) Bash(find:*) Bash(ls:*) Bash(cat:*) Bash(head:*) Bash(tail:*) Bash(wc:*) Bash(sort:*) Bash(uniq:*)"'
 
       ---@diagnostic disable: missing-fields
       require('claudecode').setup({

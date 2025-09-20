@@ -91,7 +91,16 @@ return {
         },
         lua_ls = {
           Lua = {
-            workspace = { checkThirdParty = false },
+            workspace = {
+              checkThirdParty = false,
+              library = {},              -- empty = project only (recommended)
+              -- Or: library = { vim.fn.getcwd() }  -- explicit project root
+              ignoreDir = {              -- keep the crawl out of heavy dirs
+                ".git", "node_modules", "dist", "build", ".venv", ".cache", "target", "tmp"
+              },
+              maxPreload = 500,          -- defaults are quite generous; lower them
+              preloadFileSize = 50,      -- in KB; skip giant files
+            },
             telemetry = { enable = false },
             -- NOTE: toggle below to ignore Lua_LS's noisy `missing-fields` warnings
             -- diagnostics = { disable = { 'missing-fields' } },

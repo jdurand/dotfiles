@@ -1,0 +1,106 @@
+#!/bin/bash
+
+# Docker Containers Script
+# Shows running Docker containers and provides interactive mode
+
+set -euo pipefail
+
+# Default values
+COUNT_ONLY=false
+INTERACTIVE=false
+ALL_CONTAINERS=false
+DOCKER_EXECUTABLE="/usr/local/bin/docker"
+
+# Check for docker in common locations
+if ! [ -x "$DOCKER_EXECUTABLE" ]; then
+  DOCKER_EXECUTABLE="/opt/homebrew/bin/docker"
+  if ! [ -x "$DOCKER_EXECUTABLE" ]; then
+    DOCKER_EXECUTABLE="$(which docker 2>/dev/null || echo "")"
+  fi
+fi
+
+usage() {
+  echo "Usage: $0 [OPTIONS]"
+  echo "Options:"
+  echo "  -c, --count            Only output count of containers"
+  echo "  -a, --all              Show all containers (including stopped)"
+  echo "  -i, --interactive      Interactive mode (for TUI display)"
+  echo "  -h, --help             Show this help"
+  echo ""
+  echo "Examples:"
+  echo "  $0 --count              # Get count of running containers"
+  echo "  $0 --interactive        # Show containers in interactive mode"
+  echo "  $0 --all                # Show all containers"
+}
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -c|--count)
+      COUNT_ONLY=true
+      shift
+      ;;
+    -a|--all)
+      ALL_CONTAINERS=true
+      shift
+      ;;
+    -i|--interactive)
+      INTERACTIVE=true
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+# Check if Docker is available
+if [ -z "$DOCKER_EXECUTABLE" ] || ! [ -x "$DOCKER_EXECUTABLE" ]; then
+  echo "Error: Docker not found" >&2
+  [ "$INTERACTIVE" = true ] && sleep 3
+  exit 1
+fi
+
+# Check if Docker daemon is running
+if ! "$DOCKER_EXECUTABLE" info >/dev/null 2>&1; then
+  if [ "$COUNT_ONLY" = true ]; then
+    echo "0"
+  else
+    echo "Docker daemon is not running" >&2
+    [ "$INTERACTIVE" = true ] && sleep 3
+  fi
+  exit 0
+fi
+
+# Build docker ps command
+DOCKER_CMD=("$DOCKER_EXECUTABLE" "ps")
+
+if [ "$ALL_CONTAINERS" = false ]; then
+  # Only show running containers by default
+  DOCKER_CMD+=("--filter" "status=running")
+fi
+
+if [ "$COUNT_ONLY" = true ]; then
+  # Count containers
+  "${DOCKER_CMD[@]}" -q 2>/dev/null | wc -l | tr -d ' '
+elif [ "$INTERACTIVE" = true ]; then
+  # Launch lazydocker if available, otherwise show docker ps
+  if command -v lazydocker >/dev/null 2>&1; then
+    lazydocker
+  else
+    # Fallback to formatted docker ps with headers
+    "${DOCKER_CMD[@]}" --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"
+    echo ""
+    echo "Press any key to exit..."
+    read -n 1
+  fi
+else
+  # Show containers in plain format
+  "${DOCKER_CMD[@]}" --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}" --no-trunc
+fi

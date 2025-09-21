@@ -120,7 +120,7 @@ if [ "$COUNT_ONLY" = true ]; then
       return parts[1] * 60 + parts[2]
     }
     NR > 1 && NF >= 7 && $2 != "" && $6 != "" {
-      # Only count meetings with Google Meet links (hangout_link is not empty)
+      # Count meetings with Google Meet links only
       # For today, count upcoming meetings and recent meetings (within 10 minutes grace period)
       if ($1 == current_date) {
         time_diff = time_to_minutes($2) - time_to_minutes(current_time)
@@ -128,7 +128,7 @@ if [ "$COUNT_ONLY" = true ]; then
           count++
         }
       } else {
-        # Future dates, count all meetings with Google Meet links
+        # Future dates, count meetings with Google Meet links
         count++
       }
     }

@@ -1,7 +1,7 @@
 local settings = require("settings")
 local colors = require("colors")
 
-local cal = SketchyBar.add("item", {
+local cal = SketchyBar.add("item", "calendar", {
   icon = {
     color = colors.white,
     padding_left = 8,

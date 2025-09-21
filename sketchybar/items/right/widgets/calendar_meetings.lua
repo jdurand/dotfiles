@@ -7,12 +7,13 @@ local CONFIG = {
   TIME_REFRESH_INTERVAL = 30, -- 30 seconds for updating warning status
   CALENDAR_FETCH_INTERVAL = 300, -- 5 minutes for fetching from Google Calendar
   CALENDAR_SCRIPT = os.getenv("HOME") .. "/.dotfiles/scripts/calendar-meetings",
-  GCALCLI_EXECUTABLE = "/opt/homebrew/bin/gcalcli",
   TUI_WIDTH = "140c",
   TUI_HEIGHT = "35c",
   EARLY_WARNING_MINUTES = 15, -- minutes before meeting to show yellow icon
   URGENT_WARNING_MINUTES = 5, -- minutes before meeting to show yellow background
   GRACE_PERIOD_MINUTES = 3, -- minutes after meeting start to still show warning
+  TITLE_MAX_LENGTH = 40, -- Maximum title length for display
+  URGENT_TITLE_MAX_LENGTH = 20, -- Maximum title length for urgent display
 }
 
 -- Cache for meeting data
@@ -40,7 +41,7 @@ local calendar_meetings = SketchyBar.add("item", "widgets.calendar_meetings", {
     border_color = { alpha = 0 },
   },
   padding_right = settings.paddings,
-  drawing = false, -- Initially hidden
+  drawing = true, -- Start visible, will be controlled by logic
   popup = {
     align = "center",
     background = {
@@ -64,34 +65,54 @@ SketchyBar.add("item", "widgets.calendar_meetings.padding", {
   width = 2
 })
 
--- Function to fetch upcoming meetings
-local function fetch_upcoming_meetings(callback)
-  SketchyBar.exec(CONFIG.CALENDAR_SCRIPT .. " --upcoming", callback)
+-- ===========================================================================
+-- HELPER FUNCTIONS
+-- ===========================================================================
+
+-- Truncate a string to a specified length
+local function truncate_string(str, max_length)
+  if string.len(str) > max_length then
+    return string.sub(str, 1, max_length) .. "..."
+  end
+  return str
 end
 
--- Function to fetch meetings count
-local function fetch_meetings_count(callback)
-  SketchyBar.exec(CONFIG.CALENDAR_SCRIPT .. " --count --upcoming", callback)
+-- Format meeting count as string
+local function format_meeting_count(count)
+  return count .. (count == 1 and " meeting" or " meetings")
 end
 
--- Function to parse meeting time and check warning level
+-- Parse time string into minutes
+local function parse_time_to_minutes(time_str)
+  if not time_str or time_str == "" then
+    return nil
+  end
+
+  local hour, min = time_str:match("(%d+):(%d+)")
+  if not hour or not min then
+    return nil
+  end
+
+  return tonumber(hour) * 60 + tonumber(min)
+end
+
+-- Get current time in minutes
+local function get_current_minutes()
+  local current_hour = tonumber(os.date("%H"))
+  local current_min = tonumber(os.date("%M"))
+  return current_hour * 60 + current_min
+end
+
+-- Parse meeting time and check warning level
 -- Returns: nil (no warning), "early" (EARLY_WARNING to URGENT_WARNING min before),
 --          "urgent" (URGENT_WARNING min before to GRACE_PERIOD min after)
 local function get_meeting_warning_level(start_time)
-  if not start_time or start_time == "" then
+  local meeting_minutes = parse_time_to_minutes(start_time)
+  if not meeting_minutes then
     return nil
   end
 
-  local current_hour = tonumber(os.date("%H"))
-  local current_min = tonumber(os.date("%M"))
-  local current_minutes = current_hour * 60 + current_min
-
-  local meeting_hour, meeting_min = start_time:match("(%d+):(%d+)")
-  if not meeting_hour or not meeting_min then
-    return nil
-  end
-
-  local meeting_minutes = tonumber(meeting_hour) * 60 + tonumber(meeting_min)
+  local current_minutes = get_current_minutes()
   local time_diff = meeting_minutes - current_minutes
 
   if time_diff >= -CONFIG.GRACE_PERIOD_MINUTES and time_diff <= CONFIG.URGENT_WARNING_MINUTES then
@@ -103,6 +124,358 @@ local function get_meeting_warning_level(start_time)
   end
 end
 
+-- Analyze meetings and return statistics
+local function analyze_meetings()
+  local stats = {
+    warning_level = nil,
+    meet_count = 0,
+    has_any_timed_events = false,
+    urgent_meeting = nil
+  }
+
+  for _, meeting in ipairs(cached_meetings) do
+    if meeting.start_time and meeting.start_time ~= "" then
+      stats.has_any_timed_events = true
+
+      -- Count only meetings with Google Meet links
+      if meeting.has_meet_link then
+        stats.meet_count = stats.meet_count + 1
+      end
+
+      -- Check warning level (only for meetings with Google Meet links)
+      if meeting.has_meet_link then
+        local meeting_warning = get_meeting_warning_level(meeting.start_time)
+        if meeting_warning == "urgent" then
+          stats.warning_level = "urgent"  -- Urgent takes priority
+          stats.urgent_meeting = meeting
+        elseif meeting_warning == "early" and stats.warning_level ~= "urgent" then
+          stats.warning_level = "early"
+        end
+      end
+    end
+  end
+
+  return stats
+end
+
+-- Determine widget appearance based on meeting statistics
+local function get_widget_appearance(stats)
+  local appearance = {}
+
+  if stats.warning_level == "urgent" and stats.urgent_meeting then
+    -- Urgent warning: bell icon, meeting name, bright yellow background
+    appearance.icon_string = "􀋚"  -- bell icon
+    appearance.icon_color = colors.black
+    appearance.text_color = colors.black
+    appearance.bg_color = colors.yellow
+    appearance.label_string = truncate_string(
+      stats.urgent_meeting.title or "Meeting",
+      CONFIG.URGENT_TITLE_MAX_LENGTH
+    )
+  elseif stats.warning_level == "early" then
+    -- Early warning: calendar icon with yellow color
+    appearance.icon_string = "􀉉"  -- calendar icon
+    appearance.icon_color = colors.yellow
+    appearance.text_color = colors.white
+    appearance.bg_color = { alpha = 0 }
+    appearance.label_string = format_meeting_count(stats.meet_count)
+  else
+    -- No warning: normal calendar icon and colors
+    appearance.icon_string = "􀉉"  -- calendar icon
+    appearance.icon_color = stats.meet_count == 0 and colors.grey or colors.magenta
+    appearance.text_color = colors.white
+    appearance.bg_color = { alpha = 0 }
+    appearance.label_string = format_meeting_count(stats.meet_count)
+  end
+
+  return appearance
+end
+
+-- Update widget with new appearance
+local function update_widget_display(stats)
+  if not stats.has_any_timed_events then
+    -- No timed events - keep widget present but transparent for event handling
+    calendar_meetings:set({
+      icon = {
+        string = "􀉉",  -- Keep icon for consistent width
+        color = colors.transparent,  -- Make it invisible
+      },
+      label = {
+        string = "0 meetings",  -- Keep label for consistent width
+        color = colors.transparent,  -- Make it invisible
+      },
+      background = { color = colors.transparent },
+      drawing = true,  -- Always keep drawing for event handling
+    })
+    return
+  end
+
+  -- Has timed events - show widget normally
+  local appearance = get_widget_appearance(stats)
+
+  calendar_meetings:set({
+    icon = {
+      string = appearance.icon_string,
+      color = appearance.icon_color,
+    },
+    label = {
+      string = appearance.label_string,
+      color = appearance.text_color,
+    },
+    background = {
+      color = appearance.bg_color
+    },
+    drawing = true,
+  })
+end
+
+-- Parse TSV line into parts
+local function parse_tsv_line(line)
+  local parts = {}
+  local start = 1
+  while true do
+    local tab_pos = line:find("\t", start)
+    if tab_pos then
+      table.insert(parts, line:sub(start, tab_pos - 1))
+      start = tab_pos + 1
+    else
+      table.insert(parts, line:sub(start))
+      break
+    end
+  end
+  return parts
+end
+
+-- Parse meeting data from TSV result
+local function parse_meetings_result(meetings_result)
+  local meetings = {}
+  local stats = {
+    warning_level = nil,
+    meet_count = 0,
+    has_any_timed_events = false,
+    urgent_meeting = nil
+  }
+
+  if not meetings_result then
+    return meetings, stats
+  end
+
+  local lines = {}
+  for line in meetings_result:gmatch("[^\n]+") do
+    table.insert(lines, line)
+  end
+
+  -- Skip header line and parse meetings
+  for i = 2, #lines do
+    local parts = parse_tsv_line(lines[i])
+
+    if #parts >= 7 then
+      local meeting = {
+        start_date = parts[1],
+        start_time = parts[2],
+        end_date = parts[3],
+        end_time = parts[4],
+        html_link = parts[5],
+        hangout_link = parts[6],
+        title = parts[7],
+        has_meet_link = parts[6] ~= ""
+      }
+      table.insert(meetings, meeting)
+
+      -- Update statistics for timed meetings
+      if parts[2] ~= "" then
+        stats.has_any_timed_events = true
+
+        if parts[6] ~= "" then
+          stats.meet_count = stats.meet_count + 1
+        end
+
+        -- Check warning level (only for meetings with Google Meet links)
+        if parts[6] ~= "" then
+          local meeting_warning = get_meeting_warning_level(parts[2])
+          if meeting_warning == "urgent" then
+            stats.warning_level = "urgent"
+            stats.urgent_meeting = meeting
+          elseif meeting_warning == "early" and stats.warning_level ~= "urgent" then
+            stats.warning_level = "early"
+          end
+        end
+      end
+    end
+  end
+
+  return meetings, stats
+end
+
+-- Format date label for separators
+local function format_date_label(date_str)
+  local current_date = os.date("%Y-%m-%d")
+  if date_str == current_date then
+    return "Today"
+  end
+
+  -- Format date as "Mon, Sep 22"
+  local year, month, day = date_str:match("(%d+)-(%d+)-(%d+)")
+  if year and month and day then
+    local time = os.time({year = tonumber(year), month = tonumber(month), day = tonumber(day)})
+    return os.date("%a, %b %d", time)
+  end
+
+  return date_str
+end
+
+-- Get meeting display properties
+local function get_meeting_display_props(meeting)
+  local title = truncate_string(meeting.title or "No title", CONFIG.TITLE_MAX_LENGTH)
+  local start_time = meeting.start_time or ""
+  local props = {}
+
+  if start_time == "" then
+    -- All-day event - check for special location types
+    local title_lower = title:lower()
+    if title_lower == "home" or title_lower == "office" then
+      props.is_location_header = true
+      props.display_text = title_lower == "home" and "Working from Home" or "Working from Office"
+      props.meeting_icon = title_lower == "home" and "􀎞" or "􀤨"  -- house icon or building.2 icon
+      props.icon_color = colors.white
+    else
+      props.display_text = "All day - " .. title
+      props.meeting_icon = "􀉉"  -- calendar icon
+      props.icon_color = colors.grey
+    end
+  else
+    -- Timed event
+    props.display_text = start_time .. " - " .. title
+    props.meeting_icon = meeting.has_meet_link and "􀍉" or "􀉉"  -- video icon for Meet, calendar for others
+    props.icon_color = meeting.has_meet_link and colors.green or colors.grey
+  end
+
+  props.text_color = meeting.has_meet_link and colors.white or colors.with_alpha(colors.white, 0.6)
+  return props
+end
+
+-- Create a date separator item
+local function create_date_separator(index, date_str, max_width)
+  local date_label = format_date_label(date_str)
+
+  return SketchyBar.add("item", "widgets.calendar_meetings.menu.separator." .. index, {
+    position = "popup.widgets.calendar_meetings",
+    icon = {
+      string = "── " .. date_label .. " ──",
+      font = {
+        family = settings.font.text,
+        style = settings.font.style_map["Semibold"],
+        size = 10.0,
+      },
+      color = colors.with_alpha(colors.white, 0.5),
+      padding_left = 0,
+      padding_right = 0,
+      width = max_width,
+      align = "center",
+    },
+    label = {
+      string = "",
+      padding_left = 0,
+      padding_right = 0,
+    },
+    background = {
+      color = colors.transparent,
+      height = 20,
+    },
+    width = max_width,
+  })
+end
+
+-- Create a menu item for a meeting
+local function create_menu_item(index, meeting, props, max_width)
+  local item_config = {
+    position = "popup.widgets.calendar_meetings",
+    icon = {
+      string = props.meeting_icon,
+      color = props.icon_color,
+      font = {
+        family = settings.font.text,
+        size = 12.0,
+      },
+      padding_left = 10,
+      padding_right = 8,
+    },
+    label = {
+      string = props.display_text,
+      font = {
+        family = settings.font.text,
+        style = props.is_location_header and settings.font.style_map["Bold"] or nil,
+        size = props.is_location_header and 11.0 or 11.0,
+      },
+      color = props.is_location_header and colors.white or props.text_color,
+      padding_left = 0,
+      padding_right = 18,
+    },
+    background = {
+      color = colors.transparent,
+      height = props.is_location_header and 28 or 22,
+      corner_radius = 4,
+      border_width = props.is_location_header and 1 or 0,
+      border_color = props.is_location_header and colors.with_alpha(colors.grey, 0.3) or nil,
+    },
+    width = max_width,
+  }
+
+  local menu_item = SketchyBar.add("item", "widgets.calendar_meetings.menu.item." .. index, item_config)
+
+  -- Add interactivity for non-header items
+  if not props.is_location_header then
+    -- Set up click handler
+    local link = nil
+    if meeting.hangout_link and meeting.hangout_link ~= "" then
+      link = meeting.hangout_link
+    elseif meeting.html_link and meeting.html_link ~= "" then
+      link = meeting.html_link
+    end
+
+    if link then
+      menu_item:set({
+        click_script = string.format(
+          'open "%s"; sketchybar --set widgets.calendar_meetings popup.drawing=off',
+          link:gsub('"', '\\"')
+        )
+      })
+    else
+      -- No valid link, just close the popup when clicked
+      menu_item:set({
+        click_script = 'sketchybar --set widgets.calendar_meetings popup.drawing=off'
+      })
+    end
+
+    -- Add hover effects
+    menu_item:subscribe("mouse.entered", function()
+      menu_item:set({
+        background = { color = colors.with_alpha(colors.dark_blue, 0.75) },
+        icon = { color = props.icon_color },
+        label = { color = colors.white }
+      })
+    end)
+
+    menu_item:subscribe("mouse.exited", function()
+      menu_item:set({
+        background = { color = colors.transparent },
+        icon = { color = props.icon_color },
+        label = { color = props.text_color }
+      })
+    end)
+  end
+
+  return menu_item
+end
+
+-- ===========================================================================
+-- PUBLIC FUNCTIONS
+-- ===========================================================================
+
+-- Function to fetch upcoming meetings
+local function fetch_upcoming_meetings(callback)
+  SketchyBar.exec(CONFIG.CALENDAR_SCRIPT .. " --upcoming", callback)
+end
 
 -- Function to create popup menu items from cached data
 local function create_popup_menu()
@@ -112,372 +485,92 @@ local function create_popup_menu()
   -- Calculate maximum width needed for all items
   local max_width = 150  -- minimum width
   for _, meeting in ipairs(cached_meetings) do
-    local title = meeting.title or "No title"
-    local start_time = meeting.start_time or ""
-    if string.len(title) > 40 then
-      title = string.sub(title, 1, 40) .. "..."
-    end
-    local display_text = (start_time == "" and "All day - " or start_time .. " - ") .. title
-    local item_width = math.min(300, string.len(display_text) * 7 + 40)
+    local props = get_meeting_display_props(meeting)
+    local item_width = math.min(300, string.len(props.display_text) * 7 + 40)
     max_width = math.max(max_width, item_width)
   end
 
+  -- Track current date to add separators
+  local last_date = nil
+  local item_index = 0
+
   -- Add meeting items to popup using cached data
-  for i, meeting in ipairs(cached_meetings) do
-    local title = meeting.title or "No title"
-    local start_time = meeting.start_time or ""
-    local warning_level = get_meeting_warning_level(start_time)
-
-    -- Truncate long titles
-    if string.len(title) > 40 then
-      title = string.sub(title, 1, 40) .. "..."
+  for _, meeting in ipairs(cached_meetings) do
+    -- Check if we need a date separator
+    if meeting.start_date ~= last_date then
+      item_index = item_index + 1
+      create_date_separator(item_index, meeting.start_date, max_width)
+      last_date = meeting.start_date
     end
 
-    -- Check if this is a location-based all-day event for header treatment
-    local is_location_header = false
-    local display_text, meeting_icon, icon_color
-
-    if start_time == "" then
-      -- All-day event - check for special location types
-      local title_lower = title:lower()
-      if title_lower == "home" or title_lower == "office" then
-        is_location_header = true
-        display_text = title_lower == "home" and "Working from Home" or "Working from Office"
-        meeting_icon = title_lower == "home" and "􀎞" or "􀢼"  -- house icon or office building icon
-        icon_color = colors.white
-      else
-        display_text = "All day - " .. title
-        meeting_icon = "􀉉"  -- calendar icon
-        icon_color = colors.grey
-      end
-    else
-      -- Timed event
-      display_text = start_time .. " - " .. title
-      meeting_icon = meeting.has_meet_link and "􀍉" or "􀉉"  -- video icon for Meet, calendar for others
-      icon_color = meeting.has_meet_link and colors.green or colors.grey
-    end
-
-    local text_color = meeting.has_meet_link and colors.white or colors.with_alpha(colors.white, 0.6)  -- White for Meet links, dimmed white for others
-
-    if is_location_header then
-      -- Create location header with subtle styling
-      local menu_item = SketchyBar.add("item", "widgets.calendar_meetings.menu.item." .. i, {
-        position = "popup.widgets.calendar_meetings",
-        icon = {
-          string = meeting_icon,
-          color = icon_color,
-          font = {
-            family = settings.font.text,
-            size = 12.0,
-          },
-          padding_left = 10,
-          padding_right = 8,
-        },
-        label = {
-          string = display_text,
-          font = {
-            family = settings.font.text,
-            style = settings.font.style_map["Bold"],
-            size = 11.0,
-          },
-          color = colors.white,
-          padding_left = 0,
-          padding_right = 18,
-        },
-        background = {
-          color = colors.transparent,  -- No background color
-          height = 28,  -- Taller for better spacing
-          corner_radius = 4,
-          border_width = 1,
-          border_color = colors.with_alpha(colors.grey, 0.3),  -- Bottom border for separation
-        },
-        width = max_width,
-      })
-      -- No click handler or hover effects for headers
-    else
-      -- Regular menu item
-      local menu_item = SketchyBar.add("item", "widgets.calendar_meetings.menu.item." .. i, {
-        position = "popup.widgets.calendar_meetings",
-        icon = {
-          string = meeting_icon,
-          color = icon_color,
-          font = {
-            family = settings.font.text,
-            size = 12.0,
-          },
-          padding_left = 10,
-          padding_right = 8,
-        },
-        label = {
-          string = display_text,
-          font = {
-            family = settings.font.text,
-            size = 11.0,
-          },
-          color = text_color,
-          padding_left = 0,
-          padding_right = 18,
-        },
-        background = {
-          color = colors.transparent,
-          height = 22,
-          corner_radius = 4,
-        },
-        width = max_width,
-      })
-
-      -- Set up click handler using cached links
-      local hangout_link = meeting.hangout_link and meeting.hangout_link ~= "" and meeting.hangout_link or nil
-      local html_link = meeting.html_link and meeting.html_link ~= "" and meeting.html_link or nil
-      local link = hangout_link or html_link or "https://calendar.google.com"
-
-      menu_item:set({
-        click_script = string.format(
-          'open "%s"; sketchybar --set widgets.calendar_meetings popup.drawing=off',
-          link:gsub('"', '\\"') -- Escape any quotes in the URL
-        )
-      })
-
-      -- Add hover effect for regular items only
-      menu_item:subscribe("mouse.entered", function()
-        menu_item:set({
-          background = { color = colors.with_alpha(colors.dark_blue, 0.75) },
-          icon = { color = icon_color },
-          label = { color = colors.white }
-        })
-      end)
-
-      menu_item:subscribe("mouse.exited", function()
-        menu_item:set({
-          background = { color = colors.transparent },
-          icon = { color = icon_color },
-          label = { color = text_color }
-        })
-      end)
-    end
+    item_index = item_index + 1
+    local props = get_meeting_display_props(meeting)
+    create_menu_item(item_index, meeting, props, max_width)
   end
 end
 
--- Function to update warning status based on cached meetings (no API call)
+-- Function to update warning status based on cached meetings
 local function update_warning_status()
   if #cached_meetings == 0 then
     return
   end
 
-  local warning_level = nil
-  local count = 0
-  local urgent_meeting = nil
-
-  -- Check warning level for meetings with Google Meet links only
-  for _, meeting in ipairs(cached_meetings) do
-    if meeting.start_time and meeting.start_time ~= "" and meeting.has_meet_link then
-      count = count + 1
-      local meeting_warning = get_meeting_warning_level(meeting.start_time)
-      if meeting_warning == "urgent" then
-        warning_level = "urgent"  -- Urgent takes priority
-        urgent_meeting = meeting
-      elseif meeting_warning == "early" and warning_level ~= "urgent" then
-        warning_level = "early"
-      end
-    end
-  end
-
-  -- Update widget appearance based on warning level
-  local icon_string, icon_color, text_color, bg_color, label_string
-
-  if warning_level == "urgent" and urgent_meeting then
-    -- Urgent warning: bell icon, meeting name, bright yellow background
-    icon_string = "􀋚"  -- bell icon
-    icon_color = colors.black
-    text_color = colors.black
-    bg_color = colors.yellow
-
-    -- Truncate meeting title to 20 characters
-    local title = urgent_meeting.title or "Meeting"
-    if string.len(title) > 20 then
-      title = string.sub(title, 1, 20) .. "..."
-    end
-    label_string = title
-  elseif warning_level == "early" then
-    -- Early warning: calendar icon with yellow color
-    icon_string = "􀉉"  -- calendar icon
-    icon_color = colors.yellow
-    text_color = colors.white
-    bg_color = { alpha = 0 }
-    label_string = count .. (count == 1 and " meeting" or " meetings")
-  else
-    -- No warning: normal calendar icon and colors
-    icon_string = "􀉉"  -- calendar icon
-    icon_color = colors.magenta
-    text_color = colors.white
-    bg_color = { alpha = 0 }
-    label_string = count .. (count == 1 and " meeting" or " meetings")
-  end
-
-  calendar_meetings:set({
-    icon = {
-      string = icon_string,
-      color = icon_color
-    },
-    label = {
-      string = label_string,
-      color = text_color
-    },
-    background = {
-      color = bg_color
-    },
-    drawing = count > 0,
-  })
+  local stats = analyze_meetings()
+  update_widget_display(stats)
 end
 
 -- Function to fetch and update calendar meetings from Google Calendar
 local function fetch_and_update_calendar()
-  fetch_meetings_count(function(count_result)
-    local count = tonumber(count_result and count_result:gsub("%s+", "") or "0") or 0
+  fetch_upcoming_meetings(function(meetings_result)
+    local meetings, stats = parse_meetings_result(meetings_result)
+    cached_meetings = meetings
 
-    if count > 0 then
-      -- Also fetch the actual meeting data for popup and warning detection
-      fetch_upcoming_meetings(function(meetings_result)
-        cached_meetings = {}
-        local warning_level = nil
+    -- Always update widget display (maintains event handling)
+    update_widget_display(stats)
 
-        if meetings_result then
-          local lines = {}
-          for line in meetings_result:gmatch("[^\n]+") do
-            table.insert(lines, line)
-          end
-
-          -- Skip header line and parse meetings
-          for i = 2, #lines do
-            local line = lines[i]
-            -- Split by tabs, preserving empty fields
-            local parts = {}
-            local start = 1
-            while true do
-              local tab_pos = line:find("\t", start)
-              if tab_pos then
-                table.insert(parts, line:sub(start, tab_pos - 1))
-                start = tab_pos + 1
-              else
-                table.insert(parts, line:sub(start))
-                break
-              end
-            end
-
-            -- Include all events with times (not all-day events)
-            if #parts >= 7 then
-              local meeting = {
-                start_date = parts[1],
-                start_time = parts[2],
-                end_date = parts[3],
-                end_time = parts[4],
-                html_link = parts[5],
-                hangout_link = parts[6],
-                title = parts[7],
-                has_meet_link = parts[6] ~= ""  -- Track if it has a Google Meet link
-              }
-              table.insert(cached_meetings, meeting)
-
-              -- Only check warning level for meetings with Google Meet links
-              if parts[6] ~= "" then
-                local meeting_warning = get_meeting_warning_level(parts[2])
-                if meeting_warning == "urgent" then
-                  warning_level = "urgent"  -- Urgent takes priority
-                elseif meeting_warning == "early" and warning_level ~= "urgent" then
-                  warning_level = "early"
-                end
-              end
-            end
-          end
-        end
-
-        -- Update widget appearance based on warning level
-        local icon_string, icon_color, text_color, bg_color, label_string
-        local urgent_meeting = nil
-
-        -- Find the urgent meeting if any
-        for _, meeting in ipairs(cached_meetings) do
-          if get_meeting_warning_level(meeting.start_time) == "urgent" then
-            urgent_meeting = meeting
-            break
-          end
-        end
-
-        if warning_level == "urgent" and urgent_meeting then
-          -- Urgent warning: bell icon, meeting name, bright yellow background
-          icon_string = "􀋚"  -- bell icon
-          icon_color = colors.black
-          text_color = colors.black
-          bg_color = colors.yellow
-
-          -- Truncate meeting title to 20 characters
-          local title = urgent_meeting.title or "Meeting"
-          if string.len(title) > 20 then
-            title = string.sub(title, 1, 20) .. "..."
-          end
-          label_string = title
-        elseif warning_level == "early" then
-          -- Early warning: calendar icon with yellow color
-          icon_string = "􀉉"  -- calendar icon
-          icon_color = colors.yellow
-          text_color = colors.white
-          bg_color = { alpha = 0 }
-          label_string = count .. (count == 1 and " meeting" or " meetings")
-        else
-          -- No warning: normal calendar icon and colors
-          icon_string = "􀉉"  -- calendar icon
-          icon_color = colors.magenta
-          text_color = colors.white
-          bg_color = { alpha = 0 }
-          label_string = count .. (count == 1 and " meeting" or " meetings")
-        end
-
-        calendar_meetings:set({
-          icon = {
-            string = icon_string,
-            color = icon_color
-          },
-          label = {
-            string = label_string,
-            color = text_color
-          },
-          background = {
-            color = bg_color
-          },
-          drawing = true,
-        })
-      end)
-    else
-      calendar_meetings:set({
-        drawing = false,
-      })
+    -- Clear cache only if no events at all
+    if not stats.has_any_timed_events then
       cached_meetings = {}
     end
   end)
 end
 
+-- Find urgent meeting from cache
+local function find_urgent_meeting()
+  for _, meeting in ipairs(cached_meetings) do
+    -- Only consider meetings with Google Meet links for urgent status
+    if meeting.has_meet_link and get_meeting_warning_level(meeting.start_time) == "urgent" then
+      return meeting
+    end
+  end
+  return nil
+end
+
+-- ===========================================================================
+-- EVENT HANDLERS
+-- ===========================================================================
+
 -- Click handler using cached data
 calendar_meetings:subscribe("mouse.clicked", function(env)
   Logger:info("Calendar widget clicked")
 
-  -- Check if there's actually an urgent meeting with Google Meet link right now
-  local urgent_meeting = nil
-  for _, meeting in ipairs(cached_meetings) do
-    if meeting.has_meet_link and get_meeting_warning_level(meeting.start_time) == "urgent" then
-      urgent_meeting = meeting
-      break
-    end
-  end
+  local urgent_meeting = find_urgent_meeting()
 
   if urgent_meeting then
-    Logger:info("Found urgent meeting: " .. (urgent_meeting.title or "Unknown"))
-
-    -- Use the links from the cached meeting data
-    local link = urgent_meeting.hangout_link or urgent_meeting.html_link or "https://calendar.google.com"
-    Logger:info("Using direct link: " .. link)
-    os.execute('open "' .. link .. '" &')
+    Logger:info("Found urgent meeting with Google Meet: " .. (urgent_meeting.title or "Unknown"))
+    -- Only auto-open Google Meet links for urgent meetings
+    local link = urgent_meeting.hangout_link
+    if link and link ~= "" then
+      Logger:info("Opening Google Meet link: " .. link)
+      os.execute('open "' .. link .. '" &')
+    else
+      -- Fallback to showing popup if no Meet link (shouldn't happen with our logic)
+      Logger:info("Urgent meeting has no Meet link, showing popup")
+      create_popup_menu()
+      calendar_meetings:set({ popup = { drawing = "toggle" } })
+    end
   else
-    Logger:info("No urgent meeting, showing popup menu")
+    Logger:info("No urgent Google Meet meeting, showing popup menu")
     -- Otherwise show the popup menu
     create_popup_menu()
     calendar_meetings:set({ popup = { drawing = "toggle" } })
@@ -488,6 +581,10 @@ end)
 calendar_meetings:subscribe("mouse.exited.global", function()
   calendar_meetings:set({ popup = { drawing = false } })
 end)
+
+-- ===========================================================================
+-- INITIALIZATION
+-- ===========================================================================
 
 -- Set up managed timers with automatic sleep/wake handling
 Timer.create_group({

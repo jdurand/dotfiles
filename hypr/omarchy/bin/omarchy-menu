@@ -1,0 +1,168 @@
+#!/bin/bash
+
+# Omarchy Menu System
+# Provides quick access to themes, settings, and system management
+
+OMARCHY_DIR="$HOME/.dotfiles/hypr/omarchy"
+ROFI_THEME="$OMARCHY_DIR/themes/omarchy-menu.rasi"
+
+# Menu options
+declare -a options=(
+    "🎨 Theme Selector"
+    "⚙️  Settings"
+    "🔄 Update Omarchy"
+    "📦 Package Manager"
+    "🖥️  Display Settings"
+    "⌨️  Input Settings"
+    "🔊 Audio Settings"
+    "🌐 Network Settings"
+    "🔒 Lock Screen Settings"
+    "📊 System Monitor"
+    "🗂️  File Manager"
+    "🎮 Gaming Mode"
+    "💾 Backup Configuration"
+    "🔧 Reload Hyprland"
+    "🚪 Logout"
+)
+
+# Use rofi to display menu
+chosen=$(printf '%s\n' "${options[@]}" | rofi -dmenu -i -p "Omarchy Menu" -config "$ROFI_THEME" -l 15)
+
+case "$chosen" in
+    "🎨 Theme Selector")
+        # Theme selection submenu
+        themes=$(ls -d "$OMARCHY_DIR"/themes/*/ 2>/dev/null | xargs -n1 basename | grep -v current)
+        current_theme=$(basename "$(readlink -f "$OMARCHY_DIR/themes/current")")
+
+        theme_list=""
+        while IFS= read -r theme; do
+            if [[ "$theme" == "$current_theme" ]]; then
+                theme_list+="● $theme (active)\n"
+            else
+                theme_list+="○ $theme\n"
+            fi
+        done <<< "$themes"
+
+        selected_theme=$(echo -e "${theme_list%\\n}" | rofi -dmenu -i -p "Select Theme" -config "$ROFI_THEME")
+
+        if [ -n "$selected_theme" ]; then
+            # Remove bullet and (active) marker
+            theme_name=$(echo "$selected_theme" | sed 's/^[●○] //; s/ (active)$//')
+            "$OMARCHY_DIR/bin/omarchy-theme-set" "$theme_name"
+            notify-send "Theme Changed" "Switched to $theme_name theme\nReload Hyprland to apply"
+        fi
+        ;;
+
+    "⚙️  Settings")
+        # Settings submenu
+        settings_options=(
+            "Monitor Configuration"
+            "Keybindings"
+            "Environment Variables"
+            "Autostart Applications"
+            "Window Rules"
+            "Appearance"
+        )
+
+        setting=$(printf '%s\n' "${settings_options[@]}" | rofi -dmenu -i -p "Settings" -config "$ROFI_THEME")
+
+        case "$setting" in
+            "Monitor Configuration")
+                kitty -e nvim "$OMARCHY_DIR/config/monitors.conf"
+                ;;
+            "Keybindings")
+                kitty -e nvim "$OMARCHY_DIR/config/bindings.conf"
+                ;;
+            "Environment Variables")
+                kitty -e nvim "$OMARCHY_DIR/config/envs.conf"
+                ;;
+            "Autostart Applications")
+                kitty -e nvim "$OMARCHY_DIR/config/autostart.conf"
+                ;;
+            "Window Rules")
+                kitty -e nvim "$OMARCHY_DIR/config/windows.conf"
+                ;;
+            "Appearance")
+                kitty -e nvim "$OMARCHY_DIR/config/looknfeel.conf"
+                ;;
+        esac
+        ;;
+
+    "🔄 Update Omarchy")
+        kitty --hold -e "$OMARCHY_DIR/bin/omarchy-update"
+        ;;
+
+    "📦 Package Manager")
+        kitty -e yay
+        ;;
+
+    "🖥️  Display Settings")
+        # Display settings submenu
+        display_options=(
+            "Configure Monitors"
+            "Change Resolution"
+            "Set Wallpaper"
+            "Screen Layout"
+        )
+
+        display=$(printf '%s\n' "${display_options[@]}" | rofi -dmenu -i -p "Display" -config "$ROFI_THEME")
+
+        case "$display" in
+            "Configure Monitors")
+                kitty -e nvim "$OMARCHY_DIR/config/monitors.conf"
+                ;;
+            "Set Wallpaper")
+                ~/.dotfiles/hypr/scripts/wallpaper-picker
+                ;;
+            "Screen Layout")
+                wdisplays &
+                ;;
+        esac
+        ;;
+
+    "⌨️  Input Settings")
+        kitty -e nvim "$OMARCHY_DIR/config/input.conf"
+        ;;
+
+    "🔊 Audio Settings")
+        pavucontrol &
+        ;;
+
+    "🌐 Network Settings")
+        nm-connection-editor &
+        ;;
+
+    "🔒 Lock Screen Settings")
+        kitty -e nvim ~/.config/hypr/hyprlock.conf
+        ;;
+
+    "📊 System Monitor")
+        kitty -e btop
+        ;;
+
+    "🗂️  File Manager")
+        nautilus &
+        ;;
+
+    "🎮 Gaming Mode")
+        # Toggle gaming optimizations
+        notify-send "Gaming Mode" "Feature coming soon!"
+        ;;
+
+    "💾 Backup Configuration")
+        timestamp=$(date +%Y%m%d_%H%M%S)
+        backup_dir="$HOME/.dotfiles/hypr/omarchy-backups/manual_$timestamp"
+        mkdir -p "$backup_dir"
+        cp -r "$OMARCHY_DIR/config" "$backup_dir/"
+        notify-send "Backup Complete" "Configuration backed up to:\n$backup_dir"
+        ;;
+
+    "🔧 Reload Hyprland")
+        hyprctl reload
+        notify-send "Hyprland Reloaded" "Configuration refreshed"
+        ;;
+
+    "🚪 Logout")
+        ~/.dotfiles/hypr/scripts/logout
+        ;;
+esac

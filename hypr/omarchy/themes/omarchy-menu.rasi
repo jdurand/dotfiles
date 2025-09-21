@@ -1,0 +1,128 @@
+/*
+ * Omarchy Official Menu Theme
+ * Part of the Omarchy system - will be updated with Omarchy updates
+ */
+
+configuration {
+    show-icons:          false;
+    font:                "JetBrains Mono 11";
+    disable-history:     false;
+    sidebar-mode:        false;
+}
+
+* {
+    /* Tokyo Night inspired colors - Omarchy default */
+    background:          #1a1b26;
+    background-alt:      #24283b;
+    foreground:          #c0caf5;
+    selected:            #33467C;
+    active:              #7aa2f7;
+    urgent:              #f7768e;
+
+    text-color:          @foreground;
+    background-color:    @background;
+    border-color:        @active;
+}
+
+window {
+    transparency:        "real";
+    background-color:    @background;
+    text-color:          @foreground;
+    border:              2px;
+    border-color:        @border-color;
+    border-radius:       10px;
+    width:               500px;
+    location:            center;
+    x-offset:            0;
+    y-offset:            0;
+}
+
+prompt {
+    enabled:             true;
+    padding:             12px;
+    background-color:    @background-alt;
+    text-color:          @active;
+    font:                "JetBrains Mono Bold 12";
+    border-radius:       8px;
+}
+
+textbox-prompt-colon {
+    padding:             0px;
+    background-color:    @background;
+    text-color:          @foreground;
+    expand:              false;
+    str:                 "";
+}
+
+entry {
+    background-color:    @background;
+    text-color:          @foreground;
+    placeholder-color:   @foreground;
+    expand:              true;
+    horizontal-align:    0;
+    placeholder:         "Search...";
+    padding:             0px;
+    blink:               true;
+}
+
+inputbar {
+    children:            [ prompt ];
+    background-color:    @background;
+    text-color:          @foreground;
+    expand:              false;
+    margin:              0px 0px 15px 0px;
+    padding:             0px;
+    position:            north;
+}
+
+listview {
+    background-color:    @background;
+    padding:             0px;
+    columns:             1;
+    lines:               12;
+    spacing:             5px;
+    cycle:               true;
+    dynamic:             true;
+    layout:              vertical;
+    scrollbar:           false;
+}
+
+mainbox {
+    background-color:    @background;
+    children:            [ inputbar, listview ];
+    padding:             15px;
+}
+
+element {
+    background-color:    @background;
+    text-color:          @foreground;
+    orientation:         horizontal;
+    border-radius:       8px;
+    padding:             12px 15px;
+}
+
+element-icon {
+    background-color:    transparent;
+    text-color:          inherit;
+    size:                0px;
+    border:              0px;
+}
+
+element-text {
+    background-color:    transparent;
+    text-color:          inherit;
+    expand:              true;
+    horizontal-align:    0;
+    vertical-align:      0.5;
+}
+
+element selected {
+    background-color:    @selected;
+    text-color:          @active;
+    border:              0px 0px 0px 3px;
+    border-color:        @active;
+}
+
+element-text selected {
+    text-color:          @active;
+}

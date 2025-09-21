@@ -48,6 +48,10 @@ Startup.delayed_init("calendar_meetings", function()
   require("items.right.widgets.calendar_meetings")
 end, 9)
 
+Startup.delayed_init("spotify", function()
+  require("items.right.widgets.spotify")
+end, 10)
+
 -- Execute staged initialization
 Startup.execute_pending()
 

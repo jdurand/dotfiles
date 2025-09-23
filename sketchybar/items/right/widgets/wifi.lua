@@ -172,7 +172,8 @@ wifi_up:subscribe("network_update", function(env)
   })
 end)
 
-wifi:subscribe({"wifi_change", "system_woke"}, function(env)
+-- Update function
+local function update_wifi()
   SketchyBar.exec("ipconfig getifaddr en0", function(ip)
     local connected = not (ip == "")
     wifi:set({
@@ -182,7 +183,13 @@ wifi:subscribe({"wifi_change", "system_woke"}, function(env)
       },
     })
   end)
-end)
+end
+
+-- Initial update
+update_wifi()
+
+-- Subscribe to events
+wifi:subscribe({"wifi_change", "system_woke"}, update_wifi)
 
 local function hide_details()
   wifi_bracket:set({ popup = { drawing = false } })

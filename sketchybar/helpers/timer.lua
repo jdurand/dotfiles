@@ -246,7 +246,7 @@ function Timer.init_all()
   stop_manager()
 
   -- Wait a bit then start fresh
-  SketchyBar.exec("sleep 0.5", function()
+  SketchyBar.exec("sleep 1", function()
     start_manager()
   end)
 end

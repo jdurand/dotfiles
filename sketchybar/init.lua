@@ -11,6 +11,11 @@ local Startup = require("helpers.startup")
 -- Set the bar name (if using non-default)
 -- SketchyBar.set_bar_name("bottom_bar")
 
+-- Small initial delay to let SketchyBar stabilize
+SketchyBar.exec("sleep 0.2", function()
+  Logger:info("Starting SketchyBar initialization")
+end)
+
 -- Clean up any orphaned processes from previous instances
 Startup.cleanup_processes()
 
@@ -20,37 +25,41 @@ require("bar")
 require("default")
 SketchyBar.end_config()
 
--- Load essential items immediately (no delay)
-require("items.left")
-require("items.right.calendar")
+-- Load essential items with minimal delay
+SketchyBar.exec("sleep 0.3", function()
+  require("items.left")
+  require("items.right.calendar")
+end)
 
--- Load critical system widgets immediately
-require("items.right.widgets.volume")
-require("items.right.widgets.battery")
-require("items.right.widgets.wifi")
-require("items.right.widgets.cpu")
+-- Load critical system widgets with minimal delay
+SketchyBar.exec("sleep 0.5", function()
+  require("items.right.widgets.volume")
+  require("items.right.widgets.battery")
+  require("items.right.widgets.wifi")
+  require("items.right.widgets.cpu")
+end)
 
 -- Register delayed initialization for service widgets
 -- These make external API calls so we delay them to improve startup
 Startup.delayed_init("docker", function()
   require("items.right.widgets.docker_containers")
-end, 7)
+end, 1)
 
 Startup.delayed_init("pr_reviews", function()
   require("items.right.widgets.pr_reviews")
-end, 8)
+end, 2)
 
 Startup.delayed_init("jira_issues", function()
   require("items.right.widgets.jira_issues")
-end, 8)
+end, 3)
 
 Startup.delayed_init("calendar_meetings", function()
   require("items.right.widgets.calendar_meetings")
-end, 9)
+end, 4)
 
 Startup.delayed_init("spotify", function()
   require("items.right.widgets.spotify")
-end, 10)
+end, 5)
 
 -- Execute staged initialization
 Startup.execute_pending()
@@ -63,11 +72,10 @@ SketchyBar.exec("sleep 2", function()
   require("services")
   Logger:info("Services initialized")
 
-  -- Initialize all timers with the single manager process
+  -- Set up global wake handler for timers
   local Timer = require("helpers.timer")
-  Timer.init_all()
   Timer.setup_global_wake_handler()
-  Logger:info("Services, widgets and timer manager initialized")
+  Logger:info("Services and timer manager initialized")
 end)
 
 -- Set up global wake handler

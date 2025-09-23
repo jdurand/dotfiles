@@ -30,7 +30,8 @@ local remaining_time = SketchyBar.add("item", {
 })
 
 
-battery:subscribe({"routine", "power_source_change", "system_woke"}, function()
+-- Battery update function
+local function update_battery()
   SketchyBar.exec("pmset -g batt", function(batt_info)
     local icon = "!"
     local label = "?"
@@ -75,7 +76,13 @@ battery:subscribe({"routine", "power_source_change", "system_woke"}, function()
       label = { string = lead .. label },
     })
   end)
-end)
+end
+
+-- Initial update
+update_battery()
+
+-- Subscribe to events
+battery:subscribe({"routine", "power_source_change", "system_woke"}, update_battery)
 
 battery:subscribe("mouse.clicked", function(env)
   local drawing = battery:query().popup.drawing

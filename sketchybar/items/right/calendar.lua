@@ -23,6 +23,13 @@ local cal = SketchyBar.add("item", "calendar", {
   padding_right = 5,
 })
 
-cal:subscribe({ "forced", "routine", "system_woke" }, function(env)
+-- Update function
+local function update_calendar()
   cal:set({ icon = os.date("%a %d %b"), label = os.date("%H:%M") })
-end)
+end
+
+-- Initial update
+update_calendar()
+
+-- Subscribe to events
+cal:subscribe({ "forced", "routine", "system_woke" }, update_calendar)

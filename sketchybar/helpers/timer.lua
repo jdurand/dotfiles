@@ -35,11 +35,14 @@ timer_names=()
 timer_intervals=()
 timer_last_run=()
 
+# Get current time for initialization
+current_time=$(date +%%s)
+
 # Parse timer configuration from arguments
 while [[ $# -gt 0 ]]; do
   timer_names+=("$1")
   timer_intervals+=("$2")
-  timer_last_run+=(0)
+  timer_last_run+=($current_time)
   shift 2
 done
 
@@ -180,10 +183,11 @@ function Timer.create(config)
 
   Logger:info("Timer registered: " .. config.name .. " (interval: " .. config.interval .. "s)")
 
-  -- Auto-start the timer manager if this is the first timer
-  if next(registered_timers) ~= nil and not manager_pid then
+  -- Restart the timer manager to include the new timer
+  -- Small delay to allow multiple timers to register in quick succession
+  SketchyBar.exec("sleep 0.1", function()
     restart_manager()
-  end
+  end)
 
   -- Return control functions
   return {
@@ -228,10 +232,8 @@ function Timer.create_group(config)
     end)
   end)
 
-  -- Auto-start the timer manager after all timers are registered
-  if next(registered_timers) ~= nil and not manager_pid then
-    restart_manager()
-  end
+  -- Restart the timer manager to include the new timers
+  restart_manager()
 
   -- Return control functions
   return {
@@ -246,7 +248,7 @@ function Timer.init_all()
   stop_manager()
 
   -- Wait a bit then start fresh
-  SketchyBar.exec("sleep 0.5", function()
+  SketchyBar.exec("sleep 1", function()
     start_manager()
   end)
 end

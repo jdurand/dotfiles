@@ -7,7 +7,7 @@ local Startup = {}
 
 -- Configuration
 local CONFIG = {
-  STARTUP_DELAY = 0.8, -- Initial delay before starting heavy operations
+  STARTUP_DELAY = 1.0, -- Initial delay before starting heavy operations
   STAGGER_DELAY = 0.2, -- Delay between starting each widget
   MAX_RETRIES = 3,     -- Maximum retries for failed operations
   RETRY_DELAY = 2,     -- Delay between retries
@@ -97,7 +97,7 @@ function Startup.cleanup_processes()
   SketchyBar.exec("pkill -f 'cpu_load|gpu_load' 2>/dev/null || true")
 
   -- Small delay to ensure cleanup completes
-  SketchyBar.exec("sleep 0.2")
+  SketchyBar.exec("sleep 0.5")
 end
 
 -- Recovery mechanism for hangs

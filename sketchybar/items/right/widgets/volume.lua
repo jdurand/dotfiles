@@ -8,7 +8,7 @@ local volume_percent = SketchyBar.add("item", "widgets.volume1", {
   position = "right",
   icon = { drawing = false },
   label = {
-    string = "??%",
+    string = "--",
     padding_left = -1,
     font = { family = settings.font.numbers }
   },
@@ -148,4 +148,16 @@ volume_icon:subscribe("mouse.scrolled", volume_scroll)
 volume_percent:subscribe("mouse.clicked", volume_toggle_details)
 volume_percent:subscribe("mouse.exited.global", volume_collapse_details)
 volume_percent:subscribe("mouse.scrolled", volume_scroll)
+
+-- Initial volume update
+SketchyBar.exec("osascript -e 'output volume of (get volume settings)'", function(volume_level)
+  local volume = tonumber(volume_level)
+  if volume then
+    SketchyBar.trigger("volume_change", { INFO = tostring(volume) })
+  else
+    -- No system volume available (external audio device)
+    volume_icon:set({ label = icons.volume._66 })
+    volume_percent:set({ label = "--" })
+  end
+end)
 

@@ -46,6 +46,9 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   fi
 fi
 
+# Claude CLI alias
+alias claude="/home/jdurand/.claude/local/claude"
+
 # wrapper to change directories upon Yazi exit
 function y() {
   local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd

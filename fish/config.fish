@@ -125,7 +125,7 @@ alias ls='eza --icons=always'
 alias cat='bat --paging=never'
 alias mux='tmuxinator'
 alias top='btop'
-alias claude="/home/jdurand/.claude/local/claude"
+# alias claude="$HOME/.claude/local/claude"
 
 # Keybindings
 # ------------------------------------------------------------------------------

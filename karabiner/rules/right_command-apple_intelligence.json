@@ -1,6 +1,6 @@
 {
   "description": "Right-Command or Right-Alt + Space => Apple Intelligence",
-  "enabled": true,
+  "enabled": false,
   "manipulators": [
     {
       "from": { "key_code": "right_command" },

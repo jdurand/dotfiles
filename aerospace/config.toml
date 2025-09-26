@@ -1,187 +1,127 @@
-# Start AeroSpace at login
+# ====================
+# Startup Configuration
+# ====================
+
 start-at-login = true
-
-# You can use it to add commands that run after login to macOS user session.
-# 'start-at-login' needs to be 'true' for 'after-login-command' to work
-# Available commands: https://nikitabobko.github.io/AeroSpace/commands
 after-login-command = []
-
-# You can use it to add commands that run after AeroSpace startup.
-# 'after-startup-command' is run after 'after-login-command'
-# Available commands : https://nikitabobko.github.io/AeroSpace/commands
 after-startup-command = [
   'exec-and-forget brew services start sketchybar',
-  'exec-and-forget borders active_color=0xffffffff inactive_color=0xff494d30 width=5.0'
+  # 'exec-and-forget borders active_color=0xffffffff inactive_color=0xff494d30 width=5.0'
 ]
 
-# Normalizations. See: https://nikitabobko.github.io/AeroSpace/guide#normalization
+# ====================
+# Layout Configuration
+# ====================
+
+# Normalizations
 enable-normalization-flatten-containers = true
 enable-normalization-opposite-orientation-for-nested-containers = true
 
-# See: https://nikitabobko.github.io/AeroSpace/guide#layouts
-# The 'accordion-padding' specifies the size of accordion padding
-# You can set 0 to disable the padding feature
-# accordion-padding = 30
+# Layout defaults
+default-root-container-layout = 'tiles'
+default-root-container-orientation = 'auto'  # auto: wide monitors horizontal, tall monitors vertical
 accordion-padding = 250
 
-# Possible values: tiles|accordion
-default-root-container-layout = 'tiles'
+# ====================
+# System Integration
+# ====================
 
-# Possible values: horizontal|vertical|auto
-# 'auto' means: wide monitor (anything wider than high) gets horizontal orientation,
-#               tall monitor (anything higher than wide) gets vertical orientation
-default-root-container-orientation = 'auto'
-
-# Possible values: (qwerty|dvorak)
-# See https://nikitabobko.github.io/AeroSpace/guide#key-mapping
 key-mapping.preset = 'qwerty'
 
-# Mouse follows focus when focused monitor changes
-# Drop it from your config, if you don't like this behavior
-# on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
-
-#
-# SketchyBar plugin
-#
-
-# Notify Sketchybar about workspace change
+# SketchyBar integration
 exec-on-workspace-change = ['/bin/bash', '-c',
   'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE',
-  'exec-and-forget borders active_color=0xffffffff inactive_color=0xff494d30 width=5.0'
+  # 'exec-and-forget borders active_color=0xffffffff inactive_color=0xff494d30 width=5.0'
 ]
 
-# Gaps between windows (inner-*) and between monitor edges (outer-*).
-# Possible values:
-# - Constant:     gaps.outer.top = 8
-# - Per monitor:  gaps.outer.top = [{ monitor.main = 16 }, { monitor."some-pattern" = 32 }, 24]
-#                 In this example, 24 is a default value when there is no match.
-#                 Monitor pattern is the same as for 'workspace-to-monitor-force-assignment'.
-#                 See: https://nikitabobko.github.io/AeroSpace/guide#assign-workspaces-to-monitors
+# ====================
+# Display Configuration
+# ====================
 
-# aerospace list-monitors
-# 1 | LC27G7xT
-# 2 | Built-in Retina Display
-
+# Window gaps
 [gaps]
 inner.horizontal = 5
 inner.vertical =   5
 outer.left =       5
 outer.bottom =     5
-# outer.top =        5
-outer.top = [{ monitor.'built-in' = 5 }, 28]
+outer.top = [{ monitor.'built-in' = 5 }, 28]  # Extra space for sketchybar on external monitors
 outer.right =      5
 
-# 'main' binding mode declaration
-# 'main' binding mode must be always presented
+# ====================
+# Keybindings
+# ====================
+
 [mode.main.binding]
 
-# All possible keys:
-# - Letters.        a, b, c, ..., z
-# - Numbers.        0, 1, 2, ..., 9
-# - Keypad numbers. keypad0, keypad1, keypad2, ..., keypad9
-# - F-keys.         f1, f2, ..., f20
-# - Special keys.   minus, equal, period, comma, slash, backslash, quote, semicolon, backtick,
-#                   leftSquareBracket, rightSquareBracket, space, enter, esc, backspace, tab
-# - Keypad special. keypadClear, keypadDecimalMark, keypadDivide, keypadEnter, keypadEqual,
-#                   keypadMinus, keypadMultiply, keypadPlus
-# - Arrows.         left, down, up, right
-
-# All possible modifiers: cmd, alt, ctrl, shift
-
-# All possible commands: https://nikitabobko.github.io/AeroSpace/commands
-
-# See: https://nikitabobko.github.io/AeroSpace/commands#exec-and-forget
-# You can uncomment the following lines to open up terminal with alt + enter shortcut (like in i3)
-# alt-enter = '''exec-and-forget osascript -e '
-# tell application "Terminal"
-#     do script
-#     activate
-# end tell'
-# '''
-
-# Disable hide application shortcuts
-# cmd-h = [] # Disable "hide application"
-# cmd-alt-h = [] # Disable "hide others"
-
-# Keybindings for layout management
+# Layout management
 cmd-comma = 'layout floating tiling'
 cmd-period = 'layout accordion horizontal vertical'
 cmd-slash = 'layout tiles horizontal vertical'
 
+# Window focus
 cmd-h = 'focus left'
 cmd-j = 'focus down'
 cmd-k = 'focus up'
 cmd-l = 'focus right'
 
+# Window movement
 cmd-shift-h = 'move left'
 cmd-shift-j = 'move down'
 cmd-shift-k = 'move up'
 cmd-shift-l = 'move right'
 
+# Window joining
 alt-cmd-h = ['join-with left', 'mode main']
 alt-cmd-j = ['join-with down', 'mode main']
 alt-cmd-k = ['join-with up', 'mode main']
 alt-cmd-l = ['join-with right', 'mode main']
 
+# Window resizing
 alt-cmd-shift-j = 'resize smart -50'
 alt-cmd-shift-k = 'resize smart +50'
 alt-cmd-shift-h = "resize width -50"
 alt-cmd-shift-l = "resize width +50"
-
 cmd-shift-minus = 'resize smart -50'
 cmd-shift-equal = 'resize smart +50'
 
-# Keybindings for workspace navigation
+# Workspace navigation
 cmd-1 = 'workspace 1'
 cmd-2 = 'workspace 2'
 cmd-3 = 'workspace 3'
-cmd-q = 'workspace Q'
-cmd-w = 'workspace W'
+cmd-b = 'workspace B'
+cmd-g = 'workspace G'
 cmd-e = 'workspace E'
-cmd-r = 'workspace R'
-cmd-t = 'workspace T'
 cmd-m = 'workspace M'
 
+# Move to workspace
+cmd-shift-t = 'move-node-to-workspace --focus-follows-window T'
 cmd-shift-1 = 'move-node-to-workspace --focus-follows-window 1'
 cmd-shift-2 = 'move-node-to-workspace --focus-follows-window 2'
 cmd-shift-3 = 'move-node-to-workspace --focus-follows-window 3'
-cmd-shift-q = 'move-node-to-workspace --focus-follows-window Q'
-cmd-shift-w = 'move-node-to-workspace --focus-follows-window W'
+cmd-shift-b = 'move-node-to-workspace --focus-follows-window B'
+cmd-shift-g = 'move-node-to-workspace --focus-follows-window G'
 cmd-shift-e = 'move-node-to-workspace --focus-follows-window E'
-cmd-shift-r = 'move-node-to-workspace --focus-follows-window R'
-cmd-shift-t = 'move-node-to-workspace --focus-follows-window T'
 cmd-shift-m = 'move-node-to-workspace --focus-follows-window M'
 
-# Other Keybindings
+# Other bindings
 cmd-tab = 'workspace-back-and-forth'
 cmd-shift-tab = 'move-workspace-to-monitor --wrap-around next'
 cmd-shift-f = 'fullscreen'
 cmd-shift-semicolon = 'mode service'
-
 cmd-backtick = 'exec-and-forget open -a ghostty'
 
-# Aerospace application configuration settings
-# run `aerospace list-apps` to get a list of running apps
+# ====================
+# Workspace Assignments
+# ====================
 
-# [[on-window-detected]]
-# if.app-id = 'com.apple.systempreferences'
-# if.app-name-regex-substring = 'settings'
-# if.window-title-regex-substring = 'substring'
-# if.workspace = 'workspace-name'
-# if.during-aerospace-startup = true
-# check-further-callbacks = true
-# run = ['layout floating', 'move-node-to-workspace S']  # The callback itself
+[workspace-to-monitor-force-assignment]
+T = ['secondary', '^VP27', '^LC27']  # Terminal workspace on external monitor
 
-#
-# Floating Apps
-#
+# ====================
+# Window Detection Rules
+# ====================
 
-# # Make all windows float by default
-# [[on-window-detected]]
-# check-further-callbacks = true
-# run = 'layout floating'
-
-# Set iTerm2 to open as a floating Quake-style terminal
+# Floating windows
 [[on-window-detected]]
 if.app-id = 'com.googlecode.iterm2'
 run = 'layout floating'
@@ -222,56 +162,7 @@ run = 'layout floating'
 if.app-name-regex-substring = 'password|keychain'
 run = 'layout floating'
 
-# # Any window opened from the 'T' workspace should have floating behavior
-# [[on-window-detected]]
-# if.workspace = 'T'
-# run = 'layout floating'
-
-[workspace-to-monitor-force-assignment]
-# 1 = 1                            # Monitor sequence number from left to right. 1-based indexing
-# 2 = 'main'                       # Main monitor
-# 3 = 'secondary'                  # Non-main monitor in case when there are only two monitors
-# 4 = 'built-in'                   # Case insensitive regex substring
-# 5 = '^built-in retina display$'  # Case insensitive regex match
-# 6 = ['secondary', 'dell']        # You can specify multiple patterns. The first matching pattern will be used
-T = ['secondary', '^VP27', '^LC27']
-# Q = 'built-in'
-
-#
-# Workspace-App assignment
-#
-
-[[on-window-detected]]
-if.app-id = 'com.mitchellh.ghostty'
-run = ['layout tiling', 'move-node-to-workspace T']
-# [[on-window-detected]]
-# if.app-id = 'net.kovidgoyal.kitty'
-# run = ['layout tiling', 'move-node-to-workspace 1']
-# [[on-window-detected]]
-# if.app-id = 'com.github.wez.wezterm'
-# run = ['layout tiling', 'move-node-to-workspace 1']
-
-[[on-window-detected]]
-if.during-aerospace-startup = true
-if.app-id = 'company.thebrowser.Browser'
-run = ['layout tiling', 'move-node-to-workspace W']
-
-[[on-window-detected]]
-if.during-aerospace-startup = true
-if.app-id = 'app.zen-browser.zen'
-run = ['layout tiling', 'move-node-to-workspace W']
-
-[[on-window-detected]]
-if.app-id = 'com.openai.chat'
-run = ['layout tiling', 'move-node-to-workspace Q']
-[[on-window-detected]]
-if.app-name-regex-substring = 'Gemini'
-run = ['layout tiling', 'move-node-to-workspace Q']
-[[on-window-detected]]
-if.app-id = 'com.anthropic.claudefordesktop'
-run = ['layout tiling', 'move-node-to-workspace Q']
-
-# if a window without title is detected
+# Windows without title
 [[on-window-detected]]
 if.window-title-regex-substring = '^$'
 run = 'layout floating'
@@ -281,10 +172,53 @@ if.app-id = 'net.kovidgoyal.kitty'
 if.window-title-regex-substring = 'floating-tui'
 run = ['layout floating']
 
+# ====================
+# Workspace App Assignments
+# ====================
+
+# Workspace 1 - Code editors
+[[on-window-detected]]
+if.app-id = 'com.microsoft.VSCode'
+run = ['layout tiling', 'move-node-to-workspace 1']
+
+[[on-window-detected]]
+if.app-id = 'com.exafunction.windsurf'
+run = ['layout tiling', 'move-node-to-workspace 1']
+
+[[on-window-detected]]
+if.app-id = 'com.google.Chrome.app.mdpkiolbdkhdjpekfbkbmhigcaggjagi'
+run = ['layout tiling', 'move-node-to-workspace 1']
+
+# Workspace 2 - Chrome
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome'
 run = ['layout tiling', 'move-node-to-workspace 2']
 
+# Workspace Q - AI assistants
+[[on-window-detected]]
+if.app-id = 'com.openai.chat'
+run = ['layout tiling', 'move-node-to-workspace G']
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'Gemini'
+run = ['layout tiling', 'move-node-to-workspace G']
+
+[[on-window-detected]]
+if.app-id = 'com.anthropic.claudefordesktop'
+run = ['layout tiling', 'move-node-to-workspace G']
+
+# Workspace W - Browsers (on startup)
+[[on-window-detected]]
+if.during-aerospace-startup = true
+if.app-id = 'company.thebrowser.Browser'
+run = ['layout tiling', 'move-node-to-workspace B']
+
+[[on-window-detected]]
+if.during-aerospace-startup = true
+if.app-id = 'app.zen-browser.zen'
+run = ['layout tiling', 'move-node-to-workspace B']
+
+# Workspace E - Email & calendar
 [[on-window-detected]]
 if.app-id = 'com.apple.mail'
 run = ['layout tiling', 'move-node-to-workspace E']
@@ -297,6 +231,7 @@ run = ['layout tiling', 'move-node-to-workspace E']
 if.app-id = 'com.google.Chrome.app.kjbdgfilnfhdoflbpgamdcdgpehopbep'
 run = ['layout tiling', 'move-node-to-workspace E']
 
+# Workspace R - Reading & notes
 [[on-window-detected]]
 if.app-id = 'io.readwise.read'
 run = ['layout tiling', 'move-node-to-workspace R']
@@ -305,6 +240,17 @@ run = ['layout tiling', 'move-node-to-workspace R']
 if.app-id = 'md.obsidian'
 run = ['layout tiling', 'move-node-to-workspace R']
 
+# Workspace T - Terminal
+[[on-window-detected]]
+if.app-id = 'com.mitchellh.ghostty'
+run = ['layout tiling', 'move-node-to-workspace T']
+
+# Workspace M - Music
+[[on-window-detected]]
+if.app-id = 'com.google.Chrome.app.cinhimbnkkaeohfgghhklpknlkffjgod'
+run = ['layout tiling', 'move-node-to-workspace M']
+
+# Workspace F - Communication (not shown in current config but referenced)
 [[on-window-detected]]
 if.app-id = 'com.apple.MobileSMS'
 run = ['layout tiling', 'move-node-to-workspace F']
@@ -313,30 +259,13 @@ run = ['layout tiling', 'move-node-to-workspace F']
 if.app-id = 'net.whatsapp.WhatsApp'
 run = ['layout tiling', 'move-node-to-workspace F']
 
-[[on-window-detected]]
-if.app-id = 'com.microsoft.VSCode'
-run = ['layout tiling', 'move-node-to-workspace 1']
-[[on-window-detected]]
-if.app-id = 'com.exafunction.windsurf'
-run = ['layout tiling', 'move-node-to-workspace 1']
+# ====================
+# Service Mode
+# ====================
 
-# if.app-name-regex-substring = 'YouTube'
-# if.window-title-regex-substring = 'music'
-[[on-window-detected]]
-if.app-id = 'com.google.Chrome.app.cinhimbnkkaeohfgghhklpknlkffjgod'
-run = ['layout tiling', 'move-node-to-workspace M']
-
-[[on-window-detected]]
-if.app-id = 'com.google.Chrome.app.mdpkiolbdkhdjpekfbkbmhigcaggjagi'
-run = ['layout tiling', 'move-node-to-workspace 1']
-
-# 'service' binding mode declaration.
 [mode.service.binding]
 esc = ['reload-config', 'mode main']
-r = ['flatten-workspace-tree', 'mode main'] # reset layout
-f = ['layout floating tiling', 'mode main'] # Toggle between floating and tiling layout
+r = ['flatten-workspace-tree', 'mode main']  # reset layout
+f = ['layout floating tiling', 'mode main']  # toggle floating/tiling
 cmd-shift-f = ['mode main', 'macos-native-fullscreen']
 backspace = ['close-all-windows-but-current', 'mode main']
-
-# sticky is not yet supported https://github.com/nikitabobko/AeroSpace/issues/2
-# s = ['layout sticky tiling', 'mode main']

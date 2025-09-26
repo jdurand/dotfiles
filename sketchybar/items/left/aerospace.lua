@@ -205,6 +205,6 @@ end
 -----------------------
 -- Main Initialization
 -----------------------
-initializeWorkspaces({ "T", "W", "E", "D", "M", "Q", "S" })
+initializeWorkspaces({ "T", "1", "2", "3", "Q", "W", "E", "R" })
 reassignWorkspaces()
 highlightFocusedWorkspace()

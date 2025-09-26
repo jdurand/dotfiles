@@ -1,0 +1,17 @@
+{
+  "description": "Left-Command => Spotlight|Raycast Search",
+  "enabled": true,
+  "manipulators": [
+    {
+      "from": { "key_code": "left_command" },
+      "to": [{ "key_code": "left_command" }],
+      "to_if_alone": [
+        {
+          "key_code": "spacebar",
+          "modifiers": ["left_control"]
+        }
+      ],
+      "type": "basic"
+    }
+  ]
+}

@@ -100,7 +100,7 @@ outer.right =      5
 # '''
 
 # Disable hide application shortcuts
-cmd-h = [] # Disable "hide application"
+# cmd-h = [] # Disable "hide application"
 # cmd-alt-h = [] # Disable "hide others"
 
 # Keybindings for layout management
@@ -108,87 +108,57 @@ cmd-comma = 'layout floating tiling'
 cmd-period = 'layout accordion horizontal vertical'
 cmd-slash = 'layout tiles horizontal vertical'
 
-# cmd-h = 'focus left'
-# cmd-j = 'focus down'
-# cmd-k = 'focus up'
-# cmd-l = 'focus right'
-#
-# bound to cmd+h,j,k,l in karabiner
-# see: karabiner/rules/left_command-raycast_and_hjkl_arrows.json
-cmd-alt-h = 'focus left'
-cmd-alt-j = 'focus down'
-cmd-alt-k = 'focus up'
-cmd-alt-l = 'focus right'
+cmd-h = 'focus left'
+cmd-j = 'focus down'
+cmd-k = 'focus up'
+cmd-l = 'focus right'
 
-cmd-alt-shift-j = 'resize smart -50'
-cmd-alt-shift-k = 'resize smart +50'
-# cmd-alt-shift-h = 'resize smart -50'
-# cmd-alt-shift-l = 'resize smart +50'
-cmd-alt-shift-h = "resize width -50"
-cmd-alt-shift-l = "resize width +50"
-# cmd-alt-shift-j = "resize height +50"
-# cmd-alt-shift-k = "resize height -50"
+cmd-shift-h = 'move left'
+cmd-shift-j = 'move down'
+cmd-shift-k = 'move up'
+cmd-shift-l = 'move right'
 
-alt-shift-h = 'move left'
-alt-shift-j = 'move down'
-alt-shift-k = 'move up'
-alt-shift-l = 'move right'
+alt-cmd-h = ['join-with left', 'mode main']
+alt-cmd-j = ['join-with down', 'mode main']
+alt-cmd-k = ['join-with up', 'mode main']
+alt-cmd-l = ['join-with right', 'mode main']
 
-alt-shift-minus = 'resize smart -50'
-alt-shift-equal = 'resize smart +50'
+alt-cmd-shift-j = 'resize smart -50'
+alt-cmd-shift-k = 'resize smart +50'
+alt-cmd-shift-h = "resize width -50"
+alt-cmd-shift-l = "resize width +50"
+
+cmd-shift-minus = 'resize smart -50'
+cmd-shift-equal = 'resize smart +50'
 
 # Keybindings for workspace navigation
 cmd-1 = 'workspace 1'
 cmd-2 = 'workspace 2'
 cmd-3 = 'workspace 3'
-
-alt-1 = 'workspace 1'
-alt-2 = 'workspace 2'
-alt-3 = 'workspace 3'
-
-alt-a = 'workspace A' # In your config, you can drop workspace bindings that you don't need
-alt-c = 'workspace C'
-alt-d = 'workspace D'
-alt-e = 'workspace E'
-alt-m = 'workspace M'
-alt-q = 'workspace Q'
-alt-r = 'workspace R'
-alt-s = 'workspace S'
-alt-t = 'workspace T'
-alt-w = 'workspace W'
-alt-x = 'workspace X'
-alt-z = 'workspace Z'
+cmd-q = 'workspace Q'
+cmd-w = 'workspace W'
+cmd-e = 'workspace E'
+cmd-r = 'workspace R'
+cmd-t = 'workspace T'
+cmd-m = 'workspace M'
 
 cmd-shift-1 = 'move-node-to-workspace --focus-follows-window 1'
 cmd-shift-2 = 'move-node-to-workspace --focus-follows-window 2'
 cmd-shift-3 = 'move-node-to-workspace --focus-follows-window 3'
-
-alt-shift-1 = 'move-node-to-workspace --focus-follows-window 1'
-alt-shift-2 = 'move-node-to-workspace --focus-follows-window 2'
-alt-shift-3 = 'move-node-to-workspace --focus-follows-window 3'
-
-alt-shift-a = 'move-node-to-workspace --focus-follows-window A'
-alt-shift-c = 'move-node-to-workspace --focus-follows-window C'
-alt-shift-d = 'move-node-to-workspace --focus-follows-window D'
-alt-shift-e = 'move-node-to-workspace --focus-follows-window E'
-alt-shift-m = 'move-node-to-workspace --focus-follows-window M'
-alt-shift-q = 'move-node-to-workspace --focus-follows-window Q'
-alt-shift-r = 'move-node-to-workspace --focus-follows-window R'
-alt-shift-s = 'move-node-to-workspace --focus-follows-window S'
-alt-shift-t = 'move-node-to-workspace --focus-follows-window T'
-alt-shift-w = 'move-node-to-workspace --focus-follows-window W'
-alt-shift-x = 'move-node-to-workspace --focus-follows-window X'
-alt-shift-z = 'move-node-to-workspace --focus-follows-window Z'
+cmd-shift-q = 'move-node-to-workspace --focus-follows-window Q'
+cmd-shift-w = 'move-node-to-workspace --focus-follows-window W'
+cmd-shift-e = 'move-node-to-workspace --focus-follows-window E'
+cmd-shift-r = 'move-node-to-workspace --focus-follows-window R'
+cmd-shift-t = 'move-node-to-workspace --focus-follows-window T'
+cmd-shift-m = 'move-node-to-workspace --focus-follows-window M'
 
 # Other Keybindings
-alt-tab = 'workspace-back-and-forth'
-alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
-alt-shift-f = 'fullscreen'
-alt-shift-semicolon = 'mode service'
+cmd-tab = 'workspace-back-and-forth'
+cmd-shift-tab = 'move-workspace-to-monitor --wrap-around next'
+cmd-shift-f = 'fullscreen'
+cmd-shift-semicolon = 'mode service'
 
 cmd-backtick = 'exec-and-forget open -a ghostty'
-alt-backtick = 'exec-and-forget open -a ghostty'
-# alt-backtick = 'exec-and-forget open -a WezTerm'
 
 # Aerospace application configuration settings
 # run `aerospace list-apps` to get a list of running apps
@@ -272,16 +242,6 @@ T = ['secondary', '^VP27', '^LC27']
 #
 
 [[on-window-detected]]
-if.during-aerospace-startup = true
-if.app-id = 'company.thebrowser.Browser'
-run = ['layout tiling', 'move-node-to-workspace W']
-
-[[on-window-detected]]
-if.during-aerospace-startup = true
-if.app-id = 'app.zen-browser.zen'
-run = ['layout tiling', 'move-node-to-workspace W']
-
-[[on-window-detected]]
 if.app-id = 'com.mitchellh.ghostty'
 run = ['layout tiling', 'move-node-to-workspace T']
 # [[on-window-detected]]
@@ -292,14 +252,24 @@ run = ['layout tiling', 'move-node-to-workspace T']
 # run = ['layout tiling', 'move-node-to-workspace 1']
 
 [[on-window-detected]]
+if.during-aerospace-startup = true
+if.app-id = 'company.thebrowser.Browser'
+run = ['layout tiling', 'move-node-to-workspace W']
+
+[[on-window-detected]]
+if.during-aerospace-startup = true
+if.app-id = 'app.zen-browser.zen'
+run = ['layout tiling', 'move-node-to-workspace W']
+
+[[on-window-detected]]
 if.app-id = 'com.openai.chat'
-run = ['layout tiling', 'move-node-to-workspace A']
+run = ['layout tiling', 'move-node-to-workspace Q']
 [[on-window-detected]]
 if.app-name-regex-substring = 'Gemini'
-run = ['layout tiling', 'move-node-to-workspace A']
+run = ['layout tiling', 'move-node-to-workspace Q']
 [[on-window-detected]]
 if.app-id = 'com.anthropic.claudefordesktop'
-run = ['layout tiling', 'move-node-to-workspace A']
+run = ['layout tiling', 'move-node-to-workspace Q']
 
 # if a window without title is detected
 [[on-window-detected]]
@@ -313,7 +283,7 @@ run = ['layout floating']
 
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome'
-run = ['layout tiling', 'move-node-to-workspace Q']
+run = ['layout tiling', 'move-node-to-workspace 2']
 
 [[on-window-detected]]
 if.app-id = 'com.apple.mail'
@@ -333,7 +303,7 @@ run = ['layout tiling', 'move-node-to-workspace R']
 
 [[on-window-detected]]
 if.app-id = 'md.obsidian'
-run = ['layout tiling', 'move-node-to-workspace S']
+run = ['layout tiling', 'move-node-to-workspace R']
 
 [[on-window-detected]]
 if.app-id = 'com.apple.MobileSMS'
@@ -345,38 +315,28 @@ run = ['layout tiling', 'move-node-to-workspace F']
 
 [[on-window-detected]]
 if.app-id = 'com.microsoft.VSCode'
-run = ['layout tiling', 'move-node-to-workspace C']
+run = ['layout tiling', 'move-node-to-workspace 1']
 [[on-window-detected]]
 if.app-id = 'com.exafunction.windsurf'
-run = ['layout tiling', 'move-node-to-workspace C']
+run = ['layout tiling', 'move-node-to-workspace 1']
 
 # if.app-name-regex-substring = 'YouTube'
 # if.window-title-regex-substring = 'music'
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome.app.cinhimbnkkaeohfgghhklpknlkffjgod'
-run = ['layout tiling', 'move-node-to-workspace Z']
+run = ['layout tiling', 'move-node-to-workspace M']
 
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome.app.mdpkiolbdkhdjpekfbkbmhigcaggjagi'
-run = ['layout tiling', 'move-node-to-workspace C']
+run = ['layout tiling', 'move-node-to-workspace 1']
 
 # 'service' binding mode declaration.
 [mode.service.binding]
 esc = ['reload-config', 'mode main']
 r = ['flatten-workspace-tree', 'mode main'] # reset layout
 f = ['layout floating tiling', 'mode main'] # Toggle between floating and tiling layout
-alt-shift-f = ['mode main', 'macos-native-fullscreen']
+cmd-shift-f = ['mode main', 'macos-native-fullscreen']
 backspace = ['close-all-windows-but-current', 'mode main']
 
 # sticky is not yet supported https://github.com/nikitabobko/AeroSpace/issues/2
 # s = ['layout sticky tiling', 'mode main']
-
-alt-shift-h = ['join-with left', 'mode main']
-alt-shift-j = ['join-with down', 'mode main']
-alt-shift-k = ['join-with up', 'mode main']
-alt-shift-l = ['join-with right', 'mode main']
-
-down = 'volume down'
-up = 'volume up'
-shift-down = ['volume set 0', 'mode main']
-

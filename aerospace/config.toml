@@ -65,10 +65,10 @@ cmd-k = 'focus up'
 cmd-l = 'focus right'
 
 # Window movement
-cmd-shift-h = 'move left'
-cmd-shift-j = 'move down'
-cmd-shift-k = 'move up'
-cmd-shift-l = 'move right'
+cmd-ctrl-h = 'move left'
+cmd-ctrl-j = 'move down'
+cmd-ctrl-k = 'move up'
+cmd-ctrl-l = 'move right'
 
 # Window joining
 alt-cmd-h = ['join-with left', 'mode main']
@@ -109,6 +109,17 @@ cmd-shift-tab = 'move-workspace-to-monitor --wrap-around next'
 cmd-shift-f = 'fullscreen'
 cmd-shift-semicolon = 'mode service'
 cmd-backtick = 'exec-and-forget open -a ghostty'
+
+f18 = "workspace-back-and-forth"
+f19 = "move-workspace-to-monitor --wrap-around next"
+
+# workspace switching:
+# cmd-ctrl-j = "workspace --wrap-around next"
+# cmd-ctrl-k = "workspace --wrap-around prev"
+#
+# Go to non empty workspace on the focused monitor
+cmd-shift-j = "exec-and-forget aerospace list-workspaces --monitor focused --empty no | aerospace workspace next --wrap-around"
+cmd-shift-k = "exec-and-forget aerospace list-workspaces --monitor focused --empty no | aerospace workspace prev --wrap-around"
 
 # ====================
 # Workspace Assignments
@@ -205,7 +216,8 @@ run = ['layout tiling', 'move-node-to-workspace G']
 
 [[on-window-detected]]
 if.app-id = 'com.anthropic.claudefordesktop'
-run = ['layout tiling', 'move-node-to-workspace G']
+# run = ['layout tiling', 'move-node-to-workspace G']
+run = ['layout floating'] # needed for the quick input window to behave
 
 # Workspace W - Browsers (on startup)
 [[on-window-detected]]

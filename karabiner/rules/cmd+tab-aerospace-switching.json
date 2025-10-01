@@ -1,6 +1,6 @@
 {
   "description": "Cmd+Tab → F18 and Cmd+Shift+Tab → F19 (for AeroSpace)",
-  "enabled": true,
+  "enabled": false,
   "manipulators": [
     {
       "type": "basic",

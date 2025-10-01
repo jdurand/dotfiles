@@ -110,7 +110,9 @@ cmd-shift-f = 'fullscreen'
 cmd-shift-semicolon = 'mode service'
 cmd-backtick = 'exec-and-forget open -a ghostty'
 
-f18 = "workspace-back-and-forth"
+cmd-ctrl-shift-j = "move-workspace-to-monitor next"
+cmd-ctrl-shift-k = "move-workspace-to-monitor prev"
+# f18 = "workspace-back-and-forth"
 f19 = "move-workspace-to-monitor --wrap-around next"
 
 # workspace switching:

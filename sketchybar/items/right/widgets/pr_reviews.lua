@@ -152,12 +152,22 @@ local function update_pr_reviews()
 
     if count > 0 then
       pr_reviews:set({
-        label = count .. (count == 1 and " PR" or " PRs"),
+        icon = { color = colors.orange },
+        label = {
+          string = count .. (count == 1 and " PR" or " PRs"),
+          color = colors.white,
+        },
         drawing = true,
       })
     else
+      -- Keep drawing true but make invisible for event handling
       pr_reviews:set({
-        drawing = false,
+        icon = { color = colors.transparent },
+        label = {
+          string = "0 PRs",
+          color = colors.transparent,
+        },
+        drawing = true,
       })
     end
   end)

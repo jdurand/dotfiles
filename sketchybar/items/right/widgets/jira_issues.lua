@@ -54,10 +54,26 @@ local function update_jira_issues()
     local result_clean = result and result:gsub("%s+", "") or "0"
     local count = tonumber(result_clean) or 0
 
-    jira_issues:set({
-      label = count .. (count == 1 and " issue" or " issues"),
-      drawing = count > 0,
-    })
+    if count > 0 then
+      jira_issues:set({
+        icon = { color = colors.blue },
+        label = {
+          string = count .. (count == 1 and " issue" or " issues"),
+          color = colors.white,
+        },
+        drawing = true,
+      })
+    else
+      -- Keep drawing true but make invisible for event handling
+      jira_issues:set({
+        icon = { color = colors.transparent },
+        label = {
+          string = "0 issues",
+          color = colors.transparent,
+        },
+        drawing = true,
+      })
+    end
   end)
 end
 

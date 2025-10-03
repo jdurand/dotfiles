@@ -55,19 +55,34 @@ local function update_docker_containers()
     local result_clean = result and result:gsub("%s+", "") or "0"
     local count = tonumber(result_clean) or 0
 
-    -- Update color based on container count
-    local icon_color = colors.blue
-    if count > CONFIG.YELLOW_THRESHOLD then
-      icon_color = colors.yellow
-    elseif count > CONFIG.ORANGE_THRESHOLD then
-      icon_color = colors.orange
-    end
+    if count > 0 then
+      -- Update color based on container count
+      local icon_color = colors.blue
+      if count > CONFIG.ORANGE_THRESHOLD then
+        icon_color = colors.orange
+      elseif count > CONFIG.YELLOW_THRESHOLD then
+        icon_color = colors.yellow
+      end
 
-    docker_containers:set({
-      icon = { color = icon_color },
-      label = count .. " up",
-      drawing = count > 0,
-    })
+      docker_containers:set({
+        icon = { color = icon_color },
+        label = {
+          string = count .. " up",
+          color = colors.white,
+        },
+        drawing = true,
+      })
+    else
+      -- Keep drawing true but make invisible for event handling
+      docker_containers:set({
+        icon = { color = colors.transparent },
+        label = {
+          string = "0 up",
+          color = colors.transparent,
+        },
+        drawing = true,
+      })
+    end
   end)
 end
 

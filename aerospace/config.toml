@@ -92,6 +92,7 @@ cmd-b = 'workspace B'
 cmd-g = 'workspace G'
 cmd-e = 'workspace E'
 cmd-m = 'workspace M'
+cmd-y = 'workspace Y'
 
 # Move to workspace
 cmd-shift-t = 'move-node-to-workspace --focus-follows-window T'
@@ -102,6 +103,7 @@ cmd-shift-b = 'move-node-to-workspace --focus-follows-window B'
 cmd-shift-g = 'move-node-to-workspace --focus-follows-window G'
 cmd-shift-e = 'move-node-to-workspace --focus-follows-window E'
 cmd-shift-m = 'move-node-to-workspace --focus-follows-window M'
+cmd-shift-y = 'move-node-to-workspace --focus-follows-window Y'
 
 # Other bindings
 cmd-tab = 'workspace-back-and-forth'

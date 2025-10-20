@@ -93,9 +93,9 @@ cmd-g = 'workspace G'
 cmd-e = 'workspace E'
 cmd-m = 'workspace M'
 cmd-y = 'workspace Y'
+cmd-backtick = ['workspace T', 'exec-and-forget open -a ghostty']
 
 # Move to workspace
-cmd-shift-t = 'move-node-to-workspace --focus-follows-window T'
 cmd-shift-1 = 'move-node-to-workspace --focus-follows-window 1'
 cmd-shift-2 = 'move-node-to-workspace --focus-follows-window 2'
 cmd-shift-3 = 'move-node-to-workspace --focus-follows-window 3'
@@ -104,13 +104,13 @@ cmd-shift-g = 'move-node-to-workspace --focus-follows-window G'
 cmd-shift-e = 'move-node-to-workspace --focus-follows-window E'
 cmd-shift-m = 'move-node-to-workspace --focus-follows-window M'
 cmd-shift-y = 'move-node-to-workspace --focus-follows-window Y'
+# cmd-shift-backtick = 'move-node-to-workspace --focus-follows-window T'
 
 # Other bindings
 cmd-tab = 'workspace-back-and-forth'
 cmd-shift-tab = 'move-workspace-to-monitor --wrap-around next'
 cmd-shift-f = 'fullscreen'
 cmd-shift-semicolon = 'mode service'
-cmd-backtick = 'exec-and-forget open -a ghostty'
 
 cmd-ctrl-shift-j = "move-workspace-to-monitor next"
 cmd-ctrl-shift-k = "move-workspace-to-monitor prev"
@@ -130,7 +130,7 @@ cmd-shift-k = "exec-and-forget aerospace list-workspaces --monitor focused --emp
 # ====================
 
 [workspace-to-monitor-force-assignment]
-T = ['secondary', '^VP27', '^LC27']  # Terminal workspace on external monitor
+T = ['^VP27', '^LC27']  # Terminal workspace on external monitor
 
 # ====================
 # Window Detection Rules

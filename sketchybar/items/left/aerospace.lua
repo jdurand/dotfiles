@@ -6,7 +6,7 @@ local Workspaces = {}
 
 -- Map monitor IDs between AeroSpace and SketchyBar
 local function sketchyBarMonitorId(monitor_id, total_monitors)
-  return (total_monitors > 1 and monitor_id == 1) and 2 or (monitor_id == 2 and 1 or monitor_id)
+  return monitor_id
 end
 
 -- Helper to execute commands with callbacks

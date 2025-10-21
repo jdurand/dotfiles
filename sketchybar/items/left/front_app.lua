@@ -52,8 +52,10 @@ local front_app = SketchyBar.add("item", "front_app", {
   position = "left",
   icon = {
     color = colors.magenta,
-    drawing = false,
+    drawing = true,
     font = "sketchybar-app-font:Regular:15.0",
+    string = "·",
+    width = 20,
   },
   label = {
     font = {
@@ -67,16 +69,13 @@ local front_app = SketchyBar.add("item", "front_app", {
 
 front_app:subscribe("front_app_switched", function(env)
   local app_name = env.INFO
-  local app_icon = app_icons[app_name]
+  local app_icon = app_icons[app_name] or "·"
   local display_name = truncate_name(app_name, MAX_LENGTH)
 
-  front_app:set({ label = { string = display_name } })
-
-  if app_icon then
-    front_app:set({ icon = { string = app_icon, drawing = true }})
-  else
-    front_app:set({ icon = { drawing = false }})
-  end
+  front_app:set({
+    label = { string = display_name },
+    icon = { string = app_icon, drawing = true }
+  })
 end)
 
 front_app:subscribe("mouse.clicked", function()

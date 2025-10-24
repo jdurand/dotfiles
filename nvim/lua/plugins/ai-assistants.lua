@@ -202,136 +202,6 @@ return {
       vim.keymap.set({ 'v', 'i' }, '<leader>an', '<cmd>GpNextAgent<cr>', { desc = 'gp: next AI agent' })
     end,
   },
-  -- {
-  --   'yetone/avante.nvim',
-  --   event = 'VeryLazy',
-  --   version = false, -- Set this to "*" to always pull the latest release version, or set it to false to update to the latest code changes.
-  --   opts = {
-  --     -- add any opts here
-  --     -- for example
-  --     provider = 'claude',
-  --     providers = {
-  --       claude = {
-  --         endpoint = "https://api.anthropic.com",
-  --         model = "claude-sonnet-4-20250514",
-  --         timeout = 30000, -- Timeout in milliseconds
-  --           extra_request_body = {
-  --             temperature = 0.75,
-  --             max_tokens = 20480,
-  --           },
-  --       },
-  --       openai = {
-  --         endpoint = 'https://api.openai.com/v1',
-  --         model = 'gpt-5-mini', -- your desired model (or use gpt-4o, etc.)
-  --         timeout = 30000, -- timeout in milliseconds
-  --         -- reasoning_effort = "high" -- only supported for reasoning models (o1, etc.)
-  --         extra_request_body = {
-  --           temperature = 1.0, -- adjust if needed
-  --         },
-  --       },
-  --     },
-  --     -- behaviour = {
-  --     --   enable_cursor_planning_mode = true, -- enable cursor planning mode!
-  --     -- },
-  --   },
-  --   -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
-  --   build = vim.fn.has("win32") ~= 0
-  --     and "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false"
-  --     or "make",
-  --   dependencies = {
-  --     'nvim-lua/plenary.nvim',
-  --     'MunifTanjim/nui.nvim',
-  --     --- The below dependencies are optional,
-  --     'echasnovski/mini.pick', -- for file_selector provider mini.pick
-  --     'nvim-telescope/telescope.nvim', -- for file_selector provider telescope
-  --     'hrsh7th/nvim-cmp', -- autocompletion for avante commands and mentions
-  --     'ibhagwan/fzf-lua', -- for file_selector provider fzf
-  --     'stevearc/dressing.nvim', -- for input provider dressing
-  --     'folke/snacks.nvim', -- for input provider snacks
-  --     'nvim-tree/nvim-web-devicons', -- or echasnovski/mini.icons
-  --     'zbirenbaum/copilot.lua', -- for providers='copilot'
-  --     {
-  --       -- support for image pasting
-  --       'HakonHarnes/img-clip.nvim',
-  --       event = 'VeryLazy',
-  --       opts = {
-  --         -- recommended settings
-  --         default = {
-  --           embed_image_as_base64 = false,
-  --           prompt_for_file_name = false,
-  --           drag_and_drop = {
-  --             insert_mode = true,
-  --           },
-  --           -- required for Windows users
-  --           use_absolute_path = true,
-  --         },
-  --       },
-  --     },
-  --     {
-  --       -- Make sure to set this up properly if you have lazy=true
-  --       'MeanderingProgrammer/render-markdown.nvim',
-  --       opts = {
-  --         file_types = { 'markdown', 'Avante' },
-  --       },
-  --       ft = { 'markdown', 'Avante' },
-  --     },
-  --   },
-  -- },
-  {
-    'monkoose/neocodeium',
-    event = 'VeryLazy',
-    dependencies = {
-      'hrsh7th/nvim-cmp',
-    },
-    enabled = function()
-      return vim.fn.filereadable(get_project_root() .. '/.windsurf_enabled') == 1
-    end,
-    config = function()
-      local neocodeium = require('neocodeium')
-      local cmp = require('cmp')
-
-      vim.keymap.set('i', '<C-j>', neocodeium.cycle_or_complete)
-      vim.keymap.set('i', '<C-k>', function() neocodeium.cycle_or_complete(-1) end)
-      vim.keymap.set('i', '<C-c>', neocodeium.clear)
-      vim.keymap.set('i', '<C-p>', neocodeium.accept)
-      vim.keymap.set('i', '<C-f>', neocodeium.accept_word)
-      -- vim.keymap.set('i', '<C-l>', neocodeium.accept_line)
-      vim.keymap.set('i', '<C-l>', function()
-        cmp.close()
-        neocodeium.cycle_or_complete()
-      end)
-
-      long_press_aware_keybinding('i', '<Tab>', {
-        tap = function()
-          if neocodeium.visible() then
-            neocodeium.accept()
-          else
-            neocodeium.cycle_or_complete()
-          end
-        end,
-        press = function()
-          vim.api.nvim_input('<Tab>')
-        end,
-      }, 500, { noremap = true, silent = true })
-
-      neocodeium.setup({
-        manual = true,
-      })
-
-      -- create an autocommand which closes cmp when ai completions are displayed
-      vim.api.nvim_create_autocmd('User', {
-        pattern = 'NeoCodeiumCompletionDisplayed',
-        callback = function() cmp.close() end
-      })
-
-      -- open codeium chat
-      vim.keymap.set('n', '<C-g>c', neocodeium.chat)
-      vim.keymap.set('v', '<C-g>c', function()
-        vim.cmd('y') -- Yank visually selected text
-        neocodeium.chat()
-      end)
-    end,
-  },
   {
     'coder/claudecode.nvim',
     dependencies = { 'folke/snacks.nvim' },
@@ -428,6 +298,10 @@ return {
       -- Recommended for better prompt input, and required to use opencode.nvim's embedded terminal — otherwise optional
       { 'folke/snacks.nvim', opts = { input = { enabled = true } } },
     },
+    config = function()
+      -- Required for `vim.g.opencode_opts.auto_reload`.
+      vim.o.autoread = true
+    end,
     ---@type opencode.Opts
     opts = {
       -- Your configuration, if any — see lua/opencode/config.lua
@@ -445,6 +319,7 @@ return {
       { '<leader>Ap', function() require('opencode').select_prompt() end, desc = 'Select prompt', mode = { 'n', 'v', }, },
       -- Example: keymap for custom prompt
       { '<leader>Ae', function() require('opencode').prompt("Explain @cursor and its context") end, desc = "Explain code near cursor", },
+      { '<leader>aA', function() require('opencode').toggle() end, desc = 'Toggle embedded opencode', mode = 'n' },
     },
   }
 }

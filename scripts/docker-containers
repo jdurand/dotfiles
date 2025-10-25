@@ -10,6 +10,8 @@ COUNT_ONLY=false
 INTERACTIVE=false
 ALL_CONTAINERS=false
 DOCKER_EXECUTABLE="/usr/local/bin/docker"
+TIMEOUT_SECONDS=5
+TIMEOUT_CMD="/opt/homebrew/bin/timeout"
 
 # Check for docker in common locations
 if ! [ -x "$DOCKER_EXECUTABLE" ]; then
@@ -67,15 +69,27 @@ if [ -z "$DOCKER_EXECUTABLE" ] || ! [ -x "$DOCKER_EXECUTABLE" ]; then
   exit 1
 fi
 
-# Check if Docker daemon is running
-if ! "$DOCKER_EXECUTABLE" info >/dev/null 2>&1; then
-  if [ "$COUNT_ONLY" = true ]; then
-    echo "0"
-  else
-    echo "Docker daemon is not running" >&2
-    [ "$INTERACTIVE" = true ] && sleep 3
+# Check if Docker daemon is running (with timeout)
+if [ -x "$TIMEOUT_CMD" ]; then
+  if ! "$TIMEOUT_CMD" "$TIMEOUT_SECONDS" "$DOCKER_EXECUTABLE" info >/dev/null 2>&1; then
+    if [ "$COUNT_ONLY" = true ]; then
+      echo "0"
+    else
+      echo "Docker daemon is not running" >&2
+      [ "$INTERACTIVE" = true ] && sleep 3
+    fi
+    exit 0
   fi
-  exit 0
+else
+  if ! "$DOCKER_EXECUTABLE" info >/dev/null 2>&1; then
+    if [ "$COUNT_ONLY" = true ]; then
+      echo "0"
+    else
+      echo "Docker daemon is not running" >&2
+      [ "$INTERACTIVE" = true ] && sleep 3
+    fi
+    exit 0
+  fi
 fi
 
 # Build docker ps command
@@ -87,20 +101,32 @@ if [ "$ALL_CONTAINERS" = false ]; then
 fi
 
 if [ "$COUNT_ONLY" = true ]; then
-  # Count containers
-  "${DOCKER_CMD[@]}" -q 2>/dev/null | wc -l | tr -d ' '
+  # Count containers with timeout
+  if [ -x "$TIMEOUT_CMD" ]; then
+    "$TIMEOUT_CMD" "$TIMEOUT_SECONDS" "${DOCKER_CMD[@]}" -q 2>/dev/null | wc -l | tr -d ' ' || echo "0"
+  else
+    "${DOCKER_CMD[@]}" -q 2>/dev/null | wc -l | tr -d ' ' || echo "0"
+  fi
 elif [ "$INTERACTIVE" = true ]; then
   # Launch lazydocker if available, otherwise show docker ps
   if command -v lazydocker >/dev/null 2>&1; then
     lazydocker
   else
     # Fallback to formatted docker ps with headers
-    "${DOCKER_CMD[@]}" --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"
+    if [ -x "$TIMEOUT_CMD" ]; then
+      "$TIMEOUT_CMD" "$TIMEOUT_SECONDS" "${DOCKER_CMD[@]}" --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"
+    else
+      "${DOCKER_CMD[@]}" --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"
+    fi
     echo ""
     echo "Press any key to exit..."
     read -n 1
   fi
 else
   # Show containers in plain format
-  "${DOCKER_CMD[@]}" --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}" --no-trunc
+  if [ -x "$TIMEOUT_CMD" ]; then
+    "$TIMEOUT_CMD" "$TIMEOUT_SECONDS" "${DOCKER_CMD[@]}" --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}" --no-trunc
+  else
+    "${DOCKER_CMD[@]}" --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}" --no-trunc
+  fi
 fi

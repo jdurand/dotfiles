@@ -1,0 +1,15 @@
+name: ai-chat-agent
+root: ~/Code/libro/ai-chat-agent
+
+startup_window: editor
+
+windows:
+  - console:
+      panes:
+        - git pull; docker dev server
+        - git status
+  - editor:
+      root: ~/Code/libro/ai-chat-agent
+      layout: main-horizontal
+      panes:
+        - nvim

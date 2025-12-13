@@ -252,7 +252,7 @@ return {
           local buffer = vim.api.nvim_get_current_buf()
           local name = vim.api.nvim_buf_get_name(buffer)
 
-          if name:match('claude|opencode') then
+          if name:match('claude') then
             -- -- Switch to normal mode when pressing Escape in terminal mode
             -- tnoremap('<Esc>', '<C-\\><C-n>', { buffer = buffer })
             --
@@ -301,6 +301,45 @@ return {
     config = function()
       -- Required for `vim.g.opencode_opts.auto_reload`.
       vim.o.autoread = true
+
+      vim.api.nvim_create_autocmd('TermOpen', {
+        pattern = '*', -- Fire for all terminals
+        callback = function(args)
+          local buffer = args.buf
+
+          -- Use pcall to safely check for the variable without erroring if it doesn't exist.
+          local success, opencode_var = pcall(vim.api.nvim_buf_get_var, buffer, 'opencode_channel')
+
+          -- Check if the pcall was successful and the variable is not nil
+          if success and opencode_var ~= nil then
+            -- We must exit Terminal Mode (t) to Normal Mode (n) before running window navigation (<C-w>...)
+            -- This is done by sending the special sequence: <C-\><C-n>
+
+            -- local opts = { noremap = true, silent = true, buffer = buffer }
+            --
+            -- -- Map Ctrl-H/J/K/L to exit terminal mode AND switch to the adjacent Neovim window
+            -- -- NOTE: If you are using tmux, you may need a dedicated tmux integration plugin like `christoomey/vim-tmux-navigator`.
+            --
+            -- -- Move focus left: Exit Terminal Mode (<C-\><C-n>) then execute window move command (<C-w>h)
+            -- tnoremap('<C-h>', '<C-\\><C-n><C-w>h', opts)
+            --
+            -- -- Move focus down: Exit Terminal Mode (<C-\><C-n>) then execute window move command (<C-w>j)
+            -- tnoremap('<C-j>', '<C-\\><C-n><C-w>j', opts)
+            --
+            -- -- Move focus up: Exit Terminal Mode (<C-\><C-n>) then execute window move command (<C-w>k)
+            -- tnoremap('<C-k>', '<C-\\><C-n><C-w>k', opts)
+            --
+            -- -- Move focus right: Exit Terminal Mode (<C-\><C-n>) then execute window move command (<C-w>l', opts)
+            -- tnoremap('<C-l>', '<C-\\><C-n><C-w>l', opts)
+
+            -- Map Ctrl+h/j/k/l to navigate between tmux panes
+            tnoremap('<C-h>', '<cmd>lua require("tmux").move_left()<cr>', { buffer = buffer })
+            tnoremap('<C-j>', '<cmd>lua require("tmux").move_bottom()<cr>', { buffer = buffer })
+            tnoremap('<C-k>', '<cmd>lua require("tmux").move_top()<cr>', { buffer = buffer })
+            tnoremap('<C-l>', '<cmd>lua require("tmux").move_right()<cr>', { buffer = buffer })
+          end
+        end
+      })
     end,
     ---@type opencode.Opts
     opts = {

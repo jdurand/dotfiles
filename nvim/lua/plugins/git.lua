@@ -200,5 +200,17 @@ return {
       local cmp_config = require('cmp').get_config()
       table.insert(cmp_config.sources, { name = 'git' })
     end
+  },
+  {
+    -- 'ThePrimeagen/git-worktree.nvim',
+    'AndresYague/git-worktree.nvim',
+    init = function()
+      require('telescope').load_extension('git_worktree')
+    end,
+    config = function()
+      nnoremap('<leader>gw', function()
+        require('telescope').extensions.git_worktree.git_worktrees()
+      end, { desc = "Git [W]orktrees" })
+    end
   }
 }

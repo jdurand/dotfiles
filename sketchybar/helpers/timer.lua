@@ -13,6 +13,7 @@ local Timer = {}
 -- Track all registered timers
 local registered_timers = {}
 local manager_pid = nil
+local restart_scheduled = false -- Prevent multiple concurrent restarts
 
 -- Generate the timer manager script
 local function generate_manager_script()
@@ -142,13 +143,27 @@ local function stop_manager()
   SketchyBar.exec("pkill -f sketchybar_timer_manager.sh 2>/dev/null")
 end
 
--- Restart the timer manager
+-- Restart the timer manager (with debounce to prevent race conditions)
 local function restart_manager()
   stop_manager()
 
   -- Small delay to ensure process is killed
   SketchyBar.exec("sleep 0.5", function()
     start_manager()
+    restart_scheduled = false
+  end)
+end
+
+-- Schedule a debounced restart (prevents multiple concurrent restarts)
+local function schedule_restart()
+  if restart_scheduled then
+    return -- Already scheduled, skip
+  end
+
+  restart_scheduled = true
+  -- Delay restart to allow multiple timers to register
+  SketchyBar.exec("sleep 0.3", function()
+    restart_manager()
   end)
 end
 
@@ -183,11 +198,9 @@ function Timer.create(config)
 
   Logger:info("Timer registered: " .. config.name .. " (interval: " .. config.interval .. "s)")
 
-  -- Restart the timer manager to include the new timer
-  -- Small delay to allow multiple timers to register in quick succession
-  SketchyBar.exec("sleep 0.1", function()
-    restart_manager()
-  end)
+  -- Schedule a debounced restart to include the new timer
+  -- This prevents race conditions when multiple timers register in quick succession
+  schedule_restart()
 
   -- Return control functions
   return {
@@ -232,8 +245,8 @@ function Timer.create_group(config)
     end)
   end)
 
-  -- Restart the timer manager to include the new timers
-  restart_manager()
+  -- Schedule a debounced restart to include the new timers
+  schedule_restart()
 
   -- Return control functions
   return {

@@ -90,11 +90,17 @@ end
 function Startup.cleanup_processes()
   Logger:info("Cleaning up orphaned processes")
 
-  -- Kill orphaned timer processes
+  -- Kill orphaned timer manager processes
+  SketchyBar.exec("pkill -f 'sketchybar_timer_manager.sh' 2>/dev/null || true")
+
+  -- Kill orphaned timer trigger processes (but not watchdog, we handle that separately)
   SketchyBar.exec("pkill -f 'sketchybar --trigger' 2>/dev/null || true")
 
   -- Kill orphaned event providers
-  SketchyBar.exec("pkill -f 'cpu_load|gpu_load' 2>/dev/null || true")
+  SketchyBar.exec("pkill -f 'cpu_load|network_load' 2>/dev/null || true")
+
+  -- Kill orphaned volume monitoring loops
+  SketchyBar.exec("pkill -f 'osascript.*volume settings' 2>/dev/null || true")
 
   -- Small delay to ensure cleanup completes
   SketchyBar.exec("sleep 0.5")
@@ -104,6 +110,9 @@ end
 function Startup.setup_watchdog()
   -- Create a watchdog that monitors SketchyBar responsiveness
   local watchdog_interval = 60 -- Check every minute
+
+  -- Kill any existing watchdog loops first to prevent accumulation
+  SketchyBar.exec("pkill -f 'sketchybar --trigger watchdog_check' 2>/dev/null || true")
 
   SketchyBar.add("event", "watchdog_check")
 

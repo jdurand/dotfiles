@@ -7,6 +7,9 @@ local WidgetManager = require("helpers.widget_manager")
 WidgetManager.init()
 
 -- Start volume event provider
+-- Kill any existing volume monitoring loops first to prevent accumulation
+SketchyBar.exec("pkill -f 'osascript.*volume settings' 2>/dev/null || true")
+
 SketchyBar.add("event", "volume_change")
 local volume_cmd = string.format(
   "while true; do " ..

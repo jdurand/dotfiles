@@ -7,6 +7,8 @@ set -euo pipefail
 
 # Configuration
 GCALCLI_EXECUTABLE="/opt/homebrew/bin/gcalcli"
+TIMEOUT_SECONDS=10
+TIMEOUT_CMD="/opt/homebrew/bin/timeout"
 COUNT_ONLY=false
 INTERACTIVE=false
 TODAY_ONLY=false
@@ -111,49 +113,95 @@ else
   fi
 fi
 
-# Execute command and process output
+# Execute command and process output with timeout protection
 if [ "$COUNT_ONLY" = true ]; then
   # Count actual meetings (filter out all-day events and past events beyond grace period)
-  "${GCALCLI_CMD[@]}" 2>/dev/null | awk -F'\t' -v current_time="$CURRENT_TIME" -v current_date="$CURRENT_DATE" '
-    function time_to_minutes(time) {
-      split(time, parts, ":")
-      return parts[1] * 60 + parts[2]
-    }
-    NR > 1 && NF >= 7 && $2 != "" && $6 != "" {
-      # Count meetings with Google Meet links only
-      # For today, count upcoming meetings and recent meetings (within 10 minutes grace period)
-      if ($1 == current_date) {
-        time_diff = time_to_minutes($2) - time_to_minutes(current_time)
-        if (time_diff >= -10) {  # Include meetings up to 10 minutes in the past
+  if [ -x "$TIMEOUT_CMD" ]; then
+    "$TIMEOUT_CMD" "$TIMEOUT_SECONDS" "${GCALCLI_CMD[@]}" 2>/dev/null | awk -F'\t' -v current_time="$CURRENT_TIME" -v current_date="$CURRENT_DATE" '
+      function time_to_minutes(time) {
+        split(time, parts, ":")
+        return parts[1] * 60 + parts[2]
+      }
+      NR > 1 && NF >= 7 && $2 != "" && $6 != "" {
+        # Count meetings with Google Meet links only
+        # For today, count upcoming meetings and recent meetings (within 10 minutes grace period)
+        if ($1 == current_date) {
+          time_diff = time_to_minutes($2) - time_to_minutes(current_time)
+          if (time_diff >= -10) {  # Include meetings up to 10 minutes in the past
+            count++
+          }
+        } else {
+          # Future dates, count meetings with Google Meet links
           count++
         }
-      } else {
-        # Future dates, count meetings with Google Meet links
-        count++
       }
-    }
-    END { print count + 0 }'
+      END { print count + 0 }' || echo "0"
+  else
+    "${GCALCLI_CMD[@]}" 2>/dev/null | awk -F'\t' -v current_time="$CURRENT_TIME" -v current_date="$CURRENT_DATE" '
+      function time_to_minutes(time) {
+        split(time, parts, ":")
+        return parts[1] * 60 + parts[2]
+      }
+      NR > 1 && NF >= 7 && $2 != "" && $6 != "" {
+        # Count meetings with Google Meet links only
+        # For today, count upcoming meetings and recent meetings (within 10 minutes grace period)
+        if ($1 == current_date) {
+          time_diff = time_to_minutes($2) - time_to_minutes(current_time)
+          if (time_diff >= -10) {  # Include meetings up to 10 minutes in the past
+            count++
+          }
+        } else {
+          # Future dates, count meetings with Google Meet links
+          count++
+        }
+      }
+      END { print count + 0 }' || echo "0"
+  fi
 else
   # Filter past events for today (but keep meetings within grace period)
-  "${GCALCLI_CMD[@]}" 2>/dev/null | awk -F'\t' -v current_time="$CURRENT_TIME" -v current_date="$CURRENT_DATE" '
-    function time_to_minutes(time) {
-      split(time, parts, ":")
-      return parts[1] * 60 + parts[2]
-    }
-    NR == 1 { print; next }
-    NF >= 7 {
-      # For today, show upcoming meetings and recent meetings (within 10 minutes grace period)
-      if ($1 == current_date && $2 != "") {
-        time_diff = time_to_minutes($2) - time_to_minutes(current_time)
-        if (time_diff >= -10) {  # Include meetings up to 10 minutes in the past
+  if [ -x "$TIMEOUT_CMD" ]; then
+    "$TIMEOUT_CMD" "$TIMEOUT_SECONDS" "${GCALCLI_CMD[@]}" 2>/dev/null | awk -F'\t' -v current_time="$CURRENT_TIME" -v current_date="$CURRENT_DATE" '
+      function time_to_minutes(time) {
+        split(time, parts, ":")
+        return parts[1] * 60 + parts[2]
+      }
+      NR == 1 { print; next }
+      NF >= 7 {
+        # For today, show upcoming meetings and recent meetings (within 10 minutes grace period)
+        if ($1 == current_date && $2 != "") {
+          time_diff = time_to_minutes($2) - time_to_minutes(current_time)
+          if (time_diff >= -10) {  # Include meetings up to 10 minutes in the past
+            print
+          }
+        } else if ($1 != current_date) {
+          # Future dates, show all meetings
+          print
+        } else if ($2 == "") {
+          # All-day events, show them
           print
         }
-      } else if ($1 != current_date) {
-        # Future dates, show all meetings
-        print
-      } else if ($2 == "") {
-        # All-day events, show them
-        print
+      }' || echo "Error: Request timed out"
+  else
+    "${GCALCLI_CMD[@]}" 2>/dev/null | awk -F'\t' -v current_time="$CURRENT_TIME" -v current_date="$CURRENT_DATE" '
+      function time_to_minutes(time) {
+        split(time, parts, ":")
+        return parts[1] * 60 + parts[2]
       }
-    }'
+      NR == 1 { print; next }
+      NF >= 7 {
+        # For today, show upcoming meetings and recent meetings (within 10 minutes grace period)
+        if ($1 == current_date && $2 != "") {
+          time_diff = time_to_minutes($2) - time_to_minutes(current_time)
+          if (time_diff >= -10) {  # Include meetings up to 10 minutes in the past
+            print
+          }
+        } else if ($1 != current_date) {
+          # Future dates, show all meetings
+          print
+        } else if ($2 == "") {
+          # All-day events, show them
+          print
+        }
+      }' || echo "Error: Request failed"
+  fi
 fi

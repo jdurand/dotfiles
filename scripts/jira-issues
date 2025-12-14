@@ -5,6 +5,10 @@
 
 set -euo pipefail
 
+# Configuration
+TIMEOUT_SECONDS=10
+TIMEOUT_CMD="/opt/homebrew/bin/timeout"
+
 # Default values
 DEFAULT_STATUSES=("To Do" "In Progress" "Code Review" "To Merge")
 DEFAULT_JQL="sprint in openSprints()"
@@ -118,9 +122,17 @@ JIRA_CMD=(
   $( [ "$INTERACTIVE" = true ] || echo "--plain --no-headers" )
 )
 
-# Execute command
+# Execute command with timeout protection
 if [ "$COUNT_ONLY" = true ]; then
-  "${JIRA_CMD[@]}" 2>/dev/null | wc -l | tr -d ' '
+  if [ -x "$TIMEOUT_CMD" ]; then
+    "$TIMEOUT_CMD" "$TIMEOUT_SECONDS" "${JIRA_CMD[@]}" 2>/dev/null | wc -l | tr -d ' ' || echo "0"
+  else
+    "${JIRA_CMD[@]}" 2>/dev/null | wc -l | tr -d ' ' || echo "0"
+  fi
 else
-  "${JIRA_CMD[@]}"
+  if [ -x "$TIMEOUT_CMD" ]; then
+    "$TIMEOUT_CMD" "$TIMEOUT_SECONDS" "${JIRA_CMD[@]}" 2>/dev/null || echo "Error: Request timed out"
+  else
+    "${JIRA_CMD[@]}" 2>/dev/null || echo "Error: Request failed"
+  fi
 fi

@@ -122,13 +122,16 @@ JIRA_CMD=(
   $( [ "$INTERACTIVE" = true ] || echo "--plain --no-headers" )
 )
 
-# Execute command with timeout protection
+# Execute command with timeout protection (skip timeout for interactive mode)
 if [ "$COUNT_ONLY" = true ]; then
   if [ -x "$TIMEOUT_CMD" ]; then
     "$TIMEOUT_CMD" "$TIMEOUT_SECONDS" "${JIRA_CMD[@]}" 2>/dev/null | wc -l | tr -d ' ' || echo "0"
   else
     "${JIRA_CMD[@]}" 2>/dev/null | wc -l | tr -d ' ' || echo "0"
   fi
+elif [ "$INTERACTIVE" = true ]; then
+  # No timeout for interactive mode - user controls when to exit
+  "${JIRA_CMD[@]}"
 else
   if [ -x "$TIMEOUT_CMD" ]; then
     "$TIMEOUT_CMD" "$TIMEOUT_SECONDS" "${JIRA_CMD[@]}" 2>/dev/null || echo "Error: Request timed out"

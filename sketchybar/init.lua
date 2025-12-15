@@ -78,14 +78,19 @@ SketchyBar.exec("sleep 2", function()
   Logger:info("Services and timer manager initialized")
 end)
 
--- Set up global wake handler
-local wake_handler = SketchyBar.add("item", "system.global_wake", {
+-- Set up global wake and display change handlers
+local system_handler = SketchyBar.add("item", "system.event_handler", {
   drawing = false,
 })
 
-wake_handler:subscribe("system_woke", function()
+system_handler:subscribe("system_woke", function()
   Logger:info("System wake detected - global handler")
   Startup.handle_system_wake()
+end)
+
+system_handler:subscribe("display_change", function()
+  Logger:info("Display change detected - global handler")
+  Startup.handle_display_change()
 end)
 
 -- Perform initial health check

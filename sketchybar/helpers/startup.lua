@@ -146,28 +146,31 @@ function Startup.setup_watchdog()
   end)
 end
 
--- System wake handler with improved recovery
-function Startup.handle_system_wake()
-  Logger:info("System wake detected, initiating recovery")
+-- Force a full restart of SketchyBar (nuclear option)
+function Startup.force_restart()
+  Logger:info("Forcing full SketchyBar restart")
 
-  -- Kill and restart all timer processes
+  -- Kill all background processes first
   Startup.cleanup_processes()
 
-  -- Wait for system to stabilize
-  SketchyBar.exec("sleep 3", function()
-    -- Trigger refresh of all widgets
-    SketchyBar.exec("/opt/homebrew/bin/sketchybar --trigger force_refresh")
+  -- Small delay then reload
+  SketchyBar.exec("sleep 1 && /opt/homebrew/bin/sketchybar --reload &")
+end
 
-    -- Re-initialize failed widgets if any
-    for name, _ in pairs(pending_inits) do
-      if not initialized_widgets[name] then
-        Logger:info("Re-initializing " .. name .. " after wake")
-        Startup.delayed_init(name, pending_inits[name].init, 1)
-      end
-    end
+-- System wake handler with aggressive recovery
+function Startup.handle_system_wake()
+  Logger:info("System wake detected, forcing full restart")
 
-    Startup.execute_pending()
-  end)
+  -- Nuclear option: kill everything and reload
+  Startup.force_restart()
+end
+
+-- Display change handler (monitor connect/disconnect)
+function Startup.handle_display_change()
+  Logger:info("Display change detected, forcing full restart")
+
+  -- Nuclear option: kill everything and reload
+  Startup.force_restart()
 end
 
 -- Check system health and attempt recovery if needed

@@ -145,24 +145,40 @@ vim.api.nvim_set_keymap('n', '<Leader>j', ':split<CR><C-w>j', { noremap = true }
 -- ----------------------------------------------------------------------------------------------------
 vim.api.nvim_set_keymap('n', '<C-]>', ':tag <C-r><C-w><CR>', { noremap = true })
 
--- Open current file in Preview / Default App
+-- Open current file in Quick Look/Preview
 -- ----------------------------------------------------------------------------------------------------
 vim.keymap.set('n', '<leader>pp', function()
-  local filepath = vim.fn.expand("%")
-  local ext = vim.fn.fnamemodify(filepath, ":e"):lower()
+  local filepath = vim.fn.expand('%:p')
+  local ext = vim.fn.fnamemodify(filepath, ':e'):lower()
 
-  if ext == "md" or ext == "markdown" then
-    vim.cmd("MarkdownPreview")
+  if ext == 'md' or ext == 'markdown' then
+    vim.cmd('MarkdownPreview')
+  elseif ext:match('^html?$') then
+    vim.fn.system({ 'open', '-a', 'Min.app', filepath })
   else
-    vim.ui.open(filepath)
+    -- Open images and PDFs with macOS Quick Look (qlmanage -p)
+    -- Run qlmanage and bring to foreground with osascript
+    vim.fn.jobstart(
+      'qlmanage -p ' .. vim.fn.shellescape(filepath) .. ' & sleep 0.2 && osascript -e \'tell application "qlmanage" to activate\'',
+      { detach = true, shell = true }
+    )
+    --
+    -- vim.fn.system({ 'open', '-a', 'Preview', filepath })
+    --
   end
-end, { desc = 'Open current file in Preview', noremap = true, silent = true })
+end, { desc = '[P]review current file', noremap = true, silent = true })
 
--- Open files directory
+-- Open file with default app
 vim.keymap.set('n', '<leader>po', function()
-  local dirpath = vim.fn.expand("%:p:h")
+  local filepath = vim.fn.expand('%:p')
+  vim.ui.open(filepath)
+end, { desc = '[O]pen current file', noremap = true, silent = true })
+
+-- Open file directory
+vim.keymap.set('n', '<leader>pd', function()
+  local dirpath = vim.fn.expand('%:p:h')
   vim.ui.open(dirpath)
-end, { desc = 'Open file directory', noremap = true, silent = true })
+end, { desc = 'Open file [D]irectory', noremap = true, silent = true })
 
 -- Restore default behavior for Ctrl+i since Tmux overrides it
 -- Remaped C-i to A-i in the terminal emulator configuration

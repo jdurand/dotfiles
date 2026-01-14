@@ -46,7 +46,8 @@ end
 local function get_ordered_workspace_names(specified_order)
   specified_order = specified_order or {}
 
-  local handle = io.popen("aerospace list-workspaces --all")
+  -- Use timeout to prevent hang if aerospace is unresponsive
+  local handle = io.popen("timeout 3 aerospace list-workspaces --all 2>/dev/null")
   local workspace_names = {}
   if handle then
     for line in handle:lines() do

@@ -13,8 +13,8 @@ SketchyBar.exec("pkill -f 'osascript.*volume settings' 2>/dev/null || true")
 SketchyBar.add("event", "volume_change")
 local volume_cmd = string.format(
   "while true; do " ..
-  "volume=$(osascript -e 'output volume of (get volume settings)' 2>/dev/null); " ..
-  "if [ \"$volume\" != \"missing value\" ] && [ ! -z \"$volume\" ]; then " ..
+  "volume=$(timeout 2 osascript -e 'output volume of (get volume settings)' 2>/dev/null || echo ''); " ..
+  "if [ \"$volume\" != \"missing value\" ] && [ \"$volume\" != \"\" ]; then " ..
   "/opt/homebrew/bin/sketchybar --trigger volume_change INFO=$volume; " ..
   "fi; " ..
   "sleep 2; " ..

@@ -57,7 +57,7 @@ local pr_reviews = SketchyBar.add("item", "widgets.pr_reviews", {
 -- Centralized GitHub CLI command function
 local function fetch_pr_reviews(callback)
   local command = string.format(
-    '/opt/homebrew/bin/gh search prs --review-requested %s --owner %s --state open --json repository,title,url',
+    'timeout 10 /opt/homebrew/bin/gh search prs --review-requested %s --owner %s --state open --json repository,title,url 2>/dev/null || echo "[]"',
     CONFIG.REVIEWER,
     CONFIG.ORGANIZATION
   )

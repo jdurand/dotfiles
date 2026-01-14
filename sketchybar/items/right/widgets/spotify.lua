@@ -157,98 +157,78 @@ local function update_media(env)
           }
         })
 
-        -- Try to get artwork URL via AppleScript
-        local artwork_success = false
-        local handle = io.popen("osascript -e 'tell application \"Spotify\" to try\nget artwork url of current track\nend try' 2>/dev/null")
-        if handle then
-          local artwork_url = handle:read("*a"):gsub("\n", "")
-          handle:close()
-
-          -- Debug: Log what AppleScript returned
-          Logger:debug('AppleScript artwork result: ' .. tostring(artwork_url))
-
-          if artwork_url and artwork_url ~= "" and artwork_url ~= "missing value" then
-            -- Create cache directory and generate cache filename from track ID
-            local track_id = env.INFO["Track ID"] or ""
-            local cache_id = track_id:match("spotify:track:(.+)") or "unknown"
-            local cache_dir = "/tmp/spotify_artwork"
-            local cached_image = cache_dir .. "/" .. cache_id .. "_24x24.jpg"
-
-            -- Create cache directory if it doesn't exist
-            os.execute("mkdir -p '" .. cache_dir .. "'")
-
-            -- Check if cached resized image already exists
-            local cache_check = io.popen("ls -la '" .. cached_image .. "' 2>/dev/null")
-            local cache_info = cache_check:read("*a")
-            cache_check:close()
-
-            if cache_info ~= "" then
-              -- Use cached image
-              Logger:info('Using cached artwork: ' .. cached_image)
-              artwork_success = true
-            else
-              -- Download and resize image
-              local temp_download = cache_dir .. "/" .. cache_id .. "_original.jpg"
-              local download_cmd = "curl -L -s --max-time 5 '" .. artwork_url .. "' -o '" .. temp_download .. "' 2>/tmp/curl_error.log"
-              local download_result = os.execute(download_cmd)
-
-              -- Check if download succeeded
-              local file_check = io.popen("ls -la '" .. temp_download .. "' 2>/dev/null")
-              local file_info = file_check:read("*a")
-              file_check:close()
-
-              local file_size = file_info:match("wheel%s+(%d+)")
-              if file_size and tonumber(file_size) > 1000 then
-                -- Resize image to 24x24 using macOS sips command
-                local resize_cmd = "sips -z 24 24 '" .. temp_download .. "' --out '" .. cached_image .. "' >/dev/null 2>&1"
-                local resize_result = os.execute(resize_cmd)
-
-                if resize_result then
-                  -- Clean up original download
-                  os.execute("rm -f '" .. temp_download .. "'")
-                  artwork_success = true
-                  Logger:info('Downloaded and resized artwork: ' .. cached_image)
-                else
-                  Logger:error('Failed to resize artwork')
-                end
-              else
-                Logger:error('Download failed or file too small')
-              end
-            end
-
-            if artwork_success then
-              media_cover:set({
-                drawing = true,
-                background = {
-                  image = {
-                    string = cached_image,
-                    scale = 1.0,  -- No scaling needed, already resized
-                  },
-                  corner_radius = 6,
-                },
-                width = 24,
-                height = 24,
-              })
-            end
-          end
-        end
-
-        if not artwork_success then
-          media_cover:set({
-            drawing = true,
-            background = {
-              image = {
-                string = "media.artwork",  -- Fallback to media.artwork
-                scale = 0.6,
-              },
-              color = colors.with_alpha(colors.grey, 0.3),
-              corner_radius = 6,
+        -- Show cover immediately with fallback while we fetch artwork async
+        media_cover:set({
+          drawing = true,
+          background = {
+            image = {
+              string = "media.artwork",
+              scale = 0.6,
             },
-            width = 24,
-            height = 24,
-          })
-          Logger:warn('Using fallback - AppleScript failed to get artwork')
-        end
+            color = colors.with_alpha(colors.grey, 0.3),
+            corner_radius = 6,
+          },
+          width = 24,
+          height = 24,
+        })
+
+        -- Fetch artwork asynchronously with timeout to prevent hangs
+        local track_id = env.INFO["Track ID"] or ""
+        local cache_id = track_id:match("spotify:track:(.+)") or "unknown"
+        local cache_dir = "/tmp/spotify_artwork"
+        local cached_image = cache_dir .. "/" .. cache_id .. "_24x24.jpg"
+
+        -- Check cache first, then fetch if needed (all async with timeouts)
+        SketchyBar.exec("test -f '" .. cached_image .. "' && echo 'cached' || echo 'miss'", function(cache_result)
+          if cache_result and cache_result:match("cached") then
+            -- Use cached image
+            Logger:info('Using cached artwork: ' .. cached_image)
+            media_cover:set({
+              drawing = true,
+              background = {
+                image = { string = cached_image, scale = 1.0 },
+                corner_radius = 6,
+              },
+              width = 24,
+              height = 24,
+            })
+          else
+            -- Get artwork URL from Spotify with 3s timeout to prevent hang
+            SketchyBar.exec("timeout 3 osascript -e 'tell application \"Spotify\" to try\nget artwork url of current track\nend try' 2>/dev/null || echo ''", function(artwork_url)
+              artwork_url = (artwork_url or ""):gsub("%s+", "")
+              Logger:debug('AppleScript artwork result: ' .. tostring(artwork_url))
+
+              if artwork_url ~= "" and artwork_url ~= "missing value" then
+                -- Download and resize async with timeout
+                local temp_download = cache_dir .. "/" .. cache_id .. "_original.jpg"
+                local fetch_cmd = string.format(
+                  "mkdir -p '%s' && timeout 5 curl -L -s --max-time 4 '%s' -o '%s' 2>/dev/null && " ..
+                  "sips -z 24 24 '%s' --out '%s' >/dev/null 2>&1 && rm -f '%s' && echo 'ok' || echo 'fail'",
+                  cache_dir, artwork_url, temp_download, temp_download, cached_image, temp_download
+                )
+
+                SketchyBar.exec(fetch_cmd, function(result)
+                  if result and result:match("ok") then
+                    Logger:info('Downloaded and resized artwork: ' .. cached_image)
+                    media_cover:set({
+                      drawing = true,
+                      background = {
+                        image = { string = cached_image, scale = 1.0 },
+                        corner_radius = 6,
+                      },
+                      width = 24,
+                      height = 24,
+                    })
+                  else
+                    Logger:warn('Artwork fetch failed, keeping fallback')
+                  end
+                end)
+              else
+                Logger:warn('No artwork URL available from Spotify')
+              end
+            end)
+          end
+        end)
 
         Logger:debug('Successfully showed all widgets')
       end)

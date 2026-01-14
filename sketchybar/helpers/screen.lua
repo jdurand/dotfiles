@@ -32,7 +32,8 @@ function Screen.get_properties()
   Logger:debug('Detecting screen resolution...')
 
   -- Get all screen resolutions to find the largest (likely external monitor)
-  local handle = io.popen("system_profiler SPDisplaysDataType | grep Resolution")
+  -- Use timeout to prevent hang if system_profiler is slow
+  local handle = io.popen("timeout 5 system_profiler SPDisplaysDataType 2>/dev/null | grep Resolution")
   local resolution_output = handle:read("*a")
   handle:close()
 

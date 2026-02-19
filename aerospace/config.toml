@@ -88,7 +88,7 @@ cmd-shift-equal = 'resize smart +50'
 cmd-1 = 'workspace 1'
 cmd-2 = 'workspace 2'
 cmd-3 = 'workspace 3'
-cmd-b = 'workspace B'
+# cmd-b = 'workspace B'
 cmd-g = 'workspace G'
 cmd-e = 'workspace E'
 cmd-m = 'workspace M'
@@ -99,7 +99,7 @@ cmd-backtick = ['workspace T', 'exec-and-forget open -a ghostty']
 cmd-shift-1 = 'move-node-to-workspace --focus-follows-window 1'
 cmd-shift-2 = 'move-node-to-workspace --focus-follows-window 2'
 cmd-shift-3 = 'move-node-to-workspace --focus-follows-window 3'
-cmd-shift-b = 'move-node-to-workspace --focus-follows-window B'
+# cmd-shift-b = 'move-node-to-workspace --focus-follows-window B'
 cmd-shift-g = 'move-node-to-workspace --focus-follows-window G'
 cmd-shift-e = 'move-node-to-workspace --focus-follows-window E'
 cmd-shift-m = 'move-node-to-workspace --focus-follows-window M'
@@ -166,10 +166,6 @@ if.app-id = 'company.thebrowser.Browser'
 run = 'layout floating'
 
 [[on-window-detected]]
-if.app-id = 'app.zen-browser.zen'
-run = 'layout floating'
-
-[[on-window-detected]]
 if.app-id = 'com.google.Chrome.app.cinhimbnkkaeohfgghhklpknlkffjgod'
 run = 'layout floating'
 
@@ -227,12 +223,11 @@ run = ['layout floating'] # needed for the quick input window to behave
 [[on-window-detected]]
 if.during-aerospace-startup = true
 if.app-id = 'company.thebrowser.Browser'
-run = ['layout tiling', 'move-node-to-workspace B']
+run = ['layout tiling', 'move-node-to-workspace E']
 
 [[on-window-detected]]
-if.during-aerospace-startup = true
 if.app-id = 'app.zen-browser.zen'
-run = ['layout tiling', 'move-node-to-workspace B']
+run = ['layout floating', 'move-node-to-workspace E']
 
 # Workspace E - Email & calendar
 [[on-window-detected]]

@@ -89,24 +89,43 @@ start_inhibitor() {
 stop_inhibitor() { [[ -n "${INHIB_PID}" ]] && kill "${INHIB_PID}" 2>/dev/null || true; }
 
 # Focus monitoring for lock behavior
+# Uses system-level window focus detection since cmatrix consumes terminal input
+FOCUS_PID=""
+
+get_frontmost_app() {
+  if [[ "$(uname)" == "Darwin" ]]; then
+    osascript -e 'tell application "System Events" to get name of first process whose frontmost is true' 2>/dev/null
+  elif command -v hyprctl >/dev/null 2>&1; then
+    hyprctl activewindow -j 2>/dev/null | grep -o '"class": *"[^"]*"' | cut -d'"' -f4
+  elif command -v xdotool >/dev/null 2>&1; then
+    xdotool getactivewindow getwindowname 2>/dev/null
+  else
+    echo "unknown"
+  fi
+}
+
 start_focus_monitor() {
   if ! $LOCK; then
     return 0
   fi
 
-  # Enable focus reporting
-  printf '\e[?1004h'
+  # Get the terminal app name at startup (while we have focus)
+  local terminal_app
+  terminal_app="$(get_frontmost_app)"
 
-  # Start focus monitor in background
+  # Poll for focus changes in background
   {
-    while IFS= read -r -n1 char; do
-      if [[ "$char" == $'\e' ]]; then
-        read -r -n2 -t 0.1 seq 2>/dev/null || continue
-        if [[ "$seq" == "[O" ]]; then
-          # Focus lost - trigger lock immediately
-          trigger_lock
-          break
-        fi
+    while true; do
+      sleep 0.5
+      local current_app
+      current_app="$(get_frontmost_app)"
+      if [[ -n "$current_app" && "$current_app" != "$terminal_app" ]]; then
+        # Focus lost - trigger lock and kill cmatrix
+        trigger_lock
+        [[ -n "${CMATRIX_PID:-}" ]] && kill -TERM "$CMATRIX_PID" 2>/dev/null || true
+        # Also try to kill cmatrix by name if PID not set (foreground mode)
+        pkill -TERM cmatrix 2>/dev/null || true
+        break
       fi
     done
   } &
@@ -114,8 +133,6 @@ start_focus_monitor() {
 }
 
 stop_focus_monitor() {
-  # Disable focus reporting
-  printf '\e[?1004l'
   [[ -n "${FOCUS_PID:-}" ]] && kill "${FOCUS_PID}" 2>/dev/null || true
 }
 

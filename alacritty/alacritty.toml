@@ -29,10 +29,10 @@ opacity = 0.85
 size = 13
 normal.style = "Regular"
 normal.family = "VictorMono Nerd Font"
-# normal.family = "SauceCodePro Nerd Font"
-# normal.family = "Iosevka"
-# normal.family = "ZedMono Nerd Font"
-# normal.family = "MesloLGS Nerd Font Mono"
+# normal.family = "VictorMono Nerd Font"
+# normal.family = "VictorMono Nerd Font"
+# normal.family = "VictorMono Nerd Font"
+# normal.family = "VictorMono Nerd Font"
 
 [[keyboard.bindings]]
 key = "F11"

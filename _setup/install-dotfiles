@@ -139,6 +139,11 @@ create_symlink "$HOME/.dotfiles/fish/fish_plugins" "$HOME/.config/fish/fish_plug
 # Create a symbolic links for Linux
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   create_symlink "$HOME/.dotfiles/imwheel/imwheelrc" "$HOME/.imwheelrc"
+
+  # Omarchy config (hooks and extensions, not theme-managed dirs)
+  mkdir -p "$HOME/.config/omarchy/hooks" "$HOME/.config/omarchy/extensions"
+  create_symlink "$HOME/.dotfiles/omarchy/hooks/theme-set" "$HOME/.config/omarchy/hooks/theme-set"
+  create_symlink "$HOME/.dotfiles/omarchy/extensions/menu.sh" "$HOME/.config/omarchy/extensions/menu.sh"
 fi
 
 # Install fish plugins

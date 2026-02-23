@@ -23,6 +23,9 @@ karabiner/karabiner.json
 # Ignore Claude AI files
 .claude/
 
+# Fish
+fish/fish_variables
+
 # Ignore .env
 .env
 environment/*.env

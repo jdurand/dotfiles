@@ -133,6 +133,15 @@ alias top='btop'
 # Keybindings
 # ------------------------------------------------------------------------------
 
+# Ctrl-A then S to show session manager or attach to tmux main session (outside tmux only)
+if not set -q TMUX
+  if type -q tmux-session-manager
+    bind -M insert \cas 'tmux-session-manager'
+  else
+    bind -M insert \cas 'tmux attach-session -t main'
+  end
+end
+
 # git.fzf.fish
 if type -q setup_git_fzf_key_bindings
   setup_git_fzf_key_bindings

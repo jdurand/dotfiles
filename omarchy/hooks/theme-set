@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Re-apply mako customizations after theme switch
+# (theme-set regenerates mako.ini, so we append our overrides)
+MAKO_CONFIG=~/.config/omarchy/current/theme/mako.ini
+
+if [[ -f "$MAKO_CONFIG" ]]; then
+  grep -q 'border-radius' "$MAKO_CONFIG" || sed -i '/^include=/a border-radius=8' "$MAKO_CONFIG"
+  makoctl reload
+fi

@@ -87,6 +87,9 @@ end
 if type -q starship; starship init fish | source; end
 enable_transience
 
+# Initialize mise
+if type -q mise; mise activate fish | source; end
+
 # Initialize rbenv
 if type -q rbenv; rbenv init - | source; end
 
@@ -129,6 +132,15 @@ alias top='btop'
 
 # Keybindings
 # ------------------------------------------------------------------------------
+
+# Ctrl-A then S to show session manager or attach to tmux main session (outside tmux only)
+if not set -q TMUX
+  if type -q tmux-session-manager
+    bind -M insert \cas 'tmux-session-manager'
+  else
+    bind -M insert \cas 'tmux attach-session -t main'
+  end
+end
 
 # git.fzf.fish
 if type -q setup_git_fzf_key_bindings

@@ -1,1 +1,0 @@
-../../.config/fish/config.local.fish

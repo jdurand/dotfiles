@@ -111,8 +111,6 @@ create_symlink "$HOME/.dotfiles/zsh" "$HOME/.zsh"
 create_symlink "$HOME/.dotfiles/zsh/zshrc" "$HOME/.zshrc"
 create_symlink "$HOME/.dotfiles/tmux" "$HOME/.tmux"
 create_symlink "$HOME/.dotfiles/tmux/tmux.conf" "$HOME/.tmux.conf"
-create_symlink "$HOME/.dotfiles/vim" "$HOME/.vim"
-create_symlink "$HOME/.dotfiles/vim/vimrc" "$HOME/.vimrc"
 create_symlink "$HOME/.dotfiles/fzf/fzf.zsh" "$HOME/.fzf.zsh"
 create_symlink "$HOME/.dotfiles/fzf" "$HOME/.fzf"
 create_symlink "$HOME/.dotfiles/wezterm/config.lua" "$HOME/.wezterm.lua"
@@ -134,9 +132,6 @@ done
 # Create symlink for starship.toml
 create_symlink "$HOME/.dotfiles/starship/starship.toml" "$HOME/.config/starship.toml"
 
-# Create symlink for the default .tmuxinator.yml
-create_symlink "$HOME/.dotfiles/tmuxinator/tmuxinator.yml" "$HOME/.tmuxinator.yml"
-
 # Create symlink for config.fish & fish_plugins
 create_symlink "$HOME/.dotfiles/fish/config.fish" "$HOME/.config/fish/config.fish"
 create_symlink "$HOME/.dotfiles/fish/fish_plugins" "$HOME/.config/fish/fish_plugins"
@@ -144,6 +139,11 @@ create_symlink "$HOME/.dotfiles/fish/fish_plugins" "$HOME/.config/fish/fish_plug
 # Create a symbolic links for Linux
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   create_symlink "$HOME/.dotfiles/imwheel/imwheelrc" "$HOME/.imwheelrc"
+
+  # Omarchy config (hooks and extensions, not theme-managed dirs)
+  mkdir -p "$HOME/.config/omarchy/hooks" "$HOME/.config/omarchy/extensions"
+  create_symlink "$HOME/.dotfiles/omarchy/hooks/theme-set" "$HOME/.config/omarchy/hooks/theme-set"
+  create_symlink "$HOME/.dotfiles/omarchy/extensions/menu.sh" "$HOME/.config/omarchy/extensions/menu.sh"
 fi
 
 # Install fish plugins

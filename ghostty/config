@@ -32,6 +32,7 @@ window-padding-y = 7
 #
 # Clipboard settings
 #
+copy-on-select = clipboard
 clipboard-trim-trailing-spaces = true
 # clipboard-paste-protection = false
 

@@ -192,3 +192,6 @@ if test -e "$HOME/.dotfiles/fish/startup.fish"
     end
   end
 end
+
+# OpenClaw Completion
+source "/home/jdurand/.openclaw/completions/openclaw.fish"

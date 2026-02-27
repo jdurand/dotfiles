@@ -1,0 +1,9 @@
+
+name: openclaw
+root: ~/Code/openclaw
+
+windows:
+  - console:
+      panes:
+        - ls
+        - ~/.openclaw/workspace && ls

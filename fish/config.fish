@@ -177,6 +177,11 @@ if test -e "$HOME/.config/fish/config.local.fish"
   source "$HOME/.config/fish/config.local.fish"
 end
 
+# OpenClaw Completion
+if test -e "$HOME/.openclaw/completions/openclaw.fish"
+  source "$HOME/.openclaw/completions/openclaw.fish"
+end
+
 # Cleanup
 # ------------------------------------------------------------------------------
 # unset GEM_HOME set by tmuxinator

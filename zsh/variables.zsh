@@ -96,6 +96,9 @@ export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 # which can help prevent authentication issues in clustered environments.
 export PGGSSENCMODE=disable
 
+# Silence direnv loading messages (errors/blocked notices still show)
+export DIRENV_LOG_FORMAT=""
+
 # qlty
 export QLTY_INSTALL="$HOME/.qlty"
 export PATH="$QLTY_INSTALL/bin:$PATH"

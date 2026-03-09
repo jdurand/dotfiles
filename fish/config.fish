@@ -111,6 +111,7 @@ if status is-interactive
 end
 
 # Initialize direnv
+set -x DIRENV_LOG_FORMAT ""
 if type -q direnv; direnv hook fish | source; end
 
 # Load git fzf functions

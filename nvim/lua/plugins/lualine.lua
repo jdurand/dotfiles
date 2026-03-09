@@ -103,7 +103,9 @@ return {
     },
     config = function()
       local overseer = require('overseer')
-      local neon_theme = require('user/themes/lualine/electric-neon')
+      local neon_theme = vim.env.DOTFILES_THEME == 'matrix'
+        and require('user/themes/lualine/matrix')
+        or require('user/themes/lualine/electric-neon')
 
       vim.api.nvim_set_hl(0, "NeotestWatching", { fg = "#CC8400", bg = neon_theme.normal.b.bg }) -- Orange for watching
       vim.api.nvim_set_hl(0, "NeotestFailed", { fg = "#B22222", bg = neon_theme.normal.b.bg })   -- Red for failed

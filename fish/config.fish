@@ -37,6 +37,12 @@ if test -d ~/.dotfiles/environment
   end
 end
 
+# Detect SSH sessions for theme switching
+if set -q SSH_CLIENT; or set -q SSH_TTY; or set -q SSH_CONNECTION
+  set -x DOTFILES_THEME "matrix"
+  set -x STARSHIP_CONFIG "$HOME/.dotfiles/starship/starship.matrix.toml"
+end
+
 set -x LC_ALL $LANG
 set -x MANPAGER "sh -c 'col -bx | bat -l man -p'"
 set -x EDITOR 'nvim'

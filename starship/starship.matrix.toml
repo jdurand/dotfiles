@@ -1,0 +1,75 @@
+add_newline = false
+
+# Left side prompt
+format = """
+$directory$git_branch$git_state$git_status
+$character"""
+
+# Right side prompt
+right_format = """
+$cmd_duration$nodejs$python$ruby"""
+
+# Directory module
+[directory]
+# fish_style_pwd_dir_length = 1
+style = "#00ff41"
+
+# Prompt symbols & colors
+[character]
+success_symbol = "[❯](#00ff41)"
+error_symbol = "[❯](#ccff00)"
+vimcmd_symbol = "[❮](#00cc33)"
+
+# Git information
+[git_branch]
+format = "[$branch]($style)"
+# truncation_length = 30
+truncation_symbol = "…/"
+style = "bright-black"
+
+[git_status]
+format = "[[(・$conflicted$untracked$modified$staged$renamed$deleted)](#bbbbbb) ($ahead_behind$stashed)]($style)"
+conflicted = "✖"
+untracked = ""
+modified = "✎"
+staged = "✓"
+renamed = "➜"
+deleted = "🗑️"
+stashed = "≡"
+style = "#00ff41"
+
+[git_state]
+format = '\([$state( $progress_current/$progress_total)]($style)\) '
+style = "bright-black"
+
+# Command execution duration
+[cmd_duration]
+format = "[$duration]($style) "
+style = "#00cc33"
+
+# Ruby environment (right-aligned)
+[ruby]
+symbol = " "
+format = "[$symbol($version)]($style) "
+style = "bold #00bb00"
+detect_extensions = ["rb"]
+detect_files = ["Gemfile", "Rakefile"]
+detect_folders = [".ruby-version", ".rbenv"]
+
+# Node.js environment (right-aligned)
+[nodejs]
+symbol = " "
+format = "[$symbol($version)]($style) "
+style = "bold #00bb00"
+detect_extensions = ["js", "mjs", "cjs", "ts", "tsx", "json"]
+detect_files = ["package.json", "pnpm-lock.yaml", "yarn.lock", "node_modules"]
+detect_folders = ["node_modules"]
+
+# Python environment (right-aligned)
+[python]
+symbol = "🐍 "
+format = "[$symbol($version)]($style) "
+style = "bright-black"
+detect_extensions = ["py"]
+detect_files = ["requirements.txt", "setup.py", "pyproject.toml"]
+detect_folders = [".venv", ".env", ".python-version"]

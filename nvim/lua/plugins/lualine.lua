@@ -103,9 +103,15 @@ return {
     },
     config = function()
       local overseer = require('overseer')
-      local neon_theme = vim.env.DOTFILES_THEME == 'matrix'
-        and require('user/themes/lualine/matrix')
-        or require('user/themes/lualine/electric-neon')
+      local is_ssh_session = require('user.themes.is_ssh_session')
+
+      local function get_lualine_theme()
+        return is_ssh_session()
+          and require('user/themes/lualine/matrix')
+          or require('user/themes/lualine/electric-neon')
+      end
+
+      local neon_theme = get_lualine_theme()
 
       vim.api.nvim_set_hl(0, "NeotestWatching", { fg = "#CC8400", bg = neon_theme.normal.b.bg }) -- Orange for watching
       vim.api.nvim_set_hl(0, "NeotestFailed", { fg = "#B22222", bg = neon_theme.normal.b.bg })   -- Red for failed
@@ -188,6 +194,21 @@ return {
           },
           -- lualine_z = { { 'location', separator = { right = '' }, left_padding = 2 } },
         },
+      })
+
+      -- Switch lualine theme on focus gain when SSH status changes
+      local last_theme = neon_theme
+      vim.api.nvim_create_autocmd('FocusGained', {
+        callback = function()
+          local new_theme = get_lualine_theme()
+          if new_theme ~= last_theme then
+            last_theme = new_theme
+            vim.api.nvim_set_hl(0, "NeotestWatching", { fg = "#CC8400", bg = new_theme.normal.b.bg })
+            vim.api.nvim_set_hl(0, "NeotestFailed", { fg = "#B22222", bg = new_theme.normal.b.bg })
+            vim.api.nvim_set_hl(0, "NeotestRunning", { fg = "#7A8C9A", bg = new_theme.normal.b.bg })
+            require('lualine').setup({ options = { theme = new_theme } })
+          end
+        end,
       })
     end,
   },

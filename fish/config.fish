@@ -37,10 +37,38 @@ if test -d ~/.dotfiles/environment
   end
 end
 
-# Detect SSH sessions for theme switching
-if set -q SSH_CLIENT; or set -q SSH_TTY; or set -q SSH_CONNECTION
-  set -x DOTFILES_THEME "matrix"
-  set -x STARSHIP_CONFIG "$HOME/.dotfiles/starship/starship.matrix.toml"
+# Dynamic theme detection — reassess on each prompt so that
+# attaching to a tmux session from a different context (local vs SSH)
+# switches the theme without restarting the shell.
+function __dotfiles_update_theme
+  set -l is_ssh false
+
+  if set -q TMUX
+    # Inside tmux: query session environment (updated by update-environment
+    # when a new client attaches) instead of the shell's own env vars.
+    set -l ssh_env (tmux show-environment SSH_CONNECTION 2>/dev/null)
+    if test $status -eq 0; and not string match -q -- '-SSH_CONNECTION' $ssh_env
+      set is_ssh true
+    end
+  else if set -q SSH_CLIENT; or set -q SSH_TTY; or set -q SSH_CONNECTION
+    set is_ssh true
+  end
+
+  if test $is_ssh = true
+    set -gx DOTFILES_THEME "matrix"
+    set -gx STARSHIP_CONFIG "$HOME/.dotfiles/starship/starship.matrix.toml"
+  else
+    set -ge DOTFILES_THEME
+    set -ge STARSHIP_CONFIG
+  end
+end
+
+# Set initial theme
+__dotfiles_update_theme
+
+# Re-check on each prompt to pick up tmux client changes
+function __dotfiles_theme_prompt --on-event fish_prompt
+  __dotfiles_update_theme
 end
 
 set -x LC_ALL $LANG

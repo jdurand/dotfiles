@@ -1,11 +1,11 @@
+local is_ssh_session = require('user.themes.is_ssh_session')
+
 return {
   {
     'folke/tokyonight.nvim',
     priority = 1000,
     config = function()
       local transparent = true -- less transparent than before for a bit more opacity
-
-      local is_matrix = vim.env.DOTFILES_THEME == 'matrix'
 
       require('tokyonight').setup({
         transparent = transparent,
@@ -14,7 +14,7 @@ return {
           floats = transparent and 'transparent' or 'dark',
         },
         on_colors = function(colors)
-          if is_matrix then
+          if is_ssh_session() then
             colors.bg = '#0a1a0a'
             colors.bg_dark = '#061206'
             colors.bg_float = '#0d1f0d'
@@ -58,12 +58,27 @@ return {
       -- vim.cmd.colorscheme 'tokyonight-storm'
       -- vim.cmd.colorscheme 'tokyonight-day'
       vim.cmd.colorscheme 'tokyonight-moon'
+
+      -- Re-check SSH status on focus gain so the theme switches
+      -- when attaching to the tmux session from a different context.
+      local last_ssh = is_ssh_session()
+      vim.api.nvim_create_autocmd('FocusGained', {
+        callback = function()
+          local now_ssh = is_ssh_session()
+          if now_ssh ~= last_ssh then
+            last_ssh = now_ssh
+            vim.env.DOTFILES_THEME = now_ssh and 'matrix' or nil
+            -- Re-apply colorscheme; on_colors checks is_ssh_session() dynamically
+            vim.cmd.colorscheme 'tokyonight-moon'
+          end
+        end,
+      })
     end
   },
   {
     'f-person/auto-dark-mode.nvim',
     -- disable auto-dark-mode when using matrix theme (always dark)
-    cond = function() return vim.env.DOTFILES_THEME ~= 'matrix' end,
+    cond = function() return not is_ssh_session() end,
     opts = {
       update_interval = (60 * 1000),
       set_dark_mode = function()

@@ -122,8 +122,8 @@ f19 = 'move-workspace-to-monitor --wrap-around next'
 # cmd-ctrl-k = "workspace --wrap-around prev"
 #
 # Go to non empty workspace on the focused monitor
-cmd-shift-j = "exec-and-forget aerospace list-workspaces --monitor focused --empty no | aerospace workspace next --wrap-around"
-cmd-shift-k = "exec-and-forget aerospace list-workspaces --monitor focused --empty no | aerospace workspace prev --wrap-around"
+cmd-shift-j = "exec-and-forget aerospace list-workspaces --monitor focused --empty no | aerospace workspace --wrap-around next --stdin"
+cmd-shift-k = "exec-and-forget aerospace list-workspaces --monitor focused --empty no | aerospace workspace --wrap-around prev --stdin"
 
 # ====================
 # Workspace Assignments

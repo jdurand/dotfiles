@@ -203,6 +203,11 @@ run = ['layout tiling', 'move-node-to-workspace 1']
 # Workspace 2 - Chrome
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome'
+if.window-title-regex-substring = 'Claude for Chrome'
+run = ['layout floating']
+
+[[on-window-detected]]
+if.app-id = 'com.google.Chrome'
 run = ['layout tiling', 'move-node-to-workspace 2']
 
 # Workspace Q - AI assistants

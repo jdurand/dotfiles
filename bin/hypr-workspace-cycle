@@ -1,0 +1,31 @@
+#!/bin/bash
+# Cycle workspaces on current monitor with wraparound
+# Usage: hypr-workspace-cycle next|prev
+
+DIRECTION=${1:-next}
+WORKSPACES_PER_MONITOR=5
+
+# Get current workspace and monitor
+CURRENT=$(hyprctl activeworkspace -j | jq '.id')
+MONITOR_ID=$(hyprctl activeworkspace -j | jq '.monitorID')
+
+# Calculate workspace range for this monitor
+# Monitor 0: workspaces 1-5, Monitor 1: workspaces 6-10, etc.
+MIN=$((MONITOR_ID * WORKSPACES_PER_MONITOR + 1))
+MAX=$((MIN + WORKSPACES_PER_MONITOR - 1))
+
+# Clamp current to range if somehow outside it
+if [ "$CURRENT" -lt "$MIN" ] || [ "$CURRENT" -gt "$MAX" ]; then
+  hyprctl dispatch workspace "$MIN"
+  exit 0
+fi
+
+if [ "$DIRECTION" = "next" ]; then
+  NEXT=$((CURRENT + 1))
+  [ "$NEXT" -gt "$MAX" ] && NEXT=$MIN
+else
+  NEXT=$((CURRENT - 1))
+  [ "$NEXT" -lt "$MIN" ] && NEXT=$MAX
+fi
+
+hyprctl dispatch workspace "$NEXT"

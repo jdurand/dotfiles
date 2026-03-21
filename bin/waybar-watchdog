@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Watchdog that monitors waybar and restarts it if it crashes.
+# Checks every 60 seconds. Runs as a background process from autostart.
+
+INTERVAL=60
+
+while true; do
+  sleep "$INTERVAL"
+  if ! pgrep -x waybar > /dev/null; then
+    logger -t waybar-watchdog "waybar not running, restarting..."
+    setsid uwsm-app -- waybar > /dev/null 2>&1 &
+    sleep 2
+  fi
+done

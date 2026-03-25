@@ -121,9 +121,13 @@ f19 = 'move-workspace-to-monitor --wrap-around next'
 # cmd-ctrl-j = "workspace --wrap-around next"
 # cmd-ctrl-k = "workspace --wrap-around prev"
 #
+# Focus monitor
+cmd-shift-j = 'focus-monitor --wrap-around next'
+cmd-shift-k = 'focus-monitor --wrap-around prev'
+
 # Go to non empty workspace on the focused monitor
-cmd-shift-j = "exec-and-forget aerospace list-workspaces --monitor focused --empty no | aerospace workspace --wrap-around next --stdin"
-cmd-shift-k = "exec-and-forget aerospace list-workspaces --monitor focused --empty no | aerospace workspace --wrap-around prev --stdin"
+cmd-shift-l = "exec-and-forget aerospace list-workspaces --monitor focused --empty no | aerospace workspace --wrap-around next --stdin"
+cmd-shift-h = "exec-and-forget aerospace list-workspaces --monitor focused --empty no | aerospace workspace --wrap-around prev --stdin"
 
 # ====================
 # Workspace Assignments
@@ -217,7 +221,7 @@ run = ['layout tiling', 'move-node-to-workspace G']
 
 [[on-window-detected]]
 if.app-name-regex-substring = 'Gemini'
-run = ['layout tiling', 'move-node-to-workspace G']
+run = ['layout tiling']
 
 [[on-window-detected]]
 if.app-id = 'com.anthropic.claudefordesktop'

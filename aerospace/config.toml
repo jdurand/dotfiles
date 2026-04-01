@@ -4,10 +4,10 @@
 
 start-at-login = true
 after-login-command = []
-after-startup-command = [
-  'exec-and-forget brew services start sketchybar',
-  # 'exec-and-forget borders active_color=0xffffffff inactive_color=0xff494d30 width=5.0'
-]
+# after-startup-command = [
+#   'exec-and-forget brew services start sketchybar',
+#   # 'exec-and-forget borders active_color=0xffffffff inactive_color=0xff494d30 width=5.0'
+# ]
 
 # ====================
 # Layout Configuration
@@ -29,10 +29,10 @@ accordion-padding = 250
 key-mapping.preset = 'qwerty'
 
 # SketchyBar integration
-exec-on-workspace-change = ['/bin/bash', '-c',
-  'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE',
-  # 'exec-and-forget borders active_color=0xffffffff inactive_color=0xff494d30 width=5.0'
-]
+# exec-on-workspace-change = ['/bin/bash', '-c',
+#   'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE',
+#   # 'exec-and-forget borders active_color=0xffffffff inactive_color=0xff494d30 width=5.0'
+# ]
 
 # ====================
 # Display Configuration
@@ -44,7 +44,8 @@ inner.horizontal = 5
 inner.vertical =   5
 outer.left =       5
 outer.bottom =     5
-outer.top = [{ monitor.'built-in' = 5 }, 28]  # Extra space for sketchybar on external monitors
+# outer.top = [{ monitor.'built-in' = 5 }, 28]  # Extra space for sketchybar on external monitors
+outer.top =        5
 outer.right =      5
 
 # ====================

@@ -1,0 +1,357 @@
+{
+  "reload_style_on_change": true,
+  "layer": "top",
+  "position": "top",
+  "width": 1700,
+  "margin-top": 6,
+  "margin-right": 10,
+  "margin-bottom": -3,
+  "margin-left": 10,
+  "spacing": 0,
+
+  "modules-left": [
+    "hyprland/workspaces#rw"
+  ],
+  "modules-center": [
+    "custom/omarchy",
+    "clock#5",
+    "custom/weather",
+    "custom/update",
+    "custom/voxtype",
+    "custom/screenrecording-indicator",
+    "custom/idle-indicator",
+    "custom/notification-silencing-indicator",
+    "mpris"
+  ],
+  "modules-right": [
+    "group/notify",
+    "group/tray-expander",
+    "hyprland/language",
+    "custom/separator#blank_2",
+    "disk",
+    "memory",
+    "cpu",
+    "custom/separator#blank_2",
+    "network",
+    "bluetooth",
+    "pulseaudio",
+    "battery",
+    "custom/separator#blank_2",
+    "custom/power",
+    "custom/separator#blank_2"
+  ],
+
+  // Workspaces with window-rewrite app icons
+  "hyprland/workspaces#rw": {
+    "disable-scroll": true,
+    "all-outputs": true,
+    "warp-on-scroll": false,
+    "sort-by-number": true,
+    "show-special": false,
+    "on-click": "activate",
+    "on-scroll-up": "hyprctl dispatch workspace e+1",
+    "on-scroll-down": "hyprctl dispatch workspace e-1",
+    "persistent-workspaces": {
+      "1": [],
+      "2": [],
+      "3": [],
+      "4": [],
+      "5": []
+    },
+    "format": "{icon} {windows}",
+    "format-window-separator": " ",
+    "window-rewrite-default": "󰀏 ",
+    "window-rewrite": {
+      "title<.*amazon.*>": "󰅶 ",
+      "title<.*reddit.*>": "󰑍 ",
+      "class<firefox|org.mozilla.firefox|librewolf|floorp|mercury-browser|[Cc]achy-browser>": "󰈹 ",
+      "class<zen>": "󰰷 ",
+      "class<waterfox|waterfox-bin>": "󰈹 ",
+      "class<microsoft-edge>": "󰇩 ",
+      "class<Chromium|Thorium|[Cc]hrome>": "󰊯 ",
+      "class<brave-browser>": "󰊯 ",
+      "class<tor browser>": "󰊯 ",
+      "class<kitty|konsole>": "󰆍 ",
+      "class<kitty-dropterm>": "󰆍 ",
+      "class<com.mitchellh.ghostty>": "󰊠 ",
+      "class<org.wezfurlong.wezterm>": "󰆍 ",
+      "class<Alacritty>": "󰆍 ",
+      "class<[Tt]hunderbird|[Tt]hunderbird-esr>": "󰇮 ",
+      "title<.*gmail.*>": "󰊫 ",
+      "class<[Tt]elegram-desktop|org.telegram.desktop>": "󰔁 ",
+      "class<discord|[Ww]ebcord|Vesktop>": "󰙯 ",
+      "class<slack>": "󰒱 ",
+      "title<.*whatsapp.*>": "󰖣 ",
+      "title<.*ChatGPT.*>": "󰚩 ",
+      "class<mpv>": "󰐌 ",
+      "class<celluloid|Zoom>": "󰐌 ",
+      "class<vlc>": "󰕼 ",
+      "class<[Ss]potify>": "󰓇 ",
+      "class<VSCode|code-url-handler|code-oss|codium|VSCodium>": "󰨞 ",
+      "class<dev.zed.Zed>": "󰵁 ",
+      "class<jetbrains-idea>": "󰬷 ",
+      "class<obs|com.obsproject.Studio>": "󰑋 ",
+      "class<steam>": "󰓓 ",
+      "class<thunar|nemo|nautilus>": "󰝰 ",
+      "class<gimp>": "󰃣 ",
+      "class<virt-manager>": "󰖳 ",
+      "title<.*nvim.*>": "󰕷 ",
+      "title<.*vim.*>": "󰕷 ",
+      "title<.*figma.*>": "󰈫 ",
+      "title<.*jira.*>": "󰌃 ",
+      "title<.*youtube.*>": "󰗃 ",
+      "title<.*Picture-in-Picture.*>": "󰐌 "
+    }
+  },
+
+  "custom/omarchy": {
+    "format": "<span font='Font Awesome 7 Free Solid'>&#xf0c9;</span>",
+    "on-click": "omarchy-menu",
+    "on-click-right": "xdg-terminal-exec",
+    "tooltip-format": "Omarchy Menu\n\nSuper + Alt + Space"
+  },
+
+  "clock#5": {
+    "format": "{:%a %d | %H:%M}",
+    "format-alt": "{:%A, %d %B, %Y (%R)}",
+    "tooltip-format": "<big>{:%B %Y}</big>\n<tt><small>{calendar}</small></tt>"
+  },
+
+  "custom/weather": {
+    "format": "{}",
+    "format-alt": "{alt}: {}",
+    "format-alt-click": "click",
+    "interval": 1800,
+    "return-type": "json",
+    "exec": "$HOME/.config/waybar/scripts/weather.sh",
+    "tooltip": true
+  },
+
+  "custom/update": {
+    "format": "",
+    "exec": "omarchy-update-available",
+    "on-click": "omarchy-launch-floating-terminal-with-presentation omarchy-update",
+    "tooltip-format": "Omarchy update available",
+    "signal": 7,
+    "interval": 21600
+  },
+
+  "custom/voxtype": {
+    "exec": "omarchy-voxtype-status",
+    "return-type": "json",
+    "format": "{icon}",
+    "format-icons": {
+      "idle": "",
+      "recording": "󰍬",
+      "transcribing": "󰔟"
+    },
+    "tooltip": true,
+    "on-click-right": "omarchy-voxtype-config",
+    "on-click": "omarchy-voxtype-model"
+  },
+
+  "custom/screenrecording-indicator": {
+    "on-click": "omarchy-cmd-screenrecord",
+    "exec": "$OMARCHY_PATH/default/waybar/indicators/screen-recording.sh",
+    "signal": 8,
+    "return-type": "json"
+  },
+
+  "custom/idle-indicator": {
+    "on-click": "omarchy-toggle-idle",
+    "exec": "$OMARCHY_PATH/default/waybar/indicators/idle.sh",
+    "signal": 9,
+    "return-type": "json"
+  },
+
+  "custom/notification-silencing-indicator": {
+    "on-click": "omarchy-toggle-notification-silencing",
+    "exec": "$OMARCHY_PATH/default/waybar/indicators/notification-silencing.sh",
+    "signal": 10,
+    "return-type": "json"
+  },
+
+  "mpris": {
+    "interval": 1,
+    "format": "{player_icon} {status_icon} <i>{dynamic}</i>",
+    "on-click-middle": "playerctl previous",
+    "on-click": "playerctl play-pause",
+    "on-click-right": "playerctl next",
+    "scroll-step": 5.0,
+    "smooth-scrolling-threshold": 1,
+    "tooltip": true,
+    "tooltip-format": "{dynamic}\nLeft: Play/Pause | Middle: Previous | Right: Next",
+    "player-icons": {
+      "chromium": "",
+      "default": "",
+      "firefox": "",
+      "mpv": "󰐹",
+      "spotify": "",
+      "vlc": "󰕼"
+    },
+    "status-icons": {
+      "paused": "󰐎",
+      "playing": "",
+      "stopped": ""
+    },
+    "max-length": 30
+  },
+
+  "group/notify": {
+    "orientation": "inherit",
+    "drawer": {
+      "transition-duration": 500,
+      "children-class": "custom/notifications",
+      "transition-left-to-right": false
+    },
+    "modules": ["custom/notifications", "custom/dot_update"]
+  },
+
+  "custom/notifications": {
+    "tooltip": true,
+    "tooltip-format": "Left Click: Show Last Notification\nRight Click: Clear All",
+    "format": " ",
+    "on-click": "makoctl invoke",
+    "on-click-right": "makoctl dismiss --all",
+    "escape": true
+  },
+
+  "custom/dot_update": {
+    "format": " {}",
+    "exec": "checkupdates | wc -l",
+    "exec-if": "[[ $(checkupdates | wc -l) ]]",
+    "interval": 43200,
+    "tooltip": true,
+    "tooltip-format": "System updates available"
+  },
+
+  "network": {
+    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+    "format": "{ifname}",
+    "format-wifi": "{icon}",
+    "format-ethernet": "󰌘",
+    "format-disconnected": "󰌙",
+    "tooltip-format-wifi": "{essid} {icon} {signalStrength}%\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
+    "tooltip-format-ethernet": "{ifname} 󰌘\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
+    "tooltip-format-disconnected": "󰌙 Disconnected",
+    "max-length": 30,
+    "on-click": "omarchy-launch-wifi"
+  },
+
+  "bluetooth": {
+    "format": " ",
+    "format-disabled": "󰂳",
+    "format-connected": "󰂱 {num_connections}",
+    "format-no-controller": "󰂲",
+    "tooltip-format": " {device_alias}",
+    "tooltip-format-connected": "{device_enumerate}",
+    "tooltip-format-enumerate-connected": " {device_alias} 󰂄{device_battery_percentage}%",
+    "tooltip": true,
+    "on-click": "omarchy-launch-bluetooth"
+  },
+
+  "pulseaudio": {
+    "format": "{icon} {volume}%",
+    "format-bluetooth": "{icon} {volume}%",
+    "format-muted": "<span font='Font Awesome 7 Free Solid'>&#xf6a9;</span> muted",
+    "format-icons": {
+      "headphone": "<span font='Font Awesome 7 Free Solid'>&#xf025;</span>",
+      "headset": "<span font='Font Awesome 7 Free Solid'>&#xf025;</span>",
+      "default": [
+        "<span font='Font Awesome 7 Free Solid'>&#xf026;</span>",
+        "<span font='Font Awesome 7 Free Solid'>&#xf027;</span>",
+        "<span font='Font Awesome 7 Free Solid'>&#xf028;</span>"
+      ]
+    },
+    "scroll-step": 5.0,
+    "on-click": "omarchy-launch-audio",
+    "on-click-right": "pamixer -t",
+    "tooltip-format": "{desc} | {volume}%",
+    "smooth-scrolling-threshold": 1
+  },
+
+  "cpu": {
+    "format": "{usage}% 󰍛",
+    "interval": 5,
+    "min-length": 5,
+    "on-click": "omarchy-launch-or-focus-tui btop"
+  },
+
+  "battery": {
+    "format": "{capacity}% {icon}",
+    "format-discharging": "{icon}",
+    "format-charging": "{icon}",
+    "format-plugged": "",
+    "format-icons": {
+      "charging": ["󰢜", "󰂆", "󰂇", "󰂈", "󰢝", "󰂉", "󰢞", "󰂊", "󰂋", "󰂅"],
+      "default": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
+    },
+    "format-full": "󰂅",
+    "tooltip-format-discharging": "{power:>1.0f}W↓ {capacity}%",
+    "tooltip-format-charging": "{power:>1.0f}W↑ {capacity}%",
+    "interval": 5,
+    "on-click": "omarchy-menu power",
+    "states": {
+      "warning": 20,
+      "critical": 10
+    }
+  },
+
+  "hyprland/language": {
+    "format": "<span font='Font Awesome 7 Free Solid'>&#xf11c;</span> {}",
+    "format-en": "EN",
+    "format-fr": "FR",
+    "format-es": "ES",
+    "format-de": "DE",
+    "on-click": "hyprctl switchxkblayout all next"
+  },
+
+  "memory": {
+    "interval": 10,
+    "format": "{used:0.1f}G 󰾆",
+    "format-alt": "{percentage}% 󰾆",
+    "format-alt-click": "click",
+    "tooltip": true,
+    "tooltip-format": "{used:0.1f}GB / {total:0.1f}GB",
+    "on-click-right": "omarchy-launch-or-focus-tui btop"
+  },
+
+  "disk": {
+    "interval": 30,
+    "path": "/",
+    "format": "{percentage_used}% 󰋊",
+    "tooltip-format": "{used} used of {total} on {path} ({percentage_used}%)"
+  },
+
+  "custom/power": {
+    "format": "⏻",
+    "on-click": "omarchy-menu system",
+    "tooltip": true,
+    "tooltip-format": "Lock / Logout / Restart / Shutdown"
+  },
+
+  "custom/separator#blank_2": {
+    "format": "  ",
+    "interval": "once",
+    "tooltip": false
+  },
+
+  "group/tray-expander": {
+    "orientation": "inherit",
+    "drawer": {
+      "transition-duration": 600,
+      "children-class": "tray-group-item"
+    },
+    "modules": ["custom/expand-icon", "tray"]
+  },
+
+  "custom/expand-icon": {
+    "format": "<span font='Font Awesome 7 Free Solid'>&#xf053;</span>",
+    "tooltip": false
+  },
+
+  "tray": {
+    "icon-size": 16,
+    "spacing": 4
+  }
+}

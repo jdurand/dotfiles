@@ -78,7 +78,7 @@
       "class<Alacritty>": "󰆍 ",
       "class<[Tt]hunderbird|[Tt]hunderbird-esr>": "󰇮 ",
       "title<.*gmail.*>": "󰊫 ",
-      "class<[Tt]elegram-desktop|org.telegram.desktop>": "󰔁 ",
+      "class<[Tt]elegram-desktop|org.telegram.desktop>": " ",
       "class<discord|[Ww]ebcord|Vesktop>": "󰙯 ",
       "class<slack>": "󰒱 ",
       "title<.*whatsapp.*>": "󰖣 ",
@@ -105,7 +105,7 @@
   },
 
   "custom/omarchy": {
-    "format": "<span font='Font Awesome 7 Free Solid'>&#xf0c9;</span>",
+    "format": "󰍜",
     "on-click": "omarchy-menu",
     "on-click-right": "xdg-terminal-exec",
     "tooltip-format": "Omarchy Menu\n\nSuper + Alt + Space"
@@ -253,15 +253,11 @@
   "pulseaudio": {
     "format": "{icon} {volume}%",
     "format-bluetooth": "{icon} {volume}%",
-    "format-muted": "<span font='Font Awesome 7 Free Solid'>&#xf6a9;</span> muted",
+    "format-muted": "󰝟 0%",
     "format-icons": {
-      "headphone": "<span font='Font Awesome 7 Free Solid'>&#xf025;</span>",
-      "headset": "<span font='Font Awesome 7 Free Solid'>&#xf025;</span>",
-      "default": [
-        "<span font='Font Awesome 7 Free Solid'>&#xf026;</span>",
-        "<span font='Font Awesome 7 Free Solid'>&#xf027;</span>",
-        "<span font='Font Awesome 7 Free Solid'>&#xf028;</span>"
-      ]
+      "headphone": "󰋋",
+      "headset": "󰋎",
+      "default": ["󰕿", "󰖀", "󰕾"]
     },
     "scroll-step": 5.0,
     "on-click": "omarchy-launch-audio",
@@ -298,7 +294,7 @@
   },
 
   "hyprland/language": {
-    "format": "<span font='Font Awesome 7 Free Solid'>&#xf11c;</span> {}",
+    "format": "󰌌 {}",
     "format-en": "EN",
     "format-fr": "FR",
     "format-es": "ES",
@@ -346,7 +342,7 @@
   },
 
   "custom/expand-icon": {
-    "format": "<span font='Font Awesome 7 Free Solid'>&#xf053;</span>",
+    "format": "󰅁",
     "tooltip": false
   },
 

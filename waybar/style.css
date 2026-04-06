@@ -213,6 +213,36 @@ tooltip {
   border-radius: 8px;
 }
 
+/* --- Work widgets (Jira, PRs, Calendar) --- */
+
+#custom-jira,
+#custom-pr-reviews,
+#custom-calendar {
+  padding: 6px 8px;
+  font-size: 14px;
+  color: @foreground;
+}
+
+#custom-jira.active { color: white; }
+#custom-pr-reviews.active { color: white; }
+#custom-calendar.warning { color: @yellow; }
+
+#custom-calendar.urgent {
+  color: #7ee787;
+  border-radius: 4px;
+  animation-name: blink;
+  animation-duration: 1.5s;
+  animation-timing-function: steps(8);
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+#custom-jira.empty,
+#custom-pr-reviews.empty,
+#custom-calendar.empty {
+  opacity: 0.4;
+}
+
 .hidden {
   opacity: 0;
 }

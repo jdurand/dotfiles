@@ -24,6 +24,10 @@
     "mpris"
   ],
   "modules-right": [
+    "custom/jira",
+    "custom/pr-reviews",
+    "custom/calendar",
+    "custom/separator#blank_2",
     "group/notify",
     "group/tray-expander",
     "hyprland/language",
@@ -330,6 +334,33 @@
     "format": "  ",
     "interval": "once",
     "tooltip": false
+  },
+
+  "custom/jira": {
+    "format": "{}",
+    "return-type": "json",
+    "interval": 120,
+    "exec": "$HOME/.config/waybar/scripts/jira-waybar.sh",
+    "on-click": "ags request toggle jira -i widgets",
+    "tooltip": true
+  },
+
+  "custom/pr-reviews": {
+    "format": "{}",
+    "return-type": "json",
+    "interval": 120,
+    "exec": "$HOME/.config/waybar/scripts/pr-reviews-waybar.sh",
+    "on-click": "ags request toggle prs -i widgets",
+    "tooltip": true
+  },
+
+  "custom/calendar": {
+    "format": "{}",
+    "return-type": "json",
+    "interval": 30,
+    "exec": "$HOME/.config/waybar/scripts/calendar-waybar.sh",
+    "on-click": "ags request toggle calendar -i widgets",
+    "tooltip": true
   },
 
   "group/tray-expander": {

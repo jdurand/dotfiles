@@ -7,13 +7,13 @@ set -euo pipefail
 
 # Configuration
 TIMEOUT_SECONDS=10
-TIMEOUT_CMD="/opt/homebrew/bin/timeout"
+TIMEOUT_CMD="$(command -v timeout 2>/dev/null || echo timeout)"
 
 # Default values
 DEFAULT_STATUSES=("To Do" "In Progress" "Code Review" "To Merge")
 DEFAULT_JQL="sprint in openSprints()"
 DEFAULT_COLUMNS="key,summary,status,labels,updated"
-JIRA_EXECUTABLE="/opt/homebrew/bin/jira"
+JIRA_EXECUTABLE="$(command -v jira 2>/dev/null || echo jira)"
 COUNT_ONLY=false
 INTERACTIVE=false
 

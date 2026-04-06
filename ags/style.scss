@@ -1,0 +1,429 @@
+// Neutral palette — strictly cool/gray, no warm tones
+$bg-dark: #222222;
+$fg: #c8ccd0;
+$fg-dim: #8a8e92;
+$fg-muted: #5c5f63;
+$accent: #00e5e5;
+$blue: #6cb6ff;
+$green: #7ee787;
+$yellow: #d4a72c;
+$red: #d4555a;
+$purple: #b898e8;
+$border: #333333;
+
+window {
+  background: transparent;
+}
+
+// --- Popup shell ---
+
+.popup-container {
+  background: rgba(34, 34, 34, 0.95);
+  border: 1px solid rgba(60, 60, 60, 0.5);
+  border-radius: 14px;
+  padding: 8px 6px;
+  min-width: 380px;
+}
+
+.popup-header {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 11px;
+  font-weight: 700;
+  color: $fg-muted;
+  padding: 6px 12px 8px;
+  letter-spacing: 0.5px;
+}
+
+.popup-header-link {
+  all: unset;
+  padding: 6px 12px 8px;
+
+  &:hover .sprint-name {
+    color: $fg;
+  }
+}
+
+.sprint-label {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 12px;
+  color: $fg-muted;
+  margin-right: 6px;
+}
+
+.sprint-name {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 12px;
+  font-weight: 700;
+  color: $fg;
+}
+
+.sprint-dates {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 11px;
+  color: $fg-dim;
+}
+
+.sprint-goal {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 11px;
+  font-style: italic;
+  color: $fg-muted;
+  margin-top: 3px;
+}
+
+.popup-list {
+  padding: 0;
+}
+
+.popup-row {
+  all: unset;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin: 1px 4px;
+  transition: background 150ms ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  &:active {
+    background: rgba(255, 255, 255, 0.10);
+  }
+
+  label {
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 12px;
+    color: $fg;
+  }
+}
+
+.popup-empty {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 12px;
+  color: $fg-muted;
+  padding: 20px 12px;
+}
+
+// Shared two-line row layout
+.row-top {
+  margin-bottom: 2px;
+}
+
+// Thin separator between status groups
+.section-separator {
+  min-height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 4px 12px;
+}
+
+// Small pill badges
+.badge {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+}
+
+.badge-meet {
+  color: $green;
+  background: rgba(126, 231, 135, 0.12);
+}
+
+.badge-room {
+  color: $fg-dim;
+  background: rgba(136, 136, 136, 0.12);
+}
+
+.badge-review {
+  color: $blue;
+  background: rgba(108, 182, 255, 0.10);
+}
+
+// --- Kanban Board ---
+
+// Strip GTK menubutton internal chrome in kanban cards
+.kanban-card menubutton {
+  min-height: 0;
+  min-width: 0;
+
+  > button {
+    all: unset;
+    min-height: 0;
+    min-width: 0;
+    padding: 0;
+    margin: 0;
+  }
+}
+
+.kanban-board {
+  padding: 0 4px 4px;
+}
+
+.kanban-column {
+  min-width: 300px;
+  margin: 0 4px;
+}
+
+.kanban-column-header {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 10px;
+  font-weight: 700;
+  color: $fg-muted;
+  letter-spacing: 0.5px;
+  padding: 4px 8px 6px;
+}
+
+.kanban-scroll {
+  min-height: 120px;
+}
+
+.kanban-card {
+  background: #2a2a2a;
+  border: 1px solid #363636;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin: 0 0 5px;
+}
+
+// Title row — clickable to expand
+.card-top-row {
+  all: unset;
+  padding: 0;
+  margin-bottom: 8px;
+}
+
+.card-title-static {
+  margin-bottom: 8px;
+}
+
+.card-caret {
+  font-size: 11px;
+  color: $fg-muted;
+  margin-right: 4px;
+  min-width: 10px;
+}
+
+.card-summary {
+  font-family: "JetBrainsMono Nerd Font";
+  color: $fg;
+  font-size: 11px;
+}
+
+// Meta row: key + version + subtasks + status
+.card-meta {
+  margin-top: 0;
+}
+
+// Shared meta tag style
+%meta-tag {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 9px;
+  font-weight: 600;
+  color: $fg;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 5px;
+  border-radius: 3px;
+  min-height: 0;
+}
+
+.card-key-link {
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 5px;
+  border-radius: 3px;
+  min-height: 0;
+  min-width: 0;
+
+  &:hover { background: rgba(255, 255, 255, 0.15); }
+}
+
+.card-key {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 9px;
+  font-weight: 600;
+  color: $fg;
+}
+
+.card-link-icon {
+  font-size: 7px;
+  color: $fg-muted;
+  margin-left: 2px;
+}
+
+.card-sp {
+  @extend %meta-tag;
+  margin-left: 4px;
+}
+
+.card-version {
+  @extend %meta-tag;
+  margin-left: 4px;
+}
+
+// Status badge (menubutton) — strip GTK defaults, add back minimal padding
+.status-badge {
+  all: unset;
+  min-height: 0;
+  min-width: 0;
+  padding: 6px 12px;
+  border-radius: 3px;
+  margin-left: 4px;
+
+  &:hover { opacity: 0.8; }
+
+  > box,
+  > box > label,
+  > button,
+  > button > box {
+    all: unset;
+    min-height: 0;
+    min-width: 0;
+    padding: 0;
+    margin: 0;
+  }
+}
+
+.status-badge-label {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 9px;
+  font-weight: 600;
+  color: white;
+}
+
+// Subtask count
+.subtask-count {
+  @extend %meta-tag;
+  margin-left: 4px;
+}
+
+// Expanded card section
+.card-expanded {
+  margin-top: 4px;
+}
+
+.st-todo { background: rgba(96, 96, 96, 0.25); }
+.st-progress { background: rgba(217, 160, 91, 0.25); }
+.st-review { background: rgba(108, 182, 255, 0.20); }
+.st-pending { background: rgba(126, 231, 135, 0.20); }
+.st-done { background: rgba(126, 231, 135, 0.20); }
+
+// Strip ALL GTK4 popover chrome
+popover,
+popover > contents,
+popover > arrow {
+  all: unset;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  min-height: 0;
+}
+
+popover > contents {
+  background: #2e2e2e;
+  border: 1px solid #404040;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.transition-list {
+  padding: 0;
+}
+
+.transition-option {
+  all: unset;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 10px;
+  color: $fg;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.transition-loading {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 9px;
+  color: $fg-muted;
+  padding: 4px 10px;
+}
+
+// Subtask list
+.subtask-list {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.subtask-row {
+  padding: 2px 0;
+
+  .subtask-summary {
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 9px;
+    color: $fg-dim;
+  }
+}
+
+
+// --- PR Reviews ---
+
+.pr-repo {
+  font-weight: 700;
+  color: $fg-dim;
+  font-size: 10px;
+  margin-bottom: 2px;
+}
+
+.pr-title {
+  color: $fg;
+  font-size: 12px;
+}
+
+// --- Calendar ---
+
+.meeting-time {
+  font-weight: 700;
+  color: $fg;
+  font-size: 11px;
+  min-width: 48px;
+  margin-right: 10px;
+}
+
+.meeting-time.all-day {
+  color: $fg-muted;
+  font-size: 10px;
+}
+
+.meeting-summary {
+  color: $fg;
+  font-size: 12px;
+}
+
+.meeting-video-icon {
+  color: $green;
+  margin-left: 8px;
+  font-size: 13px;
+}
+
+.meeting-location {
+  color: $fg-muted;
+  margin-left: 8px;
+  font-size: 12px;
+}
+
+.meeting-soon {
+  border-left: 3px solid $blue;
+  padding-left: 9px;
+}
+
+.meeting-urgent {
+  background: rgba(212, 85, 90, 0.08);
+  border-left: 3px solid $red;
+  padding-left: 9px;
+}

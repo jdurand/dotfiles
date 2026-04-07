@@ -76,11 +76,12 @@ export const AUTO_ASSIGN_STATUS = "in progress"
 // --- JQL ---
 
 // Base JQL for fetching parent issues
+// Must exclude all statuses not mapped in STATUS_TO_COLUMN
 export const ISSUES_JQL =
   "assignee = currentUser()" +
   " AND sprint in openSprints()" +
   " AND issuetype not in subtaskIssueTypes()" +
-  " AND status != Done" +
+  " AND status NOT IN (Done, Released, Rejected)" +
   " ORDER BY rank ASC"
 
 // --- Limits ---

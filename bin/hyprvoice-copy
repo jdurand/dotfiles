@@ -1,0 +1,6 @@
+#!/bin/sh
+# Copy the Nth most recent hyprvoice transcription to clipboard (default: 1)
+
+text=$(hyprvoice-history "${1:-1}" | sed 's/^[[:space:]]*[0-9]*[[:space:]]*//')
+printf '\033[38;5;245mcopied:\033[0m \033[1m%s\033[0m\n' "$text" >&2
+printf '%s' "$text" | wl-copy

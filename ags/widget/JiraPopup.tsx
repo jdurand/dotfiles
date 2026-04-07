@@ -394,7 +394,7 @@ function IssueCard({
         >
           <box>
             <label class="card-key" label={issue.key} />
-            <label class="card-link-icon" label={"\u29C9"} />
+            <label class="card-link-icon" label={"\u2197"} />
           </box>
         </button>
         {issue.storyPoints !== null && (
@@ -535,7 +535,9 @@ export default function JiraPopup() {
           <box orientation={VERTICAL}>
             <box>
               <label class="sprint-label" label="Current Sprint:" />
-              <label class="sprint-name" label={sprintName} xalign={0} hexpand />
+              <label class="sprint-name" label={sprintName} xalign={0} />
+              <label class="card-link-icon" label={"\u2197"} />
+              <box hexpand />
               <label class="sprint-dates" label={sprintDates} xalign={1} />
             </box>
             <label

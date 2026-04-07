@@ -1,0 +1,10 @@
+#!/bin/sh
+# Show the last N hyprvoice transcriptions (default: 5)
+
+count="${1:-5}"
+
+journalctl --user -u hyprvoice.service --no-pager -o cat \
+  | grep 'Pipeline: Final transcription text:' \
+  | tail -n "$count" \
+  | sed 's/.*Pipeline: Final transcription text: //' \
+  | nl -ba

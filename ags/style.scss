@@ -427,3 +427,30 @@ popover > contents {
   border-left: 3px solid $red;
   padding-left: 9px;
 }
+
+// Past events grayed out
+.event-past {
+  opacity: 0.4;
+}
+
+.event-past-text {
+  color: $fg-muted;
+}
+
+// "Now" separator between past and upcoming
+.now-separator {
+  padding: 4px 12px;
+}
+
+.now-label {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 8px;
+  color: $fg;
+  margin-right: 6px;
+}
+
+.now-line {
+  min-height: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+  margin-bottom: 5px;
+}

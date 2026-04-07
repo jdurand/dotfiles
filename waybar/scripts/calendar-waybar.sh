@@ -8,8 +8,10 @@ GWS="$HOME/.local/share/mise/installs/node/20.20.0/bin/gws"
 
 [ -f "$HOME/.dotfiles/environment/calendar.env" ] && source "$HOME/.dotfiles/environment/calendar.env"
 CALENDAR_ID="$GOOGLE_CALENDAR_ID"
+
 TODAY_START=$(date -d "today 00:00" -u +%Y-%m-%dT%H:%M:%S.000Z)
 TODAY_END=$(date -d "today 23:59" -u +%Y-%m-%dT%H:%M:%S.000Z)
+NOW_ISO=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 NOW_EPOCH=$(date +%s)
 
 DATA=$(timeout 10 "$GWS" calendar events list \
@@ -21,10 +23,26 @@ TIMED=$(echo "$DATA" | jq '[.items // [] | .[] | select(.start.dateTime != null)
 TOTAL_COUNT=$(echo "$TIMED" | jq 'length' 2>/dev/null)
 TOTAL_COUNT="${TOTAL_COUNT:-0}"
 
-# Only upcoming events (start time in the future, with 3min grace for ongoing)
-UPCOMING=$(echo "$TIMED" | jq "[.[] | select((.start.dateTime | fromdateiso8601) > ($NOW_EPOCH - 180))]" 2>/dev/null)
-UPCOMING_COUNT=$(echo "$UPCOMING" | jq 'length' 2>/dev/null)
-UPCOMING_COUNT="${UPCOMING_COUNT:-0}"
+# Count upcoming: convert each start time with date and compare epochs
+UPCOMING_COUNT=0
+NEXT_MEET_TITLE=""
+NEXT_MEET_EPOCH=""
+NEXT_HAS_MEET=""
+
+while IFS=$'\t' read -r start_dt hangout_link summary; do
+  [ -z "$start_dt" ] && continue
+  evt_epoch=$(date -d "$start_dt" +%s 2>/dev/null) || continue
+  # 3 min grace period for ongoing meetings
+  if [ "$evt_epoch" -gt $((NOW_EPOCH - 180)) ]; then
+    UPCOMING_COUNT=$((UPCOMING_COUNT + 1))
+    # Track next meeting with a Meet link
+    if [ -n "$hangout_link" ] && [ -z "$NEXT_MEET_EPOCH" ]; then
+      NEXT_MEET_EPOCH="$evt_epoch"
+      NEXT_MEET_TITLE="$summary"
+      NEXT_HAS_MEET="1"
+    fi
+  fi
+done < <(echo "$TIMED" | jq -r '.[] | [.start.dateTime, (.hangoutLink // ""), .summary] | @tsv' 2>/dev/null)
 
 ICON="󰃭"
 
@@ -42,27 +60,17 @@ fi
 CLASS="normal"
 TOOLTIP="${UPCOMING_COUNT} upcoming events"
 
-# Find next meeting with a Meet link
-NEXT_MEET=$(echo "$UPCOMING" | jq -r '[.[] | select(.hangoutLink != null)] | sort_by(.start.dateTime) | .[0]' 2>/dev/null)
-
-if [ "$NEXT_MEET" != "null" ] && [ -n "$NEXT_MEET" ]; then
-  NEXT_START=$(echo "$NEXT_MEET" | jq -r '.start.dateTime' 2>/dev/null)
-  NEXT_EPOCH=$(date -d "$NEXT_START" +%s 2>/dev/null)
-  NEXT_TITLE=$(echo "$NEXT_MEET" | jq -r '.summary // "Meeting"' 2>/dev/null)
-
-  if [ -n "$NEXT_EPOCH" ]; then
-    MINS_UNTIL=$(( (NEXT_EPOCH - NOW_EPOCH) / 60 ))
-    if [ "$MINS_UNTIL" -le 5 ] && [ "$MINS_UNTIL" -ge -3 ]; then
-      # Urgent: show meeting name, green flashing
-      # Truncate title for bar display
-      SHORT_TITLE="${NEXT_TITLE:0:25}"
-      [ "${#NEXT_TITLE}" -gt 25 ] && SHORT_TITLE="${SHORT_TITLE}…"
-      echo "{\"text\": \"󰍫 ${SHORT_TITLE}\", \"tooltip\": \"Join: ${NEXT_TITLE}\", \"class\": \"urgent\"}"
-      exit 0
-    elif [ "$MINS_UNTIL" -le 15 ] && [ "$MINS_UNTIL" -gt 5 ]; then
-      CLASS="warning"
-      TOOLTIP="Next meeting in ${MINS_UNTIL}min: ${NEXT_TITLE}"
-    fi
+# Warning for next meeting with Meet link
+if [ -n "$NEXT_MEET_EPOCH" ]; then
+  MINS_UNTIL=$(( (NEXT_MEET_EPOCH - NOW_EPOCH) / 60 ))
+  if [ "$MINS_UNTIL" -le 5 ] && [ "$MINS_UNTIL" -ge -3 ]; then
+    SHORT_TITLE="${NEXT_MEET_TITLE:0:25}"
+    [ "${#NEXT_MEET_TITLE}" -gt 25 ] && SHORT_TITLE="${SHORT_TITLE}…"
+    echo "{\"text\": \"󰍫 ${SHORT_TITLE}\", \"tooltip\": \"Join: ${NEXT_MEET_TITLE}\", \"class\": \"urgent\"}"
+    exit 0
+  elif [ "$MINS_UNTIL" -le 15 ] && [ "$MINS_UNTIL" -gt 5 ]; then
+    CLASS="warning"
+    TOOLTIP="Next meeting in ${MINS_UNTIL}min: ${NEXT_MEET_TITLE}"
   fi
 fi
 

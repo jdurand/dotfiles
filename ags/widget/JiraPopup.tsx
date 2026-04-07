@@ -4,25 +4,41 @@ import { execAsync } from "ags/process"
 import { interval } from "ags/time"
 import { createState, For } from "ags"
 import PopupWindow from "./PopupWindow"
+import {
+  ENV_FILE,
+  COMPANY_MANAGED,
+  FIELD_STORY_POINTS,
+  FIELD_SPRINT,
+  STATUS_TO_COLUMN,
+  TRANSITION_ORDER,
+  HIDDEN_TRANSITIONS,
+  STATUS_STYLES,
+  AUTO_ASSIGN_STATUS,
+  ISSUES_JQL,
+  MAX_ISSUES,
+  MAX_SUBTASKS,
+  POLL_INTERVAL_MS,
+  POPUP_MARGIN_RIGHT,
+  CARD_MAX_WIDTH_CHARS,
+  SUBTASK_MAX_WIDTH_CHARS,
+} from "../lib/jira-config"
 
-// Env vars resolved at runtime from jira.env via bash
 // Required env vars in ~/.dotfiles/environment/jira.env:
 //   JIRA_BASE_URL   - e.g. https://yourorg.atlassian.net
 //   JIRA_CLOUD_ID   - Atlassian cloud instance UUID
 //   JIRA_ACCOUNT_ID - your Jira account ID (for auto-assign)
 //   JIRA_PROJECT    - default project key (e.g. LIB)
+//   JIRA_BOARD_ID   - board ID for sprint URLs
 //   JIRA_EMAIL      - login email
 //   JIRA_API_TOKEN  - API token (read/write scope)
-//   JIRA_BOARD_ID   - default Jira board (24)
 
 const VERTICAL = Gtk.Orientation.VERTICAL
 const HORIZONTAL = Gtk.Orientation.HORIZONTAL
-const ENV_PREFIX = `source "$HOME/.dotfiles/environment/jira.env" 2>/dev/null`
+const ENV_PREFIX = `source "${ENV_FILE}" 2>/dev/null`
 
 let jiraBaseUrl = ""
 let jiraProject = ""
 let jiraBoardId = ""
-// Fetch env values once at startup
 execAsync(["bash", "-c", `${ENV_PREFIX}; echo "$JIRA_BASE_URL"; echo "$JIRA_PROJECT"; echo "$JIRA_BOARD_ID"`])
   .then((out) => {
     const lines = out.trim().split("\n")
@@ -64,29 +80,18 @@ interface SprintInfo {
   endDate: string
 }
 
-type Column = "todo" | "inprogress" | "inreview"
+type Column = string
 
 // --- Column assignment ---
 
 function columnFor(status: string): Column | null {
-  const lower = status.toLowerCase()
-  if (lower === "to do") return "todo"
-  if (lower === "in progress") return "inprogress"
-  if (lower === "done" || lower === "released" || lower === "rejected") return null
-  return "inreview"
+  return STATUS_TO_COLUMN[status.toLowerCase()] ?? null
 }
 
 // --- Status styling ---
 
 function statusClass(status: string): string {
-  const lower = status.toLowerCase()
-  if (lower.includes("progress")) return "st-progress"
-  if (lower === "to do") return "st-todo"
-  if (lower.includes("review") || lower.includes("qa") || lower.includes("merge")
-      || lower.includes("test")) return "st-review"
-  if (lower.includes("pending")) return "st-pending"
-  if (lower.includes("done")) return "st-done"
-  return "st-todo"
+  return STATUS_STYLES[status.toLowerCase()] ?? "st-todo"
 }
 
 // --- API helpers ---
@@ -94,7 +99,7 @@ function statusClass(status: string): string {
 const CURL_AUTH = `-u "$JIRA_EMAIL:$JIRA_API_TOKEN" -H "Content-Type: application/json"`
 const API_BASE_SH = `https://api.atlassian.com/ex/jira/$JIRA_CLOUD_ID/rest/api/3`
 
-function jiraSearch(jql: string, fields: string[], maxResults = 30): string[] {
+function jiraSearch(jql: string, fields: string[], maxResults: number): string[] {
   const fieldList = fields.map((f) => `"${f}"`).join(",")
   return [
     "bash", "-c",
@@ -107,9 +112,9 @@ function jiraSearch(jql: string, fields: string[], maxResults = 30): string[] {
 
 function fetchIssuesCmd(): string[] {
   return jiraSearch(
-    "assignee = currentUser() AND sprint in openSprints() AND issuetype not in subtaskIssueTypes() AND status != Done ORDER BY rank ASC",
-    ["summary", "status", "fixVersions", "customfield_10024", "customfield_10020"],
-    30,
+    ISSUES_JQL,
+    ["summary", "status", "fixVersions", FIELD_STORY_POINTS, FIELD_SPRINT],
+    MAX_ISSUES,
   )
 }
 
@@ -117,7 +122,7 @@ function fetchSubtasksCmd(parentKeys: string[]): string[] {
   return jiraSearch(
     `parent in (${parentKeys.join(",")}) ORDER BY rank ASC`,
     ["summary", "status", "parent"],
-    100,
+    MAX_SUBTASKS,
   )
 }
 
@@ -153,13 +158,12 @@ function parseIssues(output: string): { issues: JiraIssue[]; sprint: SprintInfo 
       summary: i.fields?.summary || "",
       status: i.fields?.status?.name || "",
       fixVersion: i.fields?.fixVersions?.[0]?.name || "",
-      storyPoints: i.fields?.customfield_10024 ?? null,
+      storyPoints: i.fields?.[FIELD_STORY_POINTS] ?? null,
       subtasks: [],
     }))
 
-    // Extract sprint from first issue's customfield_10020
     let sprint: SprintInfo | null = null
-    const sprints = data.issues?.[0]?.fields?.customfield_10020
+    const sprints = data.issues?.[0]?.fields?.[FIELD_SPRINT]
     if (Array.isArray(sprints)) {
       const active = sprints.find((s: any) => s.state === "active") || sprints[0]
       if (active) {
@@ -197,19 +201,6 @@ function parseSubtasks(output: string): Map<string, Subtask[]> {
   return map
 }
 
-// Workflow order for sorting transitions
-const TRANSITION_ORDER: Record<string, number> = {
-  "to do": 0,
-  "in progress": 1,
-  "code review": 2,
-  "test strategy": 3,
-  "qa": 4,
-  "pending version": 5,
-  "to merge": 6,
-  "pending release": 7,
-  "done": 8,
-}
-
 function transitionOrder(name: string): number {
   return TRANSITION_ORDER[name.toLowerCase()] ?? 50
 }
@@ -217,18 +208,16 @@ function transitionOrder(name: string): number {
 function parseTransitions(output: string): Transition[] {
   try {
     const data = JSON.parse(output.trim())
+    const hiddenSet = new Set(HIDDEN_TRANSITIONS)
+
     const raw = (data.transitions || [])
-      .filter((t: any) => {
-        const to = (t.to?.name || "").toLowerCase()
-        return to !== "released" && to !== "rejected"
-      })
+      .filter((t: any) => !hiddenSet.has((t.to?.name || "").toLowerCase()))
       .map((t: any) => ({
         id: t.id,
         name: t.name,
         toName: t.to?.name || t.name,
       }))
 
-    // Deduplicate by target status (keep first occurrence)
     const seen = new Set<string>()
     const unique: Transition[] = []
     for (const t of raw) {
@@ -274,7 +263,7 @@ function StatusDropdown({
   }
 
   function doTransition(t: Transition) {
-    const assignToMe = t.toName.toLowerCase() === "in progress"
+    const assignToMe = t.toName.toLowerCase() === AUTO_ASSIGN_STATUS
     execAsync(doTransitionCmd(issueKey, t.id, assignToMe))
       .then(() => onChanged())
       .catch(() => {})
@@ -333,7 +322,7 @@ function SubtaskRow({
         xalign={0}
         hexpand
         ellipsize={Pango.EllipsizeMode.END}
-        maxWidthChars={26}
+        maxWidthChars={SUBTASK_MAX_WIDTH_CHARS}
       />
       <StatusDropdown
         issueKey={subtask.key}
@@ -367,7 +356,6 @@ function IssueCard({
 
   return (
     <box class="kanban-card" orientation={VERTICAL}>
-      {/* Title row — click to expand/collapse if has subtasks */}
       {hasSubtasks ? (
         <button class="card-top-row" onClicked={toggleExpand}>
           <box>
@@ -383,7 +371,7 @@ function IssueCard({
               xalign={0}
               hexpand
               wrap
-              maxWidthChars={36}
+              maxWidthChars={CARD_MAX_WIDTH_CHARS}
             />
           </box>
         </button>
@@ -395,11 +383,10 @@ function IssueCard({
             xalign={0}
             hexpand
             wrap
-            maxWidthChars={36}
+            maxWidthChars={CARD_MAX_WIDTH_CHARS}
           />
         </box>
       )}
-      {/* Meta row: key link | version | subtask count | status */}
       <box class="card-meta">
         <button
           class="card-key-link"
@@ -426,7 +413,6 @@ function IssueCard({
           onChanged={onChanged}
         />
       </box>
-      {/* Expanded: subtasks + future actions */}
       <box
         class="card-expanded"
         orientation={VERTICAL}
@@ -463,6 +449,12 @@ function KanbanColumnHeader({
 
 // --- Main popup ---
 
+function sprintBoardUrl(sprint: SprintInfo): string {
+  const prefix = COMPANY_MANAGED ? "/jira/software/c/projects" : "/jira/software/projects"
+  const board = jiraBoardId || sprint.boardId
+  return `${jiraBaseUrl}${prefix}/${jiraProject}/boards/${board}?sprint=${sprint.id}`
+}
+
 export default function JiraPopup() {
   const [todoItems, setTodoItems] = createState<JiraIssue[]>([])
   const [progressItems, setProgressItems] = createState<JiraIssue[]>([])
@@ -488,7 +480,7 @@ export default function JiraPopup() {
           setSprintName(sprint.name)
           setSprintDates(`${formatDate(sprint.startDate)} \u2013 ${formatDate(sprint.endDate)}`)
           setSprintGoal(sprint.goal ? sprint.goal.split("\n")[0] : "")
-          sprintUrl = `${jiraBaseUrl}/jira/software/c/projects/${jiraProject}/boards/${jiraBoardId || sprint.boardId}?sprint=${sprint.id}`
+          sprintUrl = sprintBoardUrl(sprint)
         }
 
         const parentKeys = issues.map((i) => i.key)
@@ -526,11 +518,11 @@ export default function JiraPopup() {
   }
 
   fetchData()
-  interval(900_000, fetchData)
+  interval(POLL_INTERVAL_MS, fetchData)
 
   return PopupWindow({
     name: "jira-popup",
-    marginRight: 290,
+    marginRight: POPUP_MARGIN_RIGHT,
     onVisibilityChanged: (v: boolean) => {
       if (v) fetchData()
     },
@@ -555,7 +547,6 @@ export default function JiraPopup() {
           </box>
         </button>
         <box orientation={HORIZONTAL} class="kanban-board">
-          {/* To Do column */}
           <box class="kanban-column" orientation={VERTICAL}>
             <KanbanColumnHeader title="To Do" items={todoItems} />
             <box orientation={VERTICAL} class="kanban-card-list">
@@ -564,7 +555,6 @@ export default function JiraPopup() {
               </For>
             </box>
           </box>
-          {/* In Progress column */}
           <box class="kanban-column" orientation={VERTICAL}>
             <KanbanColumnHeader title="In Progress" items={progressItems} />
             <box orientation={VERTICAL} class="kanban-card-list">
@@ -573,7 +563,6 @@ export default function JiraPopup() {
               </For>
             </box>
           </box>
-          {/* In Review column */}
           <box class="kanban-column" orientation={VERTICAL}>
             <KanbanColumnHeader title="In Review" items={reviewItems} />
             <box orientation={VERTICAL} class="kanban-card-list">

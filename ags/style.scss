@@ -454,3 +454,173 @@ popover > contents {
   border-bottom: 1px solid rgba(255, 255, 255, 0.4);
   margin-bottom: 5px;
 }
+
+// --- Media Player ---
+
+.mp-container {
+  background: rgba(34, 34, 34, 0.75);
+  border-radius: 16px;
+  border: 1px solid rgba(60, 60, 60, 0.3);
+  padding: 1px 12px;
+  min-width: 220px;
+}
+
+.mp-compact {
+  min-height: 0;
+  min-width: 220px;
+}
+
+.mp-cover-small {
+  border-radius: 3px;
+  min-height: 18px;
+  min-width: 18px;
+}
+
+.mp-cover-large {
+  border-radius: 10px;
+}
+
+.mp-info {
+}
+
+.mp-title {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 11px;
+  font-weight: 700;
+  color: $fg;
+}
+
+.mp-title-full {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 13px;
+  font-weight: 700;
+  color: $fg;
+}
+
+.mp-artist {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 10px;
+  color: $fg-dim;
+}
+
+.mp-artist-full {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 11px;
+  color: $fg-dim;
+}
+
+.mp-album {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 10px;
+  color: $fg-muted;
+  margin-top: 2px;
+}
+
+.mp-link {
+  all: unset;
+  border-radius: 4px;
+
+  &:hover label {
+    color: $accent;
+  }
+}
+
+.mp-controls {
+}
+
+.mp-btn {
+  all: unset;
+  font-size: 16px;
+  color: $fg;
+  padding: 0 2px;
+  border-radius: 4px;
+  min-height: 0;
+  min-width: 0;
+
+  &:hover { background: rgba(255, 255, 255, 0.08); }
+  &:active { background: rgba(255, 255, 255, 0.12); }
+}
+
+.mp-btn-play {
+  font-size: 18px;
+}
+
+.mp-toggle {
+  all: unset;
+  font-size: 14px;
+  color: $fg-muted;
+  padding: 4px 6px;
+  border-radius: 6px;
+
+  &:hover { background: rgba(255, 255, 255, 0.08); }
+}
+
+.mp-toggle-active {
+  color: $accent;
+}
+
+// Expanded section
+.mp-expanded {
+  padding-top: 10px;
+  margin-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  min-width: 320px;
+}
+
+.mp-expanded-top {
+  margin-bottom: 10px;
+}
+
+.mp-expanded-info {
+  padding-top: 4px;
+}
+
+// Progress bar
+.mp-progress {
+  margin: 4px 0;
+}
+
+.mp-time {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 10px;
+  color: $fg-muted;
+  min-width: 32px;
+}
+
+.mp-progress-slider,
+.mp-volume-slider {
+  trough {
+    min-height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  highlight {
+    min-height: 4px;
+    border-radius: 2px;
+    background: $accent;
+  }
+
+  slider {
+    min-width: 10px;
+    min-height: 10px;
+    border-radius: 5px;
+    background: $fg;
+    margin: -3px 0;
+  }
+}
+
+// Volume + toggles row
+.mp-bottom-row {
+  margin-top: 4px;
+}
+
+.mp-volume-icon {
+  font-size: 14px;
+  color: $fg-dim;
+  margin-right: 6px;
+}
+
+.mp-toggles {
+  margin-left: 8px;
+}

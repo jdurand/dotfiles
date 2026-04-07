@@ -4,6 +4,7 @@ import style from "./style.scss"
 import JiraPopup from "./widget/JiraPopup"
 import PrReviewsPopup from "./widget/PrReviewsPopup"
 import CalendarPopup from "./widget/CalendarPopup"
+import MediaPlayer from "./widget/MediaPlayer"
 
 const windows = new Map<string, Gtk.Window>()
 
@@ -33,5 +34,6 @@ app.start({
     windows.set("jira", JiraPopup() as unknown as Gtk.Window)
     windows.set("prs", PrReviewsPopup() as unknown as Gtk.Window)
     windows.set("calendar", CalendarPopup() as unknown as Gtk.Window)
+    MediaPlayer({ align: "right" }) // self-managing, auto-shows when music plays
   },
 })

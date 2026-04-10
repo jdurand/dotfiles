@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Wraps hyprlock with automatic restart on crash.
+# If hyprlock exits non-zero (crash), it restarts after a brief delay.
+# If hyprlock exits cleanly (exit 0 = user unlocked), the wrapper stops.
+
+MAX_RESTARTS=5
+RESTART_WINDOW=60
+restart_count=0
+window_start=$(date +%s)
+
+while true; do
+    hyprlock
+    exit_code=$?
+
+    if [ $exit_code -eq 0 ]; then
+        break
+    fi
+
+    now=$(date +%s)
+    elapsed=$((now - window_start))
+
+    # Reset counter if we're outside the restart window
+    if [ $elapsed -gt $RESTART_WINDOW ]; then
+        restart_count=0
+        window_start=$now
+    fi
+
+    restart_count=$((restart_count + 1))
+
+    if [ $restart_count -ge $MAX_RESTARTS ]; then
+        echo "hyprlock crashed $MAX_RESTARTS times in ${RESTART_WINDOW}s, giving up" \
+            | systemd-cat -t hyprlock-wrapper -p err
+        break
+    fi
+
+    echo "hyprlock crashed (exit $exit_code), restarting ($restart_count/$MAX_RESTARTS)..." \
+        | systemd-cat -t hyprlock-wrapper -p warning
+    sleep 1
+done

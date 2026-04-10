@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Manual recovery from a hyprlock crash.
+# Run from a TTY (Ctrl+Alt+F3) when hyprlock is stuck on the crash screen.
+#
+# After running, switch back to your graphical session with Ctrl+Alt+F1.
+# To re-lock, run: loginctl lock-session
+
+echo "allowing session lock restore..."
+hyprctl --instance 0 keyword misc:allow_session_lock_restore 1
+
+echo "killing crashed hyprlock..."
+killall -9 hyprlock 2>/dev/null
+
+echo "done — switch back to your session with Ctrl+Alt+F1"
+echo "to re-lock: loginctl lock-session"

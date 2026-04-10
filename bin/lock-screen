@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Lock screen with hyprlock crash recovery.
+# Replaces omarchy-lock-screen with a version that auto-restarts hyprlock
+# on crash via hyprlock-wrapper.
+
+pidof hyprlock || hyprlock-wrapper &
+
+hyprctl switchxkblayout all 0 > /dev/null 2>&1
+
+if pgrep -x "1password" >/dev/null; then
+    1password --lock &
+fi
+
+pkill -f org.omarchy.screensaver

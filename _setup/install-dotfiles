@@ -144,6 +144,13 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   mkdir -p "$HOME/.config/omarchy/hooks" "$HOME/.config/omarchy/extensions"
   create_symlink "$HOME/.dotfiles/omarchy/hooks/theme-set" "$HOME/.config/omarchy/hooks/theme-set"
   create_symlink "$HOME/.dotfiles/omarchy/extensions/menu.sh" "$HOME/.config/omarchy/extensions/menu.sh"
+
+  # Symlink bin scripts to ~/.local/bin
+  mkdir -p "$HOME/.local/bin"
+  for script in "$HOME/.dotfiles/bin/"*; do
+    [ -f "$script" ] && [ -x "$script" ] && \
+      create_symlink "$script" "$HOME/.local/bin/$(basename "$script")"
+  done
 fi
 
 # Install fish plugins

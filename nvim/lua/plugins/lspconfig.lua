@@ -46,8 +46,6 @@ return {
       -- before setting up the servers.
       require('mason').setup()
       require('mason-lspconfig').setup()
-      -- local configs = require('lspconfig.configs')
-      local util = require('lspconfig.util')
 
       -- Enable the following language servers
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
@@ -118,37 +116,31 @@ return {
       capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
       -- Ensure the servers above are installed
-      local mason_lspconfig = require 'mason-lspconfig'
-
-      mason_lspconfig.setup {
+      require('mason-lspconfig').setup {
         ensure_installed = vim.tbl_keys(servers),
       }
 
+      -- Set up LSP keymaps when a server attaches to a buffer
       local on_attach = require('user.keymaps.lsp').on_attach
-
-      mason_lspconfig.setup_handlers {
-        function(server_name)
-          -- Using vim.lsp.config API (Neovim 0.11.4+) to avoid deprecation warning
-          -- Fall back to require('lspconfig') if vim.lsp.config is not available
-          if vim.lsp.config then
-            local config = vim.lsp.config[server_name] or {}
-            vim.lsp.config[server_name] = vim.tbl_deep_extend('force', config, {
-              capabilities = capabilities,
-              on_attach = on_attach,
-              settings = servers[server_name],
-              filetypes = (servers[server_name] or {}).filetypes,
-            })
-          else
-            -- Fallback for older Neovim versions
-            require('lspconfig')[server_name].setup {
-              capabilities = capabilities,
-              on_attach = on_attach,
-              settings = servers[server_name],
-              filetypes = (servers[server_name] or {}).filetypes,
-            }
-          end
+      vim.api.nvim_create_autocmd('LspAttach', {
+        callback = function(args)
+          on_attach(vim.lsp.get_client_by_id(args.data.client_id), args.buf)
         end,
-      }
+      })
+
+      -- Configure and enable each server using native vim.lsp API
+      for server_name, server_settings in pairs(servers) do
+        local config = {
+          capabilities = capabilities,
+          settings = server_settings,
+        }
+        if server_settings.filetypes then
+          config.filetypes = server_settings.filetypes
+        end
+        vim.lsp.config(server_name, config)
+      end
+
+      vim.lsp.enable(vim.tbl_keys(servers))
     end,
   },
 }

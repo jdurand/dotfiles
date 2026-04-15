@@ -132,7 +132,7 @@
   },
 
   "custom/update": {
-    "format": "",
+    "format": "󰚰",
     "exec": "omarchy-update-available",
     "on-click": "omarchy-launch-floating-terminal-with-presentation omarchy-update",
     "tooltip-format": "Omarchy update available",

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+current=$(hyprctl getoption general:layout -j | jq -r '.str')
+if [ "$current" = "dwindle" ]; then
+  hyprctl keyword general:layout scrolling
+  notify-send -t 2000 "Layout: Scrolling"
+else
+  hyprctl keyword general:layout dwindle
+  notify-send -t 2000 "Layout: Dwindle"
+fi

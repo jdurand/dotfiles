@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Scrolling: cycle column width presets
+# Dwindle: cycle fullscreen (same as SUPER+F)
+current=$(hyprctl getoption general:layout -j | jq -r '.str')
+if [ "$current" = "scrolling" ]; then
+  hyprctl dispatch layoutmsg colresize +conf
+else
+  hypr-fullscreen-cycle
+fi

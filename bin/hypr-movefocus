@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# AeroSpace-style: exit compositor fullscreen before navigating
+direction=$1
+fullscreen=$(hyprctl activewindow -j | jq '.fullscreen')
+
+# State mapping: 0=normal, 1=maximize (dispatch 1), 2=real fullscreen (dispatch 0)
+if [ "$fullscreen" = "1" ]; then
+  hyprctl dispatch fullscreen 1
+elif [ "$fullscreen" = "2" ]; then
+  hyprctl dispatch fullscreen 0
+fi
+
+hyprctl dispatch movefocus "$direction"

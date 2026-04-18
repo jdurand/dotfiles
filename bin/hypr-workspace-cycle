@@ -1,8 +1,9 @@
 #!/bin/bash
 # Cycle workspaces on current monitor with wraparound
-# Usage: hypr-workspace-cycle next|prev
+# Usage: hypr-workspace-cycle next|prev [move]
 
 DIRECTION=${1:-next}
+ACTION=${2:-switch}
 WORKSPACES_PER_MONITOR=5
 
 # Get current workspace and monitor
@@ -28,4 +29,8 @@ else
   [ "$NEXT" -lt "$MIN" ] && NEXT=$MAX
 fi
 
-hyprctl dispatch workspace "$NEXT"
+if [ "$ACTION" = "move" ]; then
+  hyprctl dispatch movetoworkspace "$NEXT"
+else
+  hyprctl dispatch workspace "$NEXT"
+fi

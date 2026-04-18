@@ -150,21 +150,30 @@ vim.api.nvim_set_keymap('n', '<C-]>', ':tag <C-r><C-w><CR>', { noremap = true })
 vim.keymap.set('n', '<leader>pp', function()
   local filepath = vim.fn.expand('%:p')
   local ext = vim.fn.fnamemodify(filepath, ':e'):lower()
+  local is_mac = vim.fn.has('macunix') == 1
+
+  -- File types to preview in Min browser
+  local browser_types = { html = true, htm = true, svg = true, pdf = true }
 
   if ext == 'md' or ext == 'markdown' then
     vim.cmd('MarkdownPreview')
-  elseif ext:match('^html?$') then
-    vim.fn.system({ 'open', '-a', 'Min.app', filepath })
+  elseif browser_types[ext] then
+    if is_mac then
+      vim.fn.system({ 'open', '-a', 'Min.app', filepath })
+    else
+      vim.fn.system({ 'min-browser', filepath })
+    end
   else
-    -- Open images and PDFs with macOS Quick Look (qlmanage -p)
-    -- Run qlmanage and bring to foreground with osascript
-    vim.fn.jobstart(
-      'qlmanage -p ' .. vim.fn.shellescape(filepath) .. ' & sleep 0.2 && osascript -e \'tell application "qlmanage" to activate\'',
-      { detach = true, shell = true }
-    )
-    --
-    -- vim.fn.system({ 'open', '-a', 'Preview', filepath })
-    --
+    if is_mac then
+      -- Open images and PDFs with macOS Quick Look (qlmanage -p)
+      -- Run qlmanage and bring to foreground with osascript
+      vim.fn.jobstart(
+        'qlmanage -p ' .. vim.fn.shellescape(filepath) .. ' & sleep 0.2 && osascript -e \'tell application "qlmanage" to activate\'',
+        { detach = true, shell = true }
+      )
+    else
+      vim.ui.open(filepath)
+    end
   end
 end, { desc = '[P]review current file', noremap = true, silent = true })
 

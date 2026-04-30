@@ -121,11 +121,8 @@ end
 if type -q starship; starship init fish | source; end
 enable_transience
 
-# Initialize mise
+# Initialize mise (ruby, node, python, etc.)
 if type -q mise; mise activate fish | source; end
-
-# Initialize rbenv
-if type -q rbenv; rbenv init - | source; end
 
 # Initialize fuzzy finder
 if type -q fzf; fzf --fish | source; end

@@ -45,21 +45,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   fi
 fi
 
-# add openssl v1.1 to PATH
-export PATH="/opt/homebrew/opt/openssl@1.1/bin:$PATH"
-# For compilers to find openssl@1.1
-export LDFLAGS="-L/opt/homebrew/opt/openssl@1.1/lib"
-export CPPFLAGS="-I/opt/homebrew/opt/openssl@1.1/include"
-# For pkg-config to find openssl@1.1
-export PKG_CONFIG_PATH="/opt/homebrew/opt/openssl@1.1/lib/pkgconfig"
-
-# export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
-# # For compilers to find openssl@1.1
-# export LDFLAGS="-L/usr/local/opt/openssl@1.1/lib"
-# export CPPFLAGS="-I/usr/local/opt/openssl@1.1/include"
-# # For pkg-config to find openssl@1.1
-# export PKG_CONFIG_PATH="/usr/local/opt/openssl@1.1/lib/pkgconfig"
-
 # Add Android SDK to PATH
 export ANDROID_HOME=$HOME/Library/Android/sdk
 export PATH=$PATH:$ANDROID_HOME/emulator

@@ -75,6 +75,13 @@ return {
       })
       -- dap_ruby.add_config({ ... })
 
+      local dap_java = require('user.extensions.nvim-dap-java')
+      dap_java.setup({
+        -- dap_configs = {
+        --   { name = 'App: custom launch', mainClass = 'com.example.App' },
+        -- }
+      })
+
       vim.fn.sign_define('DapBreakpoint', { text='❗', texthl='DapBreakpoint', linehl='DapBreakpoint', numhl='DapBreakpoint' })
 
       local whichkey = require('which-key')

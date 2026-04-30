@@ -13,7 +13,7 @@ zsh-defer plug "zsh-users/zsh-syntax-highlighting"
 autoload -U add-zsh-hook
 
 # Load fzf zsh extension
-if command -v rbenv 1>/dev/null 2>&1; then
+if command -v fzf 1>/dev/null 2>&1; then
   eval "$(fzf --zsh)"
 fi
 
@@ -22,20 +22,13 @@ for file in ~/.zsh/extensions/*; do
 done
 
 if [[ -n "${FLOATERM}" ]]; then
-  zsh-defer load_rbenv
   zsh-defer load_direnv
 else
-  load_rbenv
   load_direnv
 fi
 
 zsh-defer load_iterm_integration
 zsh-defer -t 2 load_pyenv
-
-# Load current node.js version on zsh startup
-if [[ -f package.json ]]; then
-  zsh-defer nvm use
-fi
 
 # Refresh theme to display extensions
 load_theme

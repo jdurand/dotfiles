@@ -43,3 +43,6 @@ source ~/.zsh/cleanup.zsh
 # Load and initialise completion system
 autoload -Uz compinit
 compinit
+
+# Initialize mise (ruby, node, python, etc.)
+command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"

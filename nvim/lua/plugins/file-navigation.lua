@@ -57,10 +57,19 @@ return {
   {
     'vhyrro/luarocks.nvim',
     priority = 1000, -- Very high priority is required, luarocks.nvim should run as the first plugin in your config.
-    config = true,
     opts = {
       rocks = { 'magick' },
     },
+    config = function(_, opts)
+      -- luarocks 3.13's luarocks/core/persist.lua does require("dkjson"), but dkjson
+      -- ships under luarocks/vendor/. The luarocks CLI shim adds that dir to its own
+      -- package.path; Neovim's Lua process does not, so the loader fails to init.
+      local vendor = vim.fn.stdpath('data') .. '/lazy/luarocks.nvim/.rocks/share/lua/5.1/luarocks/vendor/?.lua'
+      if not package.path:find(vendor, 1, true) then
+        package.path = package.path .. ';' .. vendor
+      end
+      require('luarocks-nvim').setup(opts)
+    end,
   },
   {
     'echasnovski/mini.files',

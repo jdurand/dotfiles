@@ -45,6 +45,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   fi
 fi
 
+export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
+
 # Add Android SDK to PATH
 export ANDROID_HOME=$HOME/Library/Android/sdk
 export PATH=$PATH:$ANDROID_HOME/emulator

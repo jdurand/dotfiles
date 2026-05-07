@@ -18,7 +18,7 @@ enable-normalization-flatten-containers = true
 enable-normalization-opposite-orientation-for-nested-containers = true
 
 # Layout defaults
-default-root-container-layout = 'tiles'
+default-root-container-layout = 'accordion'
 default-root-container-orientation = 'auto'  # auto: wide monitors horizontal, tall monitors vertical
 accordion-padding = 250
 
@@ -136,6 +136,7 @@ cmd-ctrl-h = "exec-and-forget aerospace list-workspaces --monitor focused --empt
 
 [workspace-to-monitor-force-assignment]
 T = ['^VP27', '^LC27']  # Terminal workspace on external monitor
+Y = 'built-in'          # Meetings/Y on the smaller built-in display
 
 # ====================
 # Window Detection Rules
@@ -192,7 +193,7 @@ run = ['layout floating']
 # Workspace App Assignments
 # ====================
 
-# Workspace 1 - Code editors
+# Workspace 1 - Editors, Gmail & Calendar
 [[on-window-detected]]
 if.app-id = 'com.microsoft.VSCode'
 run = ['layout tiling', 'move-node-to-workspace 1']
@@ -205,31 +206,64 @@ run = ['layout tiling', 'move-node-to-workspace 1']
 if.app-id = 'com.google.Chrome.app.mdpkiolbdkhdjpekfbkbmhigcaggjagi'
 run = ['layout tiling', 'move-node-to-workspace 1']
 
-# Workspace 2 - Chrome
+[[on-window-detected]]
+if.app-id = 'com.google.Chrome.app.fmgjjmmmlfnkbppncabfkddbjimcfncm'  # Gmail
+run = ['layout tiling', 'move-node-to-workspace 1']
+
+[[on-window-detected]]
+if.app-id = 'com.google.Chrome.app.kjbdgfilnfhdoflbpgamdcdgpehopbep'  # Google Calendar
+run = ['layout tiling', 'move-node-to-workspace 1']
+
+# Workspace 2 - Communication
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome'
 if.window-title-regex-substring = 'Claude for Chrome'
 run = ['layout floating']
 
 [[on-window-detected]]
-if.app-id = 'com.google.Chrome'
+if.app-id = 'com.tinyspeck.slackmacgap'
 run = ['layout tiling', 'move-node-to-workspace 2']
 
-# Workspace Q - AI assistants
+[[on-window-detected]]
+if.app-id = 'com.google.Chrome.app.pommaclcbfghclhalboakcipcmmndhcj'  # Google Chat
+run = ['layout tiling', 'move-node-to-workspace 2']
+
+[[on-window-detected]]
+if.app-id = 'com.apple.MobileSMS'
+run = ['layout tiling', 'move-node-to-workspace 2']
+
+[[on-window-detected]]
+if.app-id = 'net.whatsapp.WhatsApp'
+run = ['layout tiling', 'move-node-to-workspace 2']
+
+# Workspace 3 - General browsing & work
+[[on-window-detected]]
+if.app-id = 'com.google.Chrome'
+run = ['layout tiling', 'move-node-to-workspace 3']
+
+[[on-window-detected]]
+if.app-id = 'io.island.Island'
+run = ['layout tiling', 'move-node-to-workspace 3']
+
+# Workspace G - AI assistants
 [[on-window-detected]]
 if.app-id = 'com.openai.chat'
 run = ['layout tiling', 'move-node-to-workspace G']
 
 [[on-window-detected]]
+if.app-id = 'com.google.Chrome.app.caidcmannjgahlnbpmidmiecjcoiiigg'  # Gemini PWA
+run = ['layout tiling', 'move-node-to-workspace G']
+
+[[on-window-detected]]
 if.app-name-regex-substring = 'Gemini'
-run = ['layout tiling']
+run = ['layout tiling', 'move-node-to-workspace G']
 
 [[on-window-detected]]
 if.app-id = 'com.anthropic.claudefordesktop'
 # run = ['layout tiling', 'move-node-to-workspace G']
 run = ['layout floating'] # needed for the quick input window to behave
 
-# Workspace W - Browsers (on startup)
+# Workspace E - Browsers & email
 [[on-window-detected]]
 if.during-aerospace-startup = true
 if.app-id = 'company.thebrowser.Browser'
@@ -237,20 +271,16 @@ run = ['layout tiling', 'move-node-to-workspace E']
 
 [[on-window-detected]]
 if.app-id = 'app.zen-browser.zen'
-run = ['layout floating', 'move-node-to-workspace E']
+run = ['layout tiling', 'move-node-to-workspace E']
 
-# Workspace E - Email & calendar
 [[on-window-detected]]
 if.app-id = 'com.apple.mail'
 run = ['layout tiling', 'move-node-to-workspace E']
 
+# Workspace Y - Meetings (built-in display)
 [[on-window-detected]]
-if.app-id = 'com.google.Chrome.app.fmgjjmmmlfnkbppncabfkddbjimcfncm'
-run = ['layout tiling', 'move-node-to-workspace E']
-
-[[on-window-detected]]
-if.app-id = 'com.google.Chrome.app.kjbdgfilnfhdoflbpgamdcdgpehopbep'
-run = ['layout tiling', 'move-node-to-workspace E']
+if.app-id = 'com.google.Chrome.app.kjgfgldnnfoeklkmfkjfagphfepbbdan'  # Google Meet
+run = ['layout tiling', 'move-node-to-workspace Y']
 
 # Workspace R - Reading & notes
 [[on-window-detected]]
@@ -270,15 +300,6 @@ run = ['layout tiling', 'move-node-to-workspace T']
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome.app.cinhimbnkkaeohfgghhklpknlkffjgod'
 run = ['layout tiling', 'move-node-to-workspace M']
-
-# Workspace F - Communication (not shown in current config but referenced)
-[[on-window-detected]]
-if.app-id = 'com.apple.MobileSMS'
-run = ['layout tiling', 'move-node-to-workspace F']
-
-[[on-window-detected]]
-if.app-id = 'net.whatsapp.WhatsApp'
-run = ['layout tiling', 'move-node-to-workspace F']
 
 # ====================
 # Service Mode

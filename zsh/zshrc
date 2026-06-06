@@ -46,3 +46,22 @@ compinit
 
 # Initialize mise (ruby, node, python, etc.)
 command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
+
+# sbx-claude-bedrock shell integration — intercepts `sbx run claude`
+# and `sbx create claude` to auto-apply kits discovered under
+# ${PWD}/.sbx/. Bypass with `command sbx …`.
+sbx() {
+  if [ "$#" -lt 2 ]; then
+    command sbx "$@"
+    return
+  fi
+  _scb_sub=$1; _scb_agent=$2
+  if { [ "$_scb_sub" = run ] || [ "$_scb_sub" = create ]; } && [ "$_scb_agent" = claude ]; then
+    shift 2
+    # shellcheck disable=SC2046
+    set -- "$_scb_sub" "$_scb_agent" $(sbx-claude-bedrock _emit-kit-flags "$PWD") "$@"
+    command sbx "$@"
+    return
+  fi
+  command sbx "$@"
+}

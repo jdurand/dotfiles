@@ -20,7 +20,8 @@ font-feature = +ss05, +ss06 # alternatives for 0 and 7
 # macos-non-native-fullscreen = true
 macos-titlebar-style = hidden
 
-macos-icon = holographic
+# macos-icon = holographic
+# Alternatives: official, blueprint, chalkboard, microchip, glass, holographic, paper, retro, xray, custom, custom-style
 bold-is-bright = true
 cursor-color = #5ebfcf
 background-opacity = 0.85

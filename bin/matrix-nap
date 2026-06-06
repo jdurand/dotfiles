@@ -138,7 +138,8 @@ stop_focus_monitor() {
 
 trigger_lock() {
   if [[ "$(uname)" == "Darwin" ]]; then
-    pmset displaysleepnow
+    # Direct lock via Ctrl+Cmd+Q (skips screensaver)
+    osascript -e 'tell application "System Events" to keystroke "q" using {control down, command down}' 2>/dev/null
   elif [[ -x /System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession ]]; then
     /System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend
   elif command -v swaylock >/dev/null 2>&1; then

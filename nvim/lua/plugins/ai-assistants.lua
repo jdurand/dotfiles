@@ -13,7 +13,109 @@ local function get_project_root()
   return vim.fn.getcwd()
 end
 
+local function get_env_from_tmux(name)
+  if not vim.env.TMUX then return nil end
+
+  local value = vim.fn.system({ 'tmux', 'show-environment', '-g', name })
+  if vim.v.shell_error ~= 0 then return nil end
+
+  return value:match('^' .. name .. '=(.*)%s*$')
+end
+
+local function preferred_ai_agent()
+  local agent = vim.env.DEFAULT_AGENT
+    or vim.env.AGENT
+    or get_env_from_tmux('DEFAULT_AGENT')
+    or get_env_from_tmux('AGENT')
+    or 'claude'
+
+  return vim.trim(agent)
+end
+
+local function preferred_ai_agent_args()
+  local args = vim.env.DEFAULT_AGENT_ARGS
+    or get_env_from_tmux('DEFAULT_AGENT_ARGS')
+    or ''
+
+  return vim.trim(args)
+end
+
+local function ai_agent_split_args()
+  local width = vim.api.nvim_win_get_width(0)
+  local height = vim.api.nvim_win_get_height(0)
+
+  if width / height > 2.4 then
+    return { '--width', '30' }
+  end
+
+  return { '--height', '40' }
+end
+
+local function map_ai_terminal_navigation(buffer)
+  tnoremap('<C-h>', '<cmd>lua require("tmux").move_left()<cr>', { buffer = buffer })
+  tnoremap('<C-j>', '<cmd>lua require("tmux").move_bottom()<cr>', { buffer = buffer })
+  tnoremap('<C-k>', '<cmd>lua require("tmux").move_top()<cr>', { buffer = buffer })
+  tnoremap('<C-l>', '<cmd>lua require("tmux").move_right()<cr>', { buffer = buffer })
+end
+
+local function open_terminal_ai_agent(command)
+  local root = get_project_root()
+
+  if vim.env.TMUX then
+    local tmux_command = { 'tmux-run' }
+    vim.list_extend(tmux_command, ai_agent_split_args())
+    table.insert(tmux_command, command)
+
+    vim.fn.jobstart(tmux_command, { detach = true, cwd = root })
+    return
+  end
+
+  vim.cmd('botright 20split')
+  vim.fn.termopen(command, { cwd = root })
+  map_ai_terminal_navigation(vim.api.nvim_get_current_buf())
+  vim.cmd('startinsert')
+end
+
+local function open_claude_code()
+  if vim.fn.exists(':ClaudeCode') == 0 then
+    local ok, lazy = pcall(require, 'lazy')
+
+    if ok then
+      lazy.load({ plugins = { 'claudecode.nvim' } })
+    end
+  end
+
+  vim.cmd('ClaudeCode')
+end
+
+local function open_preferred_ai_agent()
+  local agent = preferred_ai_agent()
+  local args = preferred_ai_agent_args()
+  local normalized_agent = agent:lower():gsub('[%s_%-]+', '')
+
+  if agent == '' then
+    vim.notify('DEFAULT_AGENT/AGENT is empty; falling back to claude', vim.log.levels.WARN)
+    open_claude_code()
+    return
+  end
+
+  if args == '' and (normalized_agent == 'claude' or normalized_agent == 'claudecode') then
+    open_claude_code()
+    return
+  end
+
+  open_terminal_ai_agent(vim.trim(agent .. ' ' .. args))
+end
+
 return {
+  {
+    'preferred-ai-agent-keymap',
+    dir = vim.fn.stdpath('config'),
+    lazy = false,
+    init = function()
+      vim.keymap.set('n', '<leader>ac', open_preferred_ai_agent, { desc = 'ai: open preferred agent' })
+    end,
+  },
   {
     -- 'robitx/gp.nvim',
     'jdurand/gp.nvim',
@@ -260,18 +362,14 @@ return {
             -- tnoremap('<C-x>', '<Esc>', { buffer = buffer })
 
             -- Map Ctrl+h/j/k/l to navigate between tmux panes
-            tnoremap('<C-h>', '<cmd>lua require("tmux").move_left()<cr>', { buffer = buffer })
-            tnoremap('<C-j>', '<cmd>lua require("tmux").move_bottom()<cr>', { buffer = buffer })
-            tnoremap('<C-k>', '<cmd>lua require("tmux").move_top()<cr>', { buffer = buffer })
-            tnoremap('<C-l>', '<cmd>lua require("tmux").move_right()<cr>', { buffer = buffer })
+            map_ai_terminal_navigation(buffer)
           end
         end
       })
     end,
     keys = {
-      { '<leader>a', nil, desc = 'AI/Claude Code' },
+      { '<leader>a', nil, desc = 'AI/Agents' },
       { '<leader>aa', '<cmd>ClaudeCode<cr>', desc = 'claude: toggle' },
-      { '<leader>ac', '<cmd>ClaudeCode<cr>', desc = 'claude: toggle' },
 
       -- Current external terminal setup is causing keybinding issues
       -- { '<leader>af', '<cmd>ClaudeCodeFocus<cr>', desc = 'claude: focus' },

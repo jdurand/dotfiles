@@ -2,9 +2,7 @@ return {
   'iamcco/markdown-preview.nvim',
   cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
   ft = { 'markdown' },
-  build = function()
-    vim.fn['mkdp#util#install']()
-  end,
+  build = 'cd app && ./install.sh',
   init = function()
     if vim.fn.has('macunix') == 1 then
       -- Use custom function for macOS open flags

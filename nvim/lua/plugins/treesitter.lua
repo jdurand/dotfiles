@@ -19,7 +19,7 @@ return {
         "markdown", "markdown_inline",
         "jsdoc",
         -- Configuration Languages
-        "toml", "jsonc",
+        "toml", "json",
         "dockerfile",
         "lua", "vim",
         -- Scripting Languages

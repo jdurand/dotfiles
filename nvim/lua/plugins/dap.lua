@@ -82,6 +82,13 @@ return {
         -- }
       })
 
+      local dap_cs = require('user.extensions.nvim-dap-cs')
+      dap_cs.setup({
+        -- dap_configs = {
+        --   { name = '.NET: launch MyApp', program = '/abs/path/MyApp.dll' },
+        -- }
+      })
+
       vim.fn.sign_define('DapBreakpoint', { text='❗', texthl='DapBreakpoint', linehl='DapBreakpoint', numhl='DapBreakpoint' })
 
       local whichkey = require('which-key')

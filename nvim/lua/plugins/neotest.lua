@@ -19,6 +19,47 @@ return {
       local api = require('neotest')
       local overseer = require('overseer')
       local rspec = require('neotest-rspec')
+      local ok_dotnet, dotnet = pcall(require, 'neotest-dotnet')
+
+      local adapters = {
+        rspec({
+          rspec_cmd = function(type) -- file, test, dir
+            local executable = 'bin/docker-rspec'
+            local command = {}
+
+            if io.popen('command -v ' .. executable):read('*a') ~= '' then
+              command = { executable }
+            else
+              command = { 'bundle', 'exec', 'rspec' }
+            end
+
+            table.insert(command, '--color')
+            table.insert(command, '--keep-up') -- keeps the docker container running after execution
+
+            if type == 'test' then
+              table.insert(command, '--fail-fast')
+            end
+
+            return command
+          end,
+          transform_spec_path = function(path)
+            -- return relative path to specs for docker support
+            return vim.fn.fnamemodify(path, ':.')
+          end,
+          formatter_path = '/neotest-rspec/neotest_formatter.rb',
+          results_path = function()
+            -- configure a results directory that Docker can access under /rspec-test-output/...
+            return './tmp/rspec-test-output' .. require('neotest.async').fn.tempname()
+          end
+        }),
+      }
+
+      if ok_dotnet then
+        table.insert(adapters, dotnet({
+          dap = { adapter_name = 'coreclr' },
+          discovery_root = 'solution',
+        }))
+      end
 
       ---@diagnostic disable: missing-fields
       api.setup({
@@ -29,38 +70,7 @@ return {
         icons = {},
         highlights = {},
         projects = {},
-        adapters = {
-          rspec({
-            rspec_cmd = function(type) -- file, test, dir
-              local executable = 'bin/docker-rspec'
-              local command = {}
-
-              if io.popen('command -v ' .. executable):read('*a') ~= '' then
-                command = { executable }
-              else
-                command = { 'bundle', 'exec', 'rspec' }
-              end
-
-              table.insert(command, '--color')
-              table.insert(command, '--keep-up') -- keeps the docker container running after execution
-
-              if type == 'test' then
-                table.insert(command, '--fail-fast')
-              end
-
-              return command
-            end,
-            transform_spec_path = function(path)
-              -- return relative path to specs for docker support
-              return vim.fn.fnamemodify(path, ':.')
-            end,
-            formatter_path = '/neotest-rspec/neotest_formatter.rb',
-            results_path = function()
-              -- configure a results directory that Docker can access under /rspec-test-output/...
-              return './tmp/rspec-test-output' .. require('neotest.async').fn.tempname()
-            end
-          }),
-        },
+        adapters = adapters,
         overseer = {
           enabled = true,
           -- When this is true (the default), it will replace all neotest.run.* commands

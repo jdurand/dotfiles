@@ -47,6 +47,12 @@ fi
 
 export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
 
+# .NET / C# (homebrew dotnet)
+if [[ -d "/opt/homebrew/opt/dotnet/libexec" ]]; then
+  export DOTNET_ROOT="/opt/homebrew/opt/dotnet/libexec"
+  export PATH="$DOTNET_ROOT:$PATH"
+fi
+
 # Add Android SDK to PATH
 export ANDROID_HOME=$HOME/Library/Android/sdk
 export PATH=$PATH:$ANDROID_HOME/emulator

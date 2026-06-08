@@ -162,6 +162,14 @@ alias mux='tmuxinator'
 alias top='btop'
 # alias claude="$HOME/.claude/local/claude"
 
+# Pick a git worktree with fzf and cd into it ('>' marks the current one)
+function gwt --description 'cd into a git worktree picked with fzf'
+  set -l current (git rev-parse --show-toplevel 2>/dev/null)
+  set -l dir (git worktree list | awk -v cur="$current" \
+    '{ printf "%s %s\n", ($1 == cur ? ">" : " "), $0 }' | fzf | cut -c3- | awk '{print $1}')
+  test -n "$dir"; and builtin cd "$dir"
+end
+
 # Keybindings
 # ------------------------------------------------------------------------------
 

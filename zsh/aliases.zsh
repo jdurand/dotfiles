@@ -27,6 +27,15 @@ alias mux=tmuxinator
 # Lazy alias for lazygit
 alias ggit=lazygit
 
+# Pick a git worktree with fzf and cd into it ('>' marks the current one)
+gwt() {
+  local current dir
+  current="$(git rev-parse --show-toplevel 2>/dev/null)"
+  dir="$(git worktree list | awk -v cur="$current" \
+    '{ printf "%s %s\n", ($1 == cur ? ">" : " "), $0 }' | fzf | cut -c3- | awk '{print $1}')"
+  [[ -n $dir ]] && builtin cd "$dir"
+}
+
 # alias func='ghprs'
 # function gitprs() {
 #   'gh pr list --search "status:success" --draft=false'

@@ -1,3 +1,19 @@
+-- Build a workspace per subdirectory under ~/Notes so new vaults are picked
+-- up automatically without editing this file.
+local function notes_workspaces()
+  local root = vim.fn.expand '~/Notes'
+  local workspaces = {}
+  for name, kind in vim.fs.dir(root) do
+    if kind == 'directory' and name:match '^%u' then
+      table.insert(workspaces, {
+        name = name,
+        path = root .. '/' .. name,
+      })
+    end
+  end
+  return workspaces
+end
+
 return {
   'epwalsh/obsidian.nvim',
   version = '*',  -- recommended, use latest release instead of latest commit
@@ -16,20 +32,7 @@ return {
   opts = {
     ui = { enable = false },
 
-    workspaces = {
-      {
-        name = 'Personal',
-        path = '~/Notes/Personal',
-      },
-      {
-        name = 'Work',
-        path = '~/Notes/Work',
-        -- Optional, override certain settings.
-        -- overrides = {
-        --   notes_subdir = 'notes',
-        -- },
-      },
-    },
+    workspaces = notes_workspaces(),
 
     -- Optional, if you keep notes in a specific subdirectory of your vault.
     -- notes_subdir = 'notes',

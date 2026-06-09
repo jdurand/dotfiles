@@ -208,6 +208,27 @@ return {
       require('telescope').load_extension('git_worktree')
     end,
     config = function()
+      -- The telescope picker reads paths straight from `git worktree list`,
+      -- which can list stale worktrees whose directory was deleted without
+      -- `git worktree remove`. Switching to one throws a hard error. Guard the
+      -- public switch API so a missing directory warns instead of crashing.
+      local git_worktree = require('git-worktree')
+      local switch_worktree = git_worktree.switch_worktree
+      git_worktree.switch_worktree = function(path)
+        if path ~= nil and vim.fn.isdirectory(path) == 0 then
+          vim.notify(
+            string.format(
+              "git-worktree: '%s' no longer exists on disk.\nRun `git worktree prune` to drop stale worktrees.",
+              path
+            ),
+            vim.log.levels.WARN,
+            { title = "Git Worktree" }
+          )
+          return
+        end
+        return switch_worktree(path)
+      end
+
       nnoremap('<leader>gw', function()
         require('telescope').extensions.git_worktree.git_worktrees()
       end, { desc = "Git [W]orktrees" })

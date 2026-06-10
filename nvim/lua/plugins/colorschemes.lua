@@ -77,8 +77,11 @@ return {
   },
   {
     'f-person/auto-dark-mode.nvim',
-    -- disable auto-dark-mode when using matrix theme (always dark)
-    cond = function() return not is_ssh_session() end,
+    -- disable auto-dark-mode when using matrix theme (always dark), and
+    -- under vscode where VSCode owns the colorscheme. NOTE: a plugin-level
+    -- cond overrides defaults.cond in dependencies.lua, so the vscode guard
+    -- must be repeated here.
+    cond = function() return not vim.g.vscode and not is_ssh_session() end,
     opts = {
       update_interval = (60 * 1000),
       set_dark_mode = function()

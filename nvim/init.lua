@@ -2,6 +2,27 @@
 -- ----------------------------------------------------------------------------------------------------
 vim.g.mapleader = ";"
 
+-- Bust the vim.loader bytecode cache when the Neovim runtime changes (e.g. a
+-- `brew upgrade neovim`). Stale entries from a previous build cause "module
+-- not found" errors on builtin runtime modules (vim.filetype.detect, ...).
+-- Must run before any module loading — lazy.nvim bootstraps the loader inside
+-- `dependencies`.
+do
+  local stamp = vim.fn.stdpath('cache') .. '/runtime_stamp'
+  local f = io.open(stamp, 'r')
+  local prev = f and f:read('*a') or ''
+  if f then f:close() end
+  if prev ~= vim.env.VIMRUNTIME then
+    vim.fn.delete(vim.fn.stdpath('cache') .. '/luac', 'rf')
+    local w = io.open(stamp, 'w')
+    if w then
+      w:write(vim.env.VIMRUNTIME)
+      w:close()
+    end
+  end
+end
+vim.loader.enable()
+
 require('dependencies')
 
 if vim.g.vscode then

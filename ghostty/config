@@ -95,6 +95,12 @@ keybind = ctrl+shift+j=new_split:down
 keybind = ctrl+shift+k=new_split:up
 keybind = ctrl+shift+l=new_split:right
 
+# ctrl+alt+hjkl resize the focused split (left/down/up/right, by 10px).
+keybind = ctrl+alt+h=resize_split:left,25
+keybind = ctrl+alt+j=resize_split:down,25
+keybind = ctrl+alt+k=resize_split:up,25
+keybind = ctrl+alt+l=resize_split:right,25
+
 # Tab management in Supacode (tabs ≈ tmux windows). ctrl+shift+n opens a new
 # tab; ctrl+shift+u / ctrl+shift+i cycle to the previous / next tab.
 keybind = ctrl+shift+n=new_tab

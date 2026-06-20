@@ -95,5 +95,11 @@ keybind = ctrl+shift+j=new_split:down
 keybind = ctrl+shift+k=new_split:up
 keybind = ctrl+shift+l=new_split:right
 
+# Tab management in Supacode (tabs ≈ tmux windows). ctrl+shift+n opens a new
+# tab; ctrl+shift+u / ctrl+shift+i cycle to the previous / next tab.
+keybind = ctrl+shift+n=new_tab
+keybind = ctrl+shift+u=previous_tab
+keybind = ctrl+shift+i=next_tab
+
 # Fix general slowness on hyprland (https://github.com/ghostty-org/ghostty/discussions/3224)
 async-backend = epoll

@@ -55,13 +55,15 @@ h/j/k/l = left/down/up/right:
 | -------------- | ------------------------ | ---------------------- |
 | ⌃H/J/K/L       | focus split (navigate)   | pane nav (`C-hjkl`)    |
 | ⌃⇧H/J/K/L      | new split (left/down/up/right) | `split-window`   |
+| ⌃⇧N            | new tab                  | `new-window`           |
+| ⌃⇧U / ⌃⇧I      | previous / next tab      | `C-u` / `M-i` window   |
 
 Conceptual mapping:
 
 | tmux            | Supacode  | key                  |
 | --------------- | --------- | -------------------- |
-| session         | worktree  | ⌃⇧U / ⌃⇧I            |
-| window          | tab       | (native tab bar)     |
+| session         | worktree  | ⌘⌃↑ / ⌘⌃↓ (default)  |
+| window          | tab       | ⌃⇧N new, ⌃⇧U/I cycle |
 | pane            | surface   | ⌃HJKL nav, ⌃⇧HJKL split |
 | prefix (`C-a`)  | ⌃⌥ chord  | —                    |
 
@@ -84,12 +86,14 @@ Conceptual mapping:
 so `⌃⌥` = 12, `⌃⇧` = 6, `⌃⌥⇧` = 14, `⌥` = 8. `keyCode` is a macOS virtual key
 code (e.g. H=4, J=38, K=40, L=37).
 
-Worktree navigation uses **⌃⇧** (matching the tmux window keys); the command
-palette is **⌘P**; everything else uses the **⌃⌥** prefix-modifier.
+The command palette is **⌘P**; most worktree actions use the **⌃⌥**
+prefix-modifier. Tab nav lives in the Ghostty config on **⌃⇧U/I/N** (see the
+split section above), so worktree nav keeps its built-in **⌘⌃↑/↓** default
+rather than the ⌃⇧ keys.
 
 | Shortcut                  | Action                    | tmux analogue          |
 | ------------------------- | ------------------------- | ---------------------- |
-| ⌃⇧U / ⌃⇧I                 | previous / next worktree  | `C-u` / `M-i` window   |
+| ⌘⌃↑ / ⌘⌃↓ (default)       | previous / next worktree  | switch session         |
 | ⌃⌥[ / ⌃⌥]                 | worktree history back/fwd | `<` / `>` window       |
 | ⌃⌥N                       | new worktree              | new session            |
 | ⌘P                        | command palette           | session manager popup  |

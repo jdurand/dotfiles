@@ -1,0 +1,5 @@
+# Supacode writes machine-specific runtime state into this directory.
+# Keep it out of the repo; only settings.json (sanitized via a clean
+# filter, see .gitattributes) is tracked.
+layouts.json
+sidebar.json

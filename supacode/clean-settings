@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+#
+# git clean filter for supacode/settings.json
+#
+# Strips machine-specific state from settings.json as it is staged, so the
+# committed blob carries only the portable config (the `global` block, which
+# holds appearance, behaviour, and shortcutOverrides). The working-tree file
+# that Supacode actually reads keeps its real repositories/roots/pins.
+#
+# Reads the file on stdin, writes the sanitized version to stdout.
+# Registered as filter.supacode-clean.clean by _setup/install-dotfiles.
+
+set -euo pipefail
+
+jq --indent 2 '
+  .repositories   = {}
+  | .repositoryRoots  = []
+  | .pinnedWorktreeIDs = []
+'

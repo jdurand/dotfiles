@@ -1,0 +1,126 @@
+{
+  "global": {
+    "agentPresenceBadgesEnabled": true,
+    "analyticsEnabled": false,
+    "appearanceMode": "dark",
+    "autoUpdateAgentIntegrationsEnabled": true,
+    "automatedActionPolicy": "cliOnly",
+    "confirmQuitMode": "auto",
+    "copyIgnoredOnWorktreeCreate": false,
+    "copyUntrackedOnWorktreeCreate": false,
+    "crashReportsEnabled": false,
+    "defaultEditorID": "auto",
+    "deleteBranchOnDeleteWorktree": true,
+    "fetchOriginBeforeWorktreeCreation": true,
+    "githubIntegrationEnabled": true,
+    "globalScripts": [],
+    "hideSingleTabBar": true,
+    "inAppNotificationsEnabled": true,
+    "moveNotifiedWorktreeToTop": true,
+    "notificationSoundEnabled": true,
+    "promptForWorktreeCreation": true,
+    "pullRequestMergeStrategy": "merge",
+    "richAgentNotificationsEnabled": true,
+    "shortcutOverrides": {
+      "archiveWorktree": {
+        "isEnabled": true,
+        "keyCode": 0,
+        "modifiers": 12
+      },
+      "checkForUpdates": {
+        "isEnabled": false,
+        "keyCode": 0,
+        "modifiers": 0
+      },
+      "commandPalette": {
+        "isEnabled": true,
+        "keyCode": 35,
+        "modifiers": 1
+      },
+      "copyPath": {
+        "isEnabled": true,
+        "keyCode": 16,
+        "modifiers": 12
+      },
+      "deleteWorktree": {
+        "isEnabled": true,
+        "keyCode": 7,
+        "modifiers": 12
+      },
+      "jumpToLatestUnread": {
+        "isEnabled": true,
+        "keyCode": 32,
+        "modifiers": 12
+      },
+      "newWorktree": {
+        "isEnabled": true,
+        "keyCode": 8,
+        "modifiers": 12
+      },
+      "openPullRequest": {
+        "isEnabled": true,
+        "keyCode": 5,
+        "modifiers": 12
+      },
+      "openRepository": {
+        "isEnabled": true,
+        "keyCode": 31,
+        "modifiers": 12
+      },
+      "refreshWorktrees": {
+        "isEnabled": true,
+        "keyCode": 15,
+        "modifiers": 12
+      },
+      "revealInFinder": {
+        "isEnabled": true,
+        "keyCode": 3,
+        "modifiers": 12
+      },
+      "runScript": {
+        "isEnabled": true,
+        "keyCode": 36,
+        "modifiers": 12
+      },
+      "selectNextWorktree": {
+        "isEnabled": true,
+        "keyCode": 34,
+        "modifiers": 6
+      },
+      "selectPreviousWorktree": {
+        "isEnabled": true,
+        "keyCode": 32,
+        "modifiers": 6
+      },
+      "stopRunScript": {
+        "isEnabled": true,
+        "keyCode": 36,
+        "modifiers": 14
+      },
+      "toggleLeftSidebar": {
+        "isEnabled": true,
+        "keyCode": 1,
+        "modifiers": 12
+      },
+      "worktreeHistoryBack": {
+        "isEnabled": true,
+        "keyCode": 33,
+        "modifiers": 12
+      },
+      "worktreeHistoryForward": {
+        "isEnabled": true,
+        "keyCode": 30,
+        "modifiers": 12
+      }
+    },
+    "systemNotificationsEnabled": true,
+    "terminalThemeSyncEnabled": false,
+    "terminateSessionsOnQuit": false,
+    "updateChannel": "stable",
+    "updatesAutomaticallyCheckForUpdates": true,
+    "updatesAutomaticallyDownloadUpdates": false
+  },
+  "pinnedWorktreeIDs": [],
+  "repositories": {},
+  "repositoryRoots": []
+}

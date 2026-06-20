@@ -78,5 +78,22 @@ keybind = shift+enter=text:\n
 # interpreted as TAB, enabling proper handling in child programs, like Neovim.
 keybind = ctrl+i=text:\x1bi
 
+# Split keybinds for Supacode, which embeds Ghostty and reads this same config.
+# ctrl+hjkl = navigate/focus a split, ctrl+shift+hjkl = create a split; h/j/k/l =
+# left/down/up/right. The nav binds use the `performable:` prefix: Ghostty only
+# consumes the key when the action actually moves focus (i.e. a split exists in
+# that direction); otherwise it falls through to the program. So in the
+# standalone tmux setup — almost always a single Ghostty pane — ctrl+hjkl still
+# reaches tmux/nvim for their own pane/split navigation, while in Supacode's
+# real splits it navigates panes.
+keybind = performable:ctrl+h=goto_split:left
+keybind = performable:ctrl+j=goto_split:down
+keybind = performable:ctrl+k=goto_split:up
+keybind = performable:ctrl+l=goto_split:right
+keybind = ctrl+shift+h=new_split:left
+keybind = ctrl+shift+j=new_split:down
+keybind = ctrl+shift+k=new_split:up
+keybind = ctrl+shift+l=new_split:right
+
 # Fix general slowness on hyprland (https://github.com/ghostty-org/ghostty/discussions/3224)
 async-backend = epoll

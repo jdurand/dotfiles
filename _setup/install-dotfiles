@@ -118,6 +118,31 @@ create_symlink "$HOME/.dotfiles/fzf/fzf.zsh" "$HOME/.fzf.zsh"
 create_symlink "$HOME/.dotfiles/fzf" "$HOME/.fzf"
 create_symlink "$HOME/.dotfiles/wezterm/config.lua" "$HOME/.wezterm.lua"
 
+# Supacode: symlink the whole ~/.supacode directory (Supacode writes settings
+# atomically, which would replace a file-level symlink), and register the git
+# clean filter that strips machine-specific paths from settings.json.
+if [ -d "$HOME/.dotfiles/supacode" ]; then
+  git -C "$HOME/.dotfiles" config filter.supacode-clean.clean \
+    "$HOME/.dotfiles/supacode/clean-settings"
+  git -C "$HOME/.dotfiles" config filter.supacode-clean.smudge cat
+
+  if [ -L "$HOME/.supacode" ]; then
+    info "Symlink $HOME/.supacode already exists, leaving it in place."
+  elif [ -d "$HOME/.supacode" ]; then
+    # Pre-existing real config: keep the machine-state files (git-ignored) that
+    # this machine already produced, then replace the dir with the symlink.
+    for f in layouts.json sidebar.json; do
+      [ -f "$HOME/.supacode/$f" ] && cp "$HOME/.supacode/$f" "$HOME/.dotfiles/supacode/$f"
+    done
+    rm -rf "$HOME/.supacode"
+    ln -s "$HOME/.dotfiles/supacode" "$HOME/.supacode"
+    info "Migrated existing ~/.supacode and symlinked it to ~/.dotfiles/supacode"
+  else
+    ln -s "$HOME/.dotfiles/supacode" "$HOME/.supacode"
+    info "Created symlink $HOME/.supacode -> $HOME/.dotfiles/supacode"
+  fi
+fi
+
 # Ensure ~/.config directory exists
 info "Ensuring ~/.config directory exists..."
 mkdir -p ~/.config

@@ -1,0 +1,5 @@
+# Run settings.json through the `supacode-clean` filter on the way into git
+# so machine-specific paths (repositories, repositoryRoots, pinnedWorktreeIDs)
+# never get committed. The working-tree copy Supacode reads is left untouched.
+# The filter is registered per-machine by _setup/install-dotfiles.
+settings.json filter=supacode-clean

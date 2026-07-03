@@ -22,12 +22,22 @@ local function get_env_from_tmux(name)
   return value:match('^' .. name .. '=(.*)%s*$')
 end
 
-local function preferred_ai_agent()
-  local agent = vim.env.DEFAULT_AGENT
+local function explicit_preferred_ai_agent()
+  return vim.env.DEFAULT_AGENT
     or vim.env.AGENT
     or get_env_from_tmux('DEFAULT_AGENT')
     or get_env_from_tmux('AGENT')
-    or 'claude'
+end
+
+local function default_ai_agent()
+  if vim.fn.executable('codex') == 1 then return 'codex' end
+  if vim.fn.executable('claude') == 1 then return 'claude' end
+
+  return 'claude'
+end
+
+local function preferred_ai_agent()
+  local agent = explicit_preferred_ai_agent() or default_ai_agent()
 
   return vim.trim(agent)
 end
@@ -60,18 +70,20 @@ end
 
 local function open_terminal_ai_agent(command)
   local root = get_project_root()
+  local command_with_error_pause = command
+    .. [[; status=$?; if [ "$status" -ne 0 ]; then printf '\nAI agent exited with status %s.\nPress Enter to close...' "$status"; read -r _; fi]]
 
   if vim.env.TMUX then
     local tmux_command = { 'tmux-run' }
     vim.list_extend(tmux_command, ai_agent_split_args())
-    table.insert(tmux_command, command)
+    table.insert(tmux_command, command_with_error_pause)
 
     vim.fn.jobstart(tmux_command, { detach = true, cwd = root })
     return
   end
 
   vim.cmd('botright 20split')
-  vim.fn.termopen(command, { cwd = root })
+  vim.fn.termopen(command_with_error_pause, { cwd = root })
   map_ai_terminal_navigation(vim.api.nvim_get_current_buf())
   vim.cmd('startinsert')
 end

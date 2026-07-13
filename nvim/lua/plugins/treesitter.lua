@@ -29,6 +29,8 @@ return {
         -- Systems Languages
         "c", "cmake",
         "ruby", "rust", "go",
+        -- JVM / .NET Languages
+        "c_sharp", "java",
         -- Specifically for the treesitter AST
         "query",
         -- Utility Syntaxes

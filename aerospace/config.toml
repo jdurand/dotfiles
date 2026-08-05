@@ -179,6 +179,14 @@ run = 'layout floating'
 if.app-name-regex-substring = 'password|keychain'
 run = 'layout floating'
 
+[[on-window-detected]]
+if.app-id = 'com.electron.wispr-flow'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.glean.desktop'
+run = 'layout floating'
+
 # Windows without title
 [[on-window-detected]]
 if.window-title-regex-substring = '^$'

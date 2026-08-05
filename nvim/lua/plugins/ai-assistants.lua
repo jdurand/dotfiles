@@ -1,5 +1,6 @@
 local tnoremap = require('user.keymaps.bind').tnoremap
 local long_press_aware_keybinding = require('user.keymaps.long_press').long_press_aware_keybinding
+local terminal_ai_agent_jobs = {}
 
 local function get_project_root()
   local bufnr = vim.api.nvim_get_current_buf()
@@ -61,6 +62,10 @@ local function ai_agent_split_args()
   return { '--height', '40' }
 end
 
+local function ai_agent_tag(root, agent)
+  return 'nvim-ai-agent:' .. agent .. ':' .. root
+end
+
 local function map_ai_terminal_navigation(buffer)
   tnoremap('<C-h>', '<cmd>lua require("tmux").move_left()<cr>', { buffer = buffer })
   tnoremap('<C-j>', '<cmd>lua require("tmux").move_bottom()<cr>', { buffer = buffer })
@@ -68,13 +73,13 @@ local function map_ai_terminal_navigation(buffer)
   tnoremap('<C-l>', '<cmd>lua require("tmux").move_right()<cr>', { buffer = buffer })
 end
 
-local function open_terminal_ai_agent(command)
+local function open_terminal_ai_agent(command, agent)
   local root = get_project_root()
   local command_with_error_pause = command
     .. [[; status=$?; if [ "$status" -ne 0 ]; then printf '\nAI agent exited with status %s.\nPress Enter to close...' "$status"; read -r _; fi]]
 
   if vim.env.TMUX then
-    local tmux_command = { 'tmux-run' }
+    local tmux_command = { 'tmux-run', '--tag', ai_agent_tag(root, agent) }
     vim.list_extend(tmux_command, ai_agent_split_args())
     table.insert(tmux_command, command_with_error_pause)
 
@@ -83,7 +88,10 @@ local function open_terminal_ai_agent(command)
   end
 
   vim.cmd('botright 20split')
-  vim.fn.termopen({ '/bin/sh', '-c', command_with_error_pause }, { cwd = root })
+  terminal_ai_agent_jobs[ai_agent_tag(root, agent)] = vim.fn.termopen(
+    { '/bin/sh', '-c', command_with_error_pause },
+    { cwd = root }
+  )
   map_ai_terminal_navigation(vim.api.nvim_get_current_buf())
   vim.cmd('startinsert')
 end
@@ -116,7 +124,91 @@ local function open_preferred_ai_agent()
     return
   end
 
-  open_terminal_ai_agent(vim.trim(agent .. ' ' .. args))
+  open_terminal_ai_agent(vim.trim(agent .. ' ' .. args), normalized_agent)
+end
+
+local function current_visual_selection()
+  local start_pos = vim.fn.getpos('v')
+  local end_pos = vim.fn.getpos('.')
+  local lines = vim.fn.getregion(start_pos, end_pos, { type = vim.fn.mode() })
+
+  if #lines == 0 then return nil end
+
+  local root = get_project_root()
+  local file = vim.api.nvim_buf_get_name(0)
+  local relative_file = vim.fs.relpath(root, file) or file
+  local first_line = math.min(start_pos[2], end_pos[2])
+  local last_line = math.max(start_pos[2], end_pos[2])
+  local header = string.format('[Selection from %s:%d-%d]', relative_file, first_line, last_line)
+
+  return header .. '\n' .. table.concat(lines, '\n'), root
+end
+
+local function find_ai_agent_tmux_pane(root, agent)
+  local panes = vim.fn.system({ 'tmux', 'list-panes', '-a', '-F', '#{pane_id}\t#{@tmux_run_tag}' })
+  if vim.v.shell_error ~= 0 then return nil end
+
+  local expected_tag = ai_agent_tag(root, agent)
+  for _, line in ipairs(vim.split(panes, '\n', { trimempty = true })) do
+    local pane_id, tag = line:match('^(%%%d+)\t(.*)$')
+    if tag == expected_tag then return pane_id end
+  end
+
+  return nil
+end
+
+local function paste_selection_into_terminal_agent(selection, root, agent)
+  if vim.env.TMUX then
+    local pane_id = find_ai_agent_tmux_pane(root, agent)
+    if not pane_id then
+      vim.notify('No AI agent opened by <leader>ac for this project', vim.log.levels.WARN)
+      return
+    end
+
+    local buffer_name = 'nvim-ai-selection-' .. vim.fn.getpid()
+    vim.fn.system({ 'tmux', 'load-buffer', '-b', buffer_name, '-' }, selection)
+    if vim.v.shell_error ~= 0 then
+      vim.notify('Could not copy the selection into tmux', vim.log.levels.ERROR)
+      return
+    end
+
+    vim.fn.system({ 'tmux', 'paste-buffer', '-d', '-p', '-b', buffer_name, '-t', pane_id })
+    if vim.v.shell_error ~= 0 then
+      vim.notify('Could not paste the selection into the AI agent', vim.log.levels.ERROR)
+      return
+    end
+
+    vim.notify('Added selection to the AI agent prompt')
+    return
+  end
+
+  local job_id = terminal_ai_agent_jobs[ai_agent_tag(root, agent)]
+  if not job_id or vim.fn.jobwait({ job_id }, 0)[1] ~= -1 then
+    vim.notify('No AI agent opened by <leader>ac for this project', vim.log.levels.WARN)
+    return
+  end
+
+  vim.fn.chansend(job_id, '\27[200~' .. selection .. '\27[201~')
+  vim.notify('Added selection to the AI agent prompt')
+end
+
+local function send_selection_to_preferred_ai_agent()
+  local agent = preferred_ai_agent()
+  local args = preferred_ai_agent_args()
+  local normalized_agent = agent:lower():gsub('[%s_%-]+', '')
+
+  if agent == '' or (args == '' and (normalized_agent == 'claude' or normalized_agent == 'claudecode')) then
+    if vim.fn.exists(':ClaudeCodeSend') == 0 then
+      local ok, lazy = pcall(require, 'lazy')
+      if ok then lazy.load({ plugins = { 'claudecode.nvim' } }) end
+    end
+
+    vim.cmd('ClaudeCodeSend')
+    return
+  end
+
+  local selection, root = current_visual_selection()
+  if selection then paste_selection_into_terminal_agent(selection, root, normalized_agent) end
 end
 
 return {
@@ -126,6 +218,7 @@ return {
     lazy = false,
     init = function()
       vim.keymap.set('n', '<leader>ac', open_preferred_ai_agent, { desc = 'ai: open preferred agent' })
+      vim.keymap.set('v', '<leader>as', send_selection_to_preferred_ai_agent, { desc = 'ai: send selection' })
     end,
   },
   {
@@ -390,7 +483,6 @@ return {
 
       { '<leader>am', '<cmd>ClaudeCodeSelectModel<cr>', desc = 'claude: select model' },
       { '<leader>ab', '<cmd>ClaudeCodeAdd %<cr>', desc = 'claude: add current buffer' },
-      { '<leader>as', '<cmd>ClaudeCodeSend<cr>', mode = 'v', desc = 'claude: send current selection' },
       {
         '<leader>as',
         '<cmd>ClaudeCodeTreeAdd<cr>',

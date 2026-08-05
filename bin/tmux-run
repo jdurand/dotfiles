@@ -95,13 +95,13 @@ if [[ -n "$TMUX" ]]; then
       width=$(echo "$size_arg" | cut -d'x' -f1)
       height=$(echo "$size_arg" | cut -d'x' -f2)
       echo "Creating new popup ($width x $height) in $(pwd)..."
-      tmux display-popup -w "$width" -h "$height" "cd '$(pwd)' && $command_cmd"
+      tmux display-popup -d "$(pwd)" -w "$width" -h "$height" /bin/sh -c "$command_cmd"
       # For popup, we can't get pane ID, so just use a dummy value
       pane_id="popup"
     else
       # Default popup size
       echo "Creating new popup (90x40) in $(pwd)..."
-      tmux display-popup -w 90 -h 40 "cd '$(pwd)' && $command_cmd"
+      tmux display-popup -d "$(pwd)" -w 90 -h 40 /bin/sh -c "$command_cmd"
       pane_id="popup"
     fi
   else
@@ -109,16 +109,16 @@ if [[ -n "$TMUX" ]]; then
     if [[ -n "$height_arg" ]]; then
       # Vertical split (top/bottom)
       echo "Creating new vertical split pane ($height_arg% height) in $(pwd)..."
-      pane_id=$(tmux split-window -v -p "$height_arg" -P -F "#{pane_id}" "cd '$(pwd)' && $command_cmd")
+      pane_id=$(tmux split-window -c "$(pwd)" -v -p "$height_arg" -P -F "#{pane_id}" /bin/sh -c "$command_cmd")
     else
       # Horizontal split (left/right) - default
       if [[ -n "$width_arg" ]]; then
         echo "Creating new horizontal split pane ($width_arg% width) in $(pwd)..."
-        pane_id=$(tmux split-window -h -p "$width_arg" -P -F "#{pane_id}" "cd '$(pwd)' && $command_cmd")
+        pane_id=$(tmux split-window -c "$(pwd)" -h -p "$width_arg" -P -F "#{pane_id}" /bin/sh -c "$command_cmd")
       else
         # Default split percentage
         echo "Creating new horizontal split pane (30% width) in $(pwd)..."
-        pane_id=$(tmux split-window -h -p 30 -P -F "#{pane_id}" "cd '$(pwd)' && $command_cmd")
+        pane_id=$(tmux split-window -c "$(pwd)" -h -p 30 -P -F "#{pane_id}" /bin/sh -c "$command_cmd")
       fi
     fi
   fi
@@ -144,5 +144,5 @@ if [[ -n "$TMUX" ]]; then
   done
 else
   echo "Not in tmux - running command directly"
-  exec $command_cmd
+  exec /bin/sh -c "$command_cmd"
 fi

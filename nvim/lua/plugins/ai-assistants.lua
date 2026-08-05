@@ -83,7 +83,7 @@ local function open_terminal_ai_agent(command)
   end
 
   vim.cmd('botright 20split')
-  vim.fn.termopen(command_with_error_pause, { cwd = root })
+  vim.fn.termopen({ '/bin/sh', '-c', command_with_error_pause }, { cwd = root })
   map_ai_terminal_navigation(vim.api.nvim_get_current_buf())
   vim.cmd('startinsert')
 end

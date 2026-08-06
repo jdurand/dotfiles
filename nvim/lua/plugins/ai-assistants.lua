@@ -157,7 +157,7 @@ local function find_ai_agent_tmux_pane(root, agent)
   return nil
 end
 
-local function paste_selection_into_terminal_agent(selection, root, agent)
+local function paste_into_terminal_agent(text, root, agent, success_message)
   if vim.env.TMUX then
     local pane_id = find_ai_agent_tmux_pane(root, agent)
     if not pane_id then
@@ -166,7 +166,7 @@ local function paste_selection_into_terminal_agent(selection, root, agent)
     end
 
     local buffer_name = 'nvim-ai-selection-' .. vim.fn.getpid()
-    vim.fn.system({ 'tmux', 'load-buffer', '-b', buffer_name, '-' }, selection)
+    vim.fn.system({ 'tmux', 'load-buffer', '-b', buffer_name, '-' }, text)
     if vim.v.shell_error ~= 0 then
       vim.notify('Could not copy the selection into tmux', vim.log.levels.ERROR)
       return
@@ -178,7 +178,7 @@ local function paste_selection_into_terminal_agent(selection, root, agent)
       return
     end
 
-    vim.notify('Added selection to the AI agent prompt')
+    vim.notify(success_message)
     return
   end
 
@@ -188,8 +188,8 @@ local function paste_selection_into_terminal_agent(selection, root, agent)
     return
   end
 
-  vim.fn.chansend(job_id, '\27[200~' .. selection .. '\27[201~')
-  vim.notify('Added selection to the AI agent prompt')
+  vim.fn.chansend(job_id, '\27[200~' .. text .. '\27[201~')
+  vim.notify(success_message)
 end
 
 local function send_selection_to_preferred_ai_agent()
@@ -208,7 +208,64 @@ local function send_selection_to_preferred_ai_agent()
   end
 
   local selection, root = current_visual_selection()
-  if selection then paste_selection_into_terminal_agent(selection, root, normalized_agent) end
+  if selection then
+    paste_into_terminal_agent(selection, root, normalized_agent, 'Added selection to the AI agent prompt')
+  end
+end
+
+local function mini_files_paths(first_line, last_line)
+  local ok, mini_files = pcall(require, 'mini.files')
+  if not ok then return nil, 'mini.files is not available' end
+
+  local root = get_project_root()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local paths = {}
+  local seen = {}
+
+  for line = first_line, last_line do
+    local entry_ok, entry = pcall(mini_files.get_fs_entry, bufnr, line)
+    if entry_ok and entry and entry.path and entry.path ~= '' then
+      local path = entry.path:gsub('^minifiles://[^/]*/', '')
+      path = vim.fs.normalize(path)
+      local relative_path = vim.fs.relpath(root, path) or path
+
+      if not seen[relative_path] then
+        seen[relative_path] = true
+        table.insert(paths, relative_path)
+      end
+    end
+  end
+
+  if #paths == 0 then return nil, 'No files selected in mini.files' end
+
+  return paths, root
+end
+
+local function send_mini_files_to_preferred_ai_agent(first_line, last_line)
+  local agent = preferred_ai_agent()
+  local args = preferred_ai_agent_args()
+  local normalized_agent = agent:lower():gsub('[%s_%-]+', '')
+
+  if agent == '' or (args == '' and (normalized_agent == 'claude' or normalized_agent == 'claudecode')) then
+    if vim.fn.exists(':ClaudeCodeTreeAdd') == 0 then
+      local ok, lazy = pcall(require, 'lazy')
+      if ok then lazy.load({ plugins = { 'claudecode.nvim' } }) end
+    end
+
+    vim.cmd('ClaudeCodeTreeAdd')
+    return
+  end
+
+  local paths, root_or_error = mini_files_paths(first_line, last_line)
+  if not paths then
+    vim.notify(root_or_error, vim.log.levels.WARN)
+    return
+  end
+
+  local count = #paths
+  local message = count == 1 and 'Added file path to the AI agent prompt'
+    or string.format('Added %d file paths to the AI agent prompt', count)
+  paste_into_terminal_agent(table.concat(paths, '\n'), root_or_error, normalized_agent, message)
 end
 
 return {
@@ -219,6 +276,11 @@ return {
     init = function()
       vim.keymap.set('n', '<leader>ac', open_preferred_ai_agent, { desc = 'ai: open preferred agent' })
       vim.keymap.set('v', '<leader>as', send_selection_to_preferred_ai_agent, { desc = 'ai: send selection' })
+      vim.api.nvim_create_user_command('PreferredAiAgentSendFiles', function(opts)
+        local first_line = opts.range > 0 and opts.line1 or vim.fn.line('.')
+        local last_line = opts.range > 0 and opts.line2 or first_line
+        send_mini_files_to_preferred_ai_agent(first_line, last_line)
+      end, { range = true, desc = 'Send MiniFiles paths to the preferred AI agent' })
     end,
   },
   {
@@ -487,7 +549,7 @@ return {
         '<leader>as',
         '<cmd>ClaudeCodeTreeAdd<cr>',
         desc = 'Add file',
-        ft = { 'NvimTree', 'neo-tree', 'oil', 'minifiles' },
+        ft = { 'NvimTree', 'neo-tree', 'oil' },
       },
       -- -- Diff management
       -- { '<leader>aa', '<cmd>ClaudeCodeDiffAccept<cr>', desc = 'claude: accept diff' },

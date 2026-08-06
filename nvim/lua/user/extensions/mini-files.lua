@@ -342,6 +342,15 @@ local function on_buffer_create(args)
     end)
   end, { buffer = args.data.buf_id, desc = 'Refresh git ignore cache' })
 
+  nmap('<leader>as', '<cmd>PreferredAiAgentSendFiles<cr>', {
+    buffer = args.data.buf_id,
+    desc = 'Send file path to preferred AI agent',
+  })
+  vim.keymap.set('x', '<leader>as', ":<C-u>'<,'>PreferredAiAgentSendFiles<CR>", {
+    buffer = args.data.buf_id,
+    desc = 'Send file paths to preferred AI agent',
+  })
+
   refresh_files()
 
   -- Load git ignore cache asynchronously

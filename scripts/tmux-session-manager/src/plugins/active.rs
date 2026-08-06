@@ -1,7 +1,10 @@
 use anyhow::Result;
 use async_trait::async_trait;
 
-use crate::core::{session::{SessionContext, SessionItem, SessionMetadata}, tmux::TmuxClient};
+use crate::core::{
+    session::{is_floating_session, SessionContext, SessionItem, SessionMetadata},
+    tmux::TmuxClient,
+};
 use crate::plugins::SessionPlugin;
 
 pub struct ActivePlugin {
@@ -37,7 +40,7 @@ impl SessionPlugin for ActivePlugin {
     async fn discover(&self, context: &SessionContext) -> Result<Vec<SessionItem>> {
         let mut sessions = Vec::new();
 
-        // Add all active sessions except current and scratch
+        // Add all active sessions except current and floating sessions
         for session_name in &context.active_sessions {
             if let Some(current) = &context.current_session {
                 if session_name == current {
@@ -58,9 +61,9 @@ impl SessionPlugin for ActivePlugin {
             sessions.push(session_item);
         }
 
-        // Add current session at the end if it exists and is not scratch
+        // Add current session at the end if it is not a floating session
         if let Some(current) = &context.current_session {
-            if !current.contains("scratch") {
+            if !is_floating_session(current) {
                 let metadata = SessionMetadata::new("active".to_string())
                     .with_exists(true);
 

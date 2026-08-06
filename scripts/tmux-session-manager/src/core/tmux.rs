@@ -2,7 +2,7 @@ use anyhow::{anyhow, Context, Result};
 use chrono::{TimeZone, Utc};
 use tokio::process::Command;
 
-use crate::core::session::{SessionContext, TmuxSession};
+use crate::core::session::{is_floating_session, SessionContext, TmuxSession};
 
 pub struct TmuxClient {
     socket_path: Option<String>,
@@ -244,7 +244,7 @@ impl TmuxClient {
                 }
             }
 
-            if session.name.contains("scratch") {
+            if is_floating_session(&session.name) {
                 scratch_sessions.push(session.name.clone());
             } else {
                 active_sessions.push(session.name.clone());

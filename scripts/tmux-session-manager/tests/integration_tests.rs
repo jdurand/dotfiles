@@ -51,7 +51,7 @@ impl MockTmuxClient {
                 }
             }
 
-            if name.contains("scratch") {
+            if name.contains("scratch") || name == "assistant-terminal" {
                 scratch_sessions.push(name.clone());
             } else {
                 active_sessions.push(name.clone());
@@ -192,6 +192,15 @@ async fn test_session_item_formatting() {
     let formatted_current = current_session.format_for_display();
     assert!(formatted_current.contains("current-session"));
     assert!(formatted_current.contains("→")); // Should have current icon
+
+    let assistant_session = SessionItem::new(
+        "assistant-terminal".to_string(),
+        "scratch".to_string(),
+        999,
+        SessionMetadata::new("scratch".to_string()).with_exists(true),
+    );
+
+    assert!(assistant_session.format_for_display().contains("󰚩"));
 }
 
 #[tokio::test]
@@ -249,13 +258,14 @@ async fn test_config_management() -> Result<()> {
 }
 
 #[tokio::test]
-async fn test_scratch_session_priority() -> Result<()> {
+async fn test_floating_session_priority() -> Result<()> {
     let plugin_manager = PluginManager::new();
 
     let mut mock_client = MockTmuxClient::new();
     mock_client
         .add_session("regular-session".to_string(), 1234567890)
         .add_session("scratch-session".to_string(), 1234567891) // More recent
+        .add_session("assistant-terminal".to_string(), 1234567893) // Most recent
         .add_session("current-session".to_string(), 1234567892) // Current session
         .set_current_session("current-session".to_string());
 
@@ -273,6 +283,20 @@ async fn test_scratch_session_priority() -> Result<()> {
     // Both should exist
     assert!(scratch_sessions.len() > 0, "Should find scratch sessions");
     assert!(regular_sessions.len() > 0, "Should find regular sessions");
+    assert_eq!(
+        scratch_sessions.len(),
+        2,
+        "Should find both floating sessions"
+    );
+    assert!(scratch_sessions
+        .iter()
+        .any(|s| s.name == "assistant-terminal"));
+    assert!(
+        !sessions
+            .iter()
+            .any(|s| { s.name == "assistant-terminal" && s.plugin_name == "recent" }),
+        "Assistant terminal should not be suggested as most recent"
+    );
 
     // All scratch sessions should have higher priority numbers (lower priority) than regular sessions
     for scratch in &scratch_sessions {

@@ -3,6 +3,10 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 
+pub fn is_floating_session(name: &str) -> bool {
+    name.contains("scratch") || name == "assistant-terminal"
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SessionItem {
     pub id: Uuid,
@@ -90,6 +94,7 @@ impl SessionItem {
                 "recent" => "★",
                 "active" => "●",
                 "worktree" => if self.is_active { "●" } else { "○" },
+                "scratch" if self.name == "assistant-terminal" => "󰚩",
                 "scratch" => "󱗽",
                 "tmuxinator" => "●",
                 _ => "●",

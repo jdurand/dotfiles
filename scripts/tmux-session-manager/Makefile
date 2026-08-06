@@ -10,7 +10,8 @@ build-release:
 	@echo "Building tmux-session-manager in release mode..."
 	cargo build --release
 	@mkdir -p bin
-	cp target/release/tmux-session-manager bin/
+	cp target/release/tmux-session-manager bin/tmux-session-manager.new
+	mv -f bin/tmux-session-manager.new bin/tmux-session-manager
 	@echo "✓ Built: bin/tmux-session-manager"
 
 # Build in debug mode (faster compilation)
@@ -18,7 +19,8 @@ build-debug:
 	@echo "Building tmux-session-manager in debug mode..."
 	cargo build
 	@mkdir -p bin
-	cp target/debug/tmux-session-manager bin/
+	cp target/debug/tmux-session-manager bin/tmux-session-manager.new
+	mv -f bin/tmux-session-manager.new bin/tmux-session-manager
 	@echo "✓ Built: bin/tmux-session-manager (debug)"
 
 # Clean build artifacts

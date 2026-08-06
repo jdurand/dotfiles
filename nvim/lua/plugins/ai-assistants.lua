@@ -31,10 +31,11 @@ local function explicit_preferred_ai_agent()
 end
 
 local function default_ai_agent()
-  if vim.fn.executable('codex') == 1 then return 'codex' end
+  if vim.fn.executable('opencode') == 1 then return 'opencode' end
   if vim.fn.executable('claude') == 1 then return 'claude' end
+  if vim.fn.executable('codex') == 1 then return 'codex' end
 
-  return 'claude'
+  return 'opencode'
 end
 
 local function preferred_ai_agent()

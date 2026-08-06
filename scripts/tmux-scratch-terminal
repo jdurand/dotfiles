@@ -14,7 +14,7 @@
 
 set -euo pipefail
 
-readonly SESSION_NAME="scratch-terminal"
+readonly SESSION_NAME="${TMUX_SCRATCH_SESSION_NAME:-scratch-terminal}"
 readonly DEFAULT_WIDTH="90%"
 readonly DEFAULT_HEIGHT="90%"
 readonly BORDER_COLOR="#33ccff"
@@ -24,10 +24,15 @@ readonly TEXT_COLOR="#fffff"
 SCRATCH_WIDTH="${TMUX_SCRATCH_WIDTH:-$DEFAULT_WIDTH}"
 SCRATCH_HEIGHT="${TMUX_SCRATCH_HEIGHT:-$DEFAULT_HEIGHT}"
 SCRATCH_BORDER="${TMUX_SCRATCH_BORDER:-rounded}"
+SCRATCH_START_COMMAND="${TMUX_SCRATCH_START_COMMAND:-}"
+SCRATCH_DISPLAY_NAME="${TMUX_SCRATCH_DISPLAY_NAME:-Scratch Terminal}"
+SCRATCH_LOG_PREFIX="${TMUX_SCRATCH_LOG_PREFIX:-tmux-scratch}"
+SCRATCH_EXCLUSIVE_SESSION="${TMUX_SCRATCH_EXCLUSIVE_SESSION:-assistant-terminal}"
+SCRATCH_MANAGER_COMMAND="${TMUX_SCRATCH_MANAGER_COMMAND:-${BASH_SOURCE[0]}}"
 
 # Helper functions
 log() {
-  echo "[tmux-scratch] $*" >&2
+  echo "[${SCRATCH_LOG_PREFIX}] $*" >&2
 }
 
 is_tmux_session() {
@@ -45,6 +50,11 @@ popup_exists() {
 
 is_in_scratch_session() {
   [[ "$(tmux display-message -p '#{session_name}')" == "${SESSION_NAME}" ]]
+}
+
+is_in_exclusive_session() {
+  [[ -n "${SCRATCH_EXCLUSIVE_SESSION}" ]] &&
+    [[ "$(tmux display-message -p '#{session_name}')" == "${SCRATCH_EXCLUSIVE_SESSION}" ]]
 }
 
 get_current_path() {
@@ -65,7 +75,16 @@ open_scratch() {
 
   local current_path
   current_path=$(get_current_path)
-  
+
+  local popup_command
+  if session_exists; then
+    popup_command=(tmux new-session -A -s "${SESSION_NAME}")
+  elif [[ -n "${SCRATCH_START_COMMAND}" ]]; then
+    popup_command=(tmux new-session -A -c "${current_path}" -s "${SESSION_NAME}" "${SCRATCH_START_COMMAND}")
+  else
+    popup_command=(tmux new-session -A -c "${current_path}" -s "${SESSION_NAME}")
+  fi
+
   tmux display-popup \
     -d "${current_path}" \
     -w "${SCRATCH_WIDTH}" \
@@ -73,7 +92,7 @@ open_scratch() {
     -S "fg=${BORDER_COLOR}" \
     -s "fg=${TEXT_COLOR}" \
     -b "${SCRATCH_BORDER}" \
-    -E "tmux new-session -A -s ${SESSION_NAME}"
+    -E "${popup_command[@]}"
   
   log "Opened scratch terminal"
 }
@@ -95,6 +114,10 @@ toggle_scratch() {
   if is_in_scratch_session; then
     # We're inside the scratch session, detach to close popup
     close_scratch
+  elif is_in_exclusive_session; then
+    # Close the other persistent popup, then open this one after detach settles.
+    tmux run-shell -b "sleep 0.2; ${SCRATCH_MANAGER_COMMAND} open"
+    tmux detach-client
   elif session_exists; then
     # Session exists but we're not in it, reopen as popup
     open_scratch
@@ -162,7 +185,7 @@ show_status() {
     popup_active="Currently inside"
   fi
   
-  echo "Scratch Terminal Status:"
+  echo "${SCRATCH_DISPLAY_NAME} Status:"
   echo "  Session exists: $exists"
   echo "  Popup active: $popup_active"
   echo "  In scratch session: $in_scratch"
@@ -244,7 +267,7 @@ send_keys() {
 
 show_help() {
   cat << EOF
-tmux-scratch-terminal - Comprehensive scratch terminal manager
+tmux-scratch-terminal - Comprehensive persistent popup terminal manager
 
 Usage: $(basename "$0") <command> [options]
 
@@ -263,6 +286,9 @@ Environment Variables:
   TMUX_SCRATCH_WIDTH    Popup width (default: ${DEFAULT_WIDTH})
   TMUX_SCRATCH_HEIGHT   Popup height (default: ${DEFAULT_HEIGHT})
   TMUX_SCRATCH_BORDER   Border style (default: rounded)
+  TMUX_SCRATCH_SESSION_NAME   Backing tmux session (default: scratch-terminal)
+  TMUX_SCRATCH_START_COMMAND  Command used when first creating the session
+  TMUX_SCRATCH_EXCLUSIVE_SESSION  Popup session replaced by this one
 
 Examples:
   $(basename "$0") toggle               # Toggle scratch terminal

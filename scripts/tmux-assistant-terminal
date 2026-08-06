@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+export TMUX_SCRATCH_SESSION_NAME="assistant-terminal"
+export TMUX_SCRATCH_DISPLAY_NAME="Assistant Terminal"
+export TMUX_SCRATCH_LOG_PREFIX="tmux-assistant"
+export TMUX_SCRATCH_START_COMMAND="${HOME}/.dotfiles/scripts/tmux-assistant-shell"
+export TMUX_SCRATCH_EXCLUSIVE_SESSION="scratch-terminal"
+export TMUX_SCRATCH_MANAGER_COMMAND="${HOME}/.dotfiles/scripts/tmux-assistant-terminal"
+export TMUX_SCRATCH_WIDTH="${TMUX_ASSISTANT_WIDTH:-90%}"
+export TMUX_SCRATCH_HEIGHT="${TMUX_ASSISTANT_HEIGHT:-90%}"
+export TMUX_SCRATCH_BORDER="${TMUX_ASSISTANT_BORDER:-rounded}"
+
+exec "${HOME}/.dotfiles/scripts/tmux-scratch-terminal" "$@"

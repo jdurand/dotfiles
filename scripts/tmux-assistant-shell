@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+set -u
+
+# Let the popup client attach and settle at its final size before starting a
+# full-screen TUI. Starting it as the tmux client attaches causes a rapid
+# resize/focus race that makes OpenCode exit immediately.
+sleep "${TMUX_ASSISTANT_LAUNCH_DELAY:-0.3}"
+
+assistant_session="${TMUX_ASSISTANT_SESSION_NAME:-assistant-terminal}"
+assistant="${ASSISTANT:-opencode}"
+
+if [[ -n "${assistant}" ]]; then
+  /bin/sh -c "${assistant}"
+fi
+
+# Closing the only pane closes the assistant session. When the user has added
+# another pane, keep this pane available as a normal terminal instead.
+pane_count=$(tmux list-panes -s -t "${assistant_session}" -F '#{pane_id}' 2>/dev/null | wc -l | tr -d ' ')
+
+if [[ "${pane_count:-0}" -gt 1 ]]; then
+  exec "${SHELL:-/bin/sh}" -l
+fi

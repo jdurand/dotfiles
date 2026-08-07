@@ -26,6 +26,8 @@ alias mux=tmuxinator
 
 # Lazy alias for lazygit
 alias ggit=lazygit
+alias gg=lazygit
+alias gd='gh dash'
 
 # Pick a git worktree with fzf and cd into it ('>' marks the current one)
 gwt() {

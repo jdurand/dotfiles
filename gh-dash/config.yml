@@ -96,11 +96,25 @@ keybindings:
 
 repoPaths: {}
 theme:
+  colors:
+    text:
+      primary: "#f0e6f6"
+      secondary: "#33ccff"
+      inverted: "#1b0b23"
+      faint: "#8a9caa"
+      warning: "#ffcc00"
+      success: "#99cc00"
+    background:
+      selected: "#2a2d3a"
+    border:
+      primary: "#33ccff"
+      secondary: "#8a9caa"
+      faint: "#32344d"
   ui:
     sectionsShowCount: true
     table:
       showSeparator: true
-      compact: false
+      compact: true
 pager:
   diff: ""
 confirmQuit: false

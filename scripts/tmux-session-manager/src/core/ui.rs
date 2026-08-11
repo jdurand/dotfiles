@@ -87,7 +87,7 @@ impl<'a> FzfInterface<'a> {
         let title = self.build_title().await?;
 
         let tmux_cmd = format!(
-            r#"cat '{}' | fzf \
+            r#"command cat '{}' | fzf \
                 --prompt='{}: ' \
                 --ansi \
                 --reverse \

@@ -94,6 +94,9 @@ return {
         },
         lua_ls = {
           Lua = {
+            diagnostics = {
+              globals = { 'hs', 'vim' },
+            },
             workspace = {
               checkThirdParty = false,
               library = {},              -- empty = project only (recommended)

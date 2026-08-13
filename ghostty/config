@@ -71,8 +71,10 @@ keybind = alt+v=text:\x1bv
 # Toggle fullscreen
 keybind = f11=toggle_fullscreen
 
-# Shift + Enter = line jump
-keybind = shift+enter=text:\n
+# Preserve Shift+Enter as a distinct modified Enter key through tmux. CSI-u
+# encodes Enter (13) with the Shift modifier (2), rather than collapsing it to
+# Enter or Ctrl+j.
+keybind = shift+enter=text:\x1b[13;2u
 
 # This workaround remaps Ctrl+i to Ctrl+a in Tmux to prevent it from being
 # interpreted as TAB, enabling proper handling in child programs, like Neovim.

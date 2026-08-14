@@ -22,8 +22,8 @@ return {
       -- close current tab
       nnoremap('<C-t><C-q>', ':tabclose<cr>')
 
-      nnoremap('<', ':tabprevious<cr>', { desc = 'Previous Tab' })
-      nnoremap('>', ':tabnext<cr>', { desc = 'Next Tab' })
+      nnoremap('<', ':tabprevious<cr>', { desc = 'Previous Tab', nowait = true })
+      nnoremap('>', ':tabnext<cr>', { desc = 'Next Tab', nowait = true })
       nnoremap('<leader>i', ':tabnext<cr>', { desc = 'Next Tab' })
       nnoremap('<leader>u', ':tabprevious<cr>', { desc = 'Previous Tab' })
 

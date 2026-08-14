@@ -50,8 +50,6 @@ return {
       tnoremap('<C-PageUp>', '<C-\\><C-n>:FloatermPrev<CR>', { desc = 'Previous Terminal' })
       tnoremap('<leader>ty', '<C-\\><C-n>:FloatermNext<CR>', { desc = 'Next Terminal' })
       tnoremap('<leader>tr', '<C-\\><C-n>:FloatermPrev<CR>', { desc = 'Previous Terminal' })
-      tnoremap('>>', '<C-\\><C-n>:FloatermNext<CR>', { desc = 'Next Terminal' })
-      tnoremap('<<', '<C-\\><C-n>:FloatermPrev<CR>', { desc = 'Previous Terminal' })
 
       -- Check if any floating terminal is open
       local function is_floaterm_open()

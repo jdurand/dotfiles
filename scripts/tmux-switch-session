@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+direction="${1:-}"
+client_name="${2:-}"
+skip_sessions="${TMUX_SKIP_SESSION_NAMES:-scratch-terminal,assistant-terminal}"
+
+case "$direction" in
+  next) step=1 ;;
+  previous) step=-1 ;;
+  *)
+    echo "Usage: tmux-switch-session {next|previous} [client-name]" >&2
+    exit 2
+    ;;
+esac
+
+if [[ -n "$client_name" ]]; then
+  current_session=$(tmux display-message -p -c "$client_name" '#{session_id}')
+else
+  current_session=$(tmux display-message -p '#{session_id}')
+fi
+target_session=$(
+  tmux list-sessions -F '#{session_id}:#{session_name}' |
+    awk -F: -v current="$current_session" -v skip="$skip_sessions" -v step="$step" '
+      BEGIN {
+        count = split(skip, skipped, ",")
+        for (i = 1; i <= count; i++) skip_names[skipped[i]] = 1
+      }
+      {
+        ids[NR] = $1
+        names[NR] = substr($0, index($0, ":") + 1)
+        if ($1 == current) current_index = NR
+      }
+      END {
+        if (!current_index) exit 1
+
+        for (offset = 1; offset <= NR; offset++) {
+          candidate = ((current_index - 1 + step * offset) % NR + NR) % NR + 1
+          if (!(names[candidate] in skip_names)) {
+            print ids[candidate]
+            exit
+          }
+        }
+      }
+    '
+)
+
+[[ -n "$target_session" ]] || exit 0
+
+if [[ -n "$client_name" ]]; then
+  tmux switch-client -c "$client_name" -t "$target_session"
+else
+  tmux switch-client -t "$target_session"
+fi

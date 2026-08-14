@@ -30,7 +30,7 @@ return {
         "c", "cmake",
         "ruby", "rust", "go",
         -- JVM / .NET Languages
-        "c_sharp", "java",
+        "c_sharp", "java", "kotlin",
         -- Specifically for the treesitter AST
         "query",
         -- Utility Syntaxes

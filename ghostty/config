@@ -68,6 +68,12 @@ keybind = alt+k=text:\x1bk
 keybind = alt+l=text:\x1bl
 keybind = alt+v=text:\x1bv
 
+# Send the session-switching Alt+Shift keys explicitly using CSI-u. This also
+# avoids macOS treating Option+U/I/P as accent dead keys.
+keybind = alt+shift+u=text:\x1b[117;4u
+keybind = alt+shift+i=text:\x1b[105;4u
+keybind = alt+shift+p=text:\x1b[112;4u
+
 # Toggle fullscreen
 keybind = f11=toggle_fullscreen
 

@@ -3,11 +3,14 @@
 local function notes_workspaces()
   local root = vim.fn.expand '~/Notes'
   local workspaces = {}
-  for name, kind in vim.fs.dir(root) do
-    if kind == 'directory' and name:match '^%u' then
+  for name in vim.fs.dir(root) do
+    local path = root .. '/' .. name
+    -- vim.fs.dir() reports symlinked vaults as "link", so check the
+    -- resolved entry instead of filtering on the directory-entry type.
+    if vim.fn.isdirectory(path) == 1 and name:match '^%u' then
       table.insert(workspaces, {
         name = name,
-        path = root .. '/' .. name,
+        path = path,
       })
     end
   end

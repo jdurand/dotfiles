@@ -3,6 +3,20 @@ return {
   event = 'VimEnter',
   dependencies = { 'nvim-tree/nvim-web-devicons' },
   config = function()
+    local dashboard_cache = vim.fn.stdpath('cache') .. '/dashboard/cache'
+    if vim.fn.filereadable(dashboard_cache) == 1 then
+      local data = table.concat(vim.fn.readfile(dashboard_cache, 'b'), '\n')
+      local chunk = loadstring(data, '@' .. dashboard_cache)
+      local ok, projects = chunk and pcall(chunk)
+
+      -- dashboard-nvim writes this cache asynchronously on exit. If Neovim is
+      -- interrupted before the write is truncated, the trailing bytes make it
+      -- invalid Lua and the dashboard fails to open on the next startup.
+      if not ok or type(projects) ~= 'table' then
+        vim.fn.writefile({ 'return {}' }, dashboard_cache)
+      end
+    end
+
     local nvim_version = vim.version().major .. "." .. vim.version().minor .. "." .. vim.version().patch
     local update_dotfiles = function()
       local o = require('overseer')

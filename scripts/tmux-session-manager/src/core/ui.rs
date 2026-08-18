@@ -132,19 +132,43 @@ impl<'a> FzfInterface<'a> {
         self.parse_fzf_result(&result)
     }
 
-    async fn show_regular_fzf(&mut self, sessions: Vec<String>, _context: &SessionContext) -> Result<FzfResult> {
+    async fn show_regular_fzf(&mut self, sessions: Vec<String>, context: &SessionContext) -> Result<FzfResult> {
         let title = self.build_title().await?;
+        let preview_script = NamedTempFile::new()?;
+        self.create_preview_script(&preview_script, context).await?;
 
-        let mut cmd = Command::new("fzf")
-            .args(&[
-                "--height=40%",
+        let preview_window = if self.preview_enabled {
+            "right:50%:wrap"
+        } else {
+            "hidden"
+        };
+        let preview = format!("--preview={} {{}}", preview_script.path().display());
+        let preview_window = format!("--preview-window={}", preview_window);
+        let toggle_preview = format!(
+            "--bind=ctrl-p:toggle-preview+change-preview({} {{}})+change-preview-window(right:50%:wrap)",
+            preview_script.path().display()
+        );
+        let help_preview = format!(
+            "--bind=?:change-preview({} {{}} HELP)+change-preview-window(right:50%:wrap)",
+            preview_script.path().display()
+        );
+
+        let mut cmd = Command::new("fzf");
+        if !TmuxClient::is_inside_tmux() || !self.force_no_popup {
+            cmd.arg("--height=40%");
+        }
+        let mut child = cmd.args(&[
                 "--border",
                 &format!("--prompt={}: ", title),
                 "--ansi",
+                "--reverse",
                 "--expect=ctrl-x,ctrl-r,ctrl-s,ctrl-n,ctrl-p",
-                "--preview=echo -e 'Session Switcher Help\\n\\nKeybindings:\\n  Enter    - Switch to session\\n  Ctrl-x   - Kill session\\n  Ctrl-r   - Rename session\\n  Ctrl-n   - Create new session\\n  ?        - Toggle help\\n\\nSession Icons:\\n  ● - Active session\\n  → - Current session\\n  ● - Tmuxinator config (grey)\\n  ● - Git worktree (blue)\\n  󱗽 - Scratch session\\n\\nNavigation:\\n  Ctrl-j/k    - Move selection\\n  Esc         - Exit without selection'",
-                "--preview-window=hidden",
-                "--bind=?:toggle-preview"
+                &preview,
+                &preview_window,
+                &toggle_preview,
+                &help_preview,
+                "--bind=ctrl-d:preview-page-down",
+                "--bind=ctrl-u:preview-page-up",
             ])
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
@@ -152,7 +176,7 @@ impl<'a> FzfInterface<'a> {
             .spawn()?;
 
         // Write sessions to stdin
-        if let Some(stdin) = cmd.stdin.take() {
+        if let Some(stdin) = child.stdin.take() {
             let mut stdin = tokio::io::BufWriter::new(stdin);
             for session in &sessions {
                 use tokio::io::AsyncWriteExt;
@@ -162,7 +186,7 @@ impl<'a> FzfInterface<'a> {
             stdin.flush().await?;
         }
 
-        let output = cmd.wait_with_output().await?;
+        let output = child.wait_with_output().await?;
 
         if !output.status.success() {
             return Ok(FzfResult {

@@ -214,13 +214,14 @@ impl TmuxClient {
             .context("Invalid window count")?;
         let attached = parts[3] == "1";
 
-        let last_attached = if let Ok(timestamp) = timestamp_str.parse::<i64>() {
-            Utc.timestamp_opt(timestamp, 0)
-                .single()
-                .unwrap_or_else(Utc::now)
-        } else {
-            Utc::now()
-        };
+        // tmux leaves session_last_attached empty for sessions that have never
+        // had a client. Treat those as oldest; using the current time would
+        // incorrectly promote them above the genuinely last-accessed session.
+        let last_attached = timestamp_str
+            .parse::<i64>()
+            .ok()
+            .and_then(|timestamp| Utc.timestamp_opt(timestamp, 0).single())
+            .unwrap_or_else(|| Utc.timestamp_opt(0, 0).single().unwrap());
 
         Ok(Some(TmuxSession {
             name,
@@ -271,5 +272,30 @@ impl TmuxClient {
 
     pub fn is_inside_tmux() -> bool {
         std::env::var("TMUX").is_ok()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_last_attached_timestamp() {
+        let session = TmuxClient::new()
+            .parse_session_line("1234567890:recent:2:0")
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(session.last_attached.timestamp(), 1234567890);
+    }
+
+    #[test]
+    fn never_attached_session_is_treated_as_oldest() {
+        let session = TmuxClient::new()
+            .parse_session_line(":never-attached:1:0")
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(session.last_attached.timestamp(), 0);
     }
 }

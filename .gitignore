@@ -27,6 +27,9 @@ karabiner/karabiner.json
 fish/fish_variables
 fish/config.local.fish
 
+# Tmuxinator
+tmuxinator/tmuxinator.local
+
 # Ignore .env
 .env
 environment/*.env

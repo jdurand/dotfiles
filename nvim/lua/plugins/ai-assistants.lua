@@ -1,5 +1,4 @@
 local tnoremap = require('user.keymaps.bind').tnoremap
-local long_press_aware_keybinding = require('user.keymaps.long_press').long_press_aware_keybinding
 local terminal_ai_agent_jobs = {}
 
 local function get_project_root()
@@ -269,6 +268,16 @@ local function send_mini_files_to_preferred_ai_agent(first_line, last_line)
   paste_into_terminal_agent(table.concat(paths, '\n'), root_or_error, normalized_agent, message)
 end
 
+vim.api.nvim_create_user_command('AiAgentOpen', open_preferred_ai_agent, {
+  desc = 'Open the preferred AI agent',
+})
+
+vim.api.nvim_create_user_command('AiAgentSendFiles', function(opts)
+  local first_line = opts.range > 0 and opts.line1 or vim.fn.line('.')
+  local last_line = opts.range > 0 and opts.line2 or first_line
+  send_mini_files_to_preferred_ai_agent(first_line, last_line)
+end, { range = true, desc = 'Send MiniFiles paths to the preferred AI agent' })
+
 return {
   {
     'preferred-ai-agent-keymap',
@@ -277,11 +286,6 @@ return {
     init = function()
       vim.keymap.set('n', '<leader>ac', open_preferred_ai_agent, { desc = 'ai: open preferred agent' })
       vim.keymap.set('v', '<leader>as', send_selection_to_preferred_ai_agent, { desc = 'ai: send selection' })
-      vim.api.nvim_create_user_command('PreferredAiAgentSendFiles', function(opts)
-        local first_line = opts.range > 0 and opts.line1 or vim.fn.line('.')
-        local last_line = opts.range > 0 and opts.line2 or first_line
-        send_mini_files_to_preferred_ai_agent(first_line, last_line)
-      end, { range = true, desc = 'Send MiniFiles paths to the preferred AI agent' })
     end,
   },
   {

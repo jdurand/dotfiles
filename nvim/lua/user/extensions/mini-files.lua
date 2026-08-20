@@ -342,11 +342,11 @@ local function on_buffer_create(args)
     end)
   end, { buffer = args.data.buf_id, desc = 'Refresh git ignore cache' })
 
-  nmap('<leader>as', '<cmd>PreferredAiAgentSendFiles<cr>', {
+  nmap('<leader>as', '<cmd>AiAgentSendFiles<cr>', {
     buffer = args.data.buf_id,
     desc = 'Send file path to preferred AI agent',
   })
-  vim.keymap.set('x', '<leader>as', ":<C-u>'<,'>PreferredAiAgentSendFiles<CR>", {
+  vim.keymap.set('x', '<leader>as', ":<C-u>'<,'>AiAgentSendFiles<CR>", {
     buffer = args.data.buf_id,
     desc = 'Send file paths to preferred AI agent',
   })

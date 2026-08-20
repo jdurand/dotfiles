@@ -61,8 +61,41 @@ get_current_path() {
   tmux display-message -p '#{pane_current_path}'
 }
 
+get_current_session() {
+  tmux display-message -p '#{session_name}'
+}
+
+get_current_client() {
+  tmux display-message -p '#{client_name}'
+}
+
+parent_session_option() {
+  printf '@%s-parent-session' "${SESSION_NAME}"
+}
+
+parent_client_option() {
+  printf '@%s-parent-client' "${SESSION_NAME}"
+}
+
+remember_parent() {
+  local session_name="${1:-}"
+  local client_name="${2:-}"
+
+  if [[ -z "${session_name}" || "${session_name}" == "${SESSION_NAME}" || "${session_name}" == "${SCRATCH_EXCLUSIVE_SESSION}" ]]; then
+    return 0
+  fi
+
+  tmux set-option -gq "$(parent_session_option)" "${session_name}"
+  if [[ -n "${client_name}" ]]; then
+    tmux set-option -gq "$(parent_client_option)" "${client_name}"
+  fi
+}
+
 # Core functionality
 open_scratch() {
+  local origin_session="${1:-}"
+  local origin_client="${2:-}"
+
   if ! is_tmux_session; then
     log "Error: Not running inside tmux session"
     exit 1
@@ -75,6 +108,14 @@ open_scratch() {
 
   local current_path
   current_path=$(get_current_path)
+
+  if [[ -z "${origin_session}" ]]; then
+    origin_session=$(get_current_session)
+  fi
+  if [[ -z "${origin_client}" ]]; then
+    origin_client=$(get_current_client)
+  fi
+  remember_parent "${origin_session}" "${origin_client}"
 
   local popup_command
   if session_exists; then
@@ -111,6 +152,9 @@ close_scratch() {
 }
 
 toggle_scratch() {
+  local origin_session="${1:-}"
+  local origin_client="${2:-}"
+
   if is_in_scratch_session; then
     # We're inside the scratch session, detach to close popup
     close_scratch
@@ -120,49 +164,69 @@ toggle_scratch() {
     tmux detach-client
   elif session_exists; then
     # Session exists but we're not in it, reopen as popup
-    open_scratch
+    open_scratch "${origin_session}" "${origin_client}"
   else
     # No session exists, create and open it
-    open_scratch
+    open_scratch "${origin_session}" "${origin_client}"
   fi
 }
 
 embed_scratch() {
-  if ! is_in_scratch_session; then
+  local invoking_session="${1:-}"
+  local popup_client="${2:-}"
+
+  if [[ "${invoking_session}" != "${SESSION_NAME}" ]] && ! is_in_scratch_session; then
     log "Error: Not currently in scratch session"
     exit 1
   fi
-  
-  # Get the most recently active session (excluding scratch session)
-  local last_session
-  last_session=$(tmux list-sessions -F "#{session_last_attached}:#{session_name}" 2>/dev/null | \
-    grep -v ":${SESSION_NAME}$" | \
-    sort -rn | \
-    head -1 | \
-    cut -d: -f2)
-  
-  if [[ -z "$last_session" ]]; then
+
+  local target_session
+  target_session=$(tmux show-option -gqv "$(parent_session_option)")
+
+  if [[ -z "${target_session}" ]] || ! tmux has-session -t "=${target_session}" 2>/dev/null; then
     log "Error: No target session found to embed into"
     exit 1
   fi
-  
-  # Get all windows from scratch session
+
+  local target_client
+  target_client=$(tmux show-option -gqv "$(parent_client_option)")
+
+  # IDs remain stable while tmux assigns new indices in the parent session.
+  local active_window
+  active_window=$(tmux display-message -p -t "${SESSION_NAME}:" '#{window_id}')
+
   local windows
-  windows=$(tmux list-windows -t "${SESSION_NAME}" -F "#{window_index}")
-  
-  # Move each window to the target session
+  windows=$(tmux list-windows -t "${SESSION_NAME}" -F "#{window_id}")
+
   for window in $windows; do
-    # Move window to target session (this automatically renumbers)
-    tmux move-window -s "${SESSION_NAME}:${window}" -t "${last_session}:"
+    tmux move-window -s "${window}" -t "${target_session}:"
   done
-  
-  # Switch to the target session (the scratch session is now empty and will be killed)
-  tmux switch-client -t "$last_session"
-  
-  # Kill the now-empty scratch session
+
+  if [[ -n "${target_client}" ]] && tmux list-clients -F '#{client_name}' | grep -Fxq "${target_client}"; then
+    tmux switch-client -c "${target_client}" -t "${active_window}"
+  else
+    tmux select-window -t "${active_window}"
+  fi
+
+  if [[ -n "${popup_client}" ]]; then
+    tmux detach-client -t "${popup_client}" 2>/dev/null || true
+  fi
   tmux kill-session -t "${SESSION_NAME}" 2>/dev/null || true
-  
-  log "Embedded scratch terminal windows into session: $last_session"
+  tmux set-option -gu "$(parent_session_option)" 2>/dev/null || true
+  tmux set-option -gu "$(parent_client_option)" 2>/dev/null || true
+
+  log "Embedded ${SCRATCH_DISPLAY_NAME} windows into session: ${target_session}"
+}
+
+embed_active_terminal() {
+  local invoking_session="${1:-}"
+  local popup_client="${2:-}"
+
+  if [[ "${invoking_session}" == "assistant-terminal" && "${SESSION_NAME}" != "assistant-terminal" ]]; then
+    exec "${HOME}/.dotfiles/scripts/tmux-assistant-terminal" embed "${invoking_session}" "${popup_client}"
+  fi
+
+  embed_scratch "${invoking_session}" "${popup_client}"
 }
 
 kill_scratch_session() {
@@ -306,16 +370,19 @@ main() {
 
   case "$command" in
     open)
-      open_scratch
+      open_scratch "${2:-}" "${3:-}"
       ;;
     close)
       close_scratch
       ;;
     toggle)
-      toggle_scratch
+      toggle_scratch "${2:-}" "${3:-}"
       ;;
     embed)
-      embed_scratch
+      embed_scratch "${2:-}" "${3:-}"
+      ;;
+    embed-active)
+      embed_active_terminal "${2:-}" "${3:-}"
       ;;
     kill)
       kill_scratch_session

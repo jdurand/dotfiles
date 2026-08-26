@@ -9,8 +9,8 @@ return {
         cycle_navigation = true,
         -- enables default keybindings (C-hjkl) for normal mode
         enable_default_keybindings = true,
-        -- prevents unzoom tmux when navigating beyond vim border
-        persist_zoom = true,
+        -- unzoom tmux only when navigating beyond the vim border
+        persist_zoom = false,
       },
       resize = {
         -- enables default keybindings (A-hjkl) for normal mode

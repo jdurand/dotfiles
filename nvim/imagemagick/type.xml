@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<typemap>
+  <type
+    format="ttf"
+    name="Verdana,Geneva,DejaVu Sans,sans-serif"
+    fullname="Verdana CSS fallback"
+    family="Verdana,Geneva,DejaVu Sans,sans-serif"
+    glyphs="/System/Library/Fonts/Supplemental/Verdana.ttf"
+    stretch="normal"
+    style="normal"
+    weight="400"
+  />
+  <type
+    format="ttf"
+    name="Verdana"
+    fullname="Verdana"
+    family="Verdana"
+    glyphs="/System/Library/Fonts/Supplemental/Verdana.ttf"
+    stretch="normal"
+    style="normal"
+    weight="400"
+  />
+  <type
+    format="ttf"
+    name="Verdana-Bold"
+    fullname="Verdana Bold"
+    family="Verdana"
+    glyphs="/System/Library/Fonts/Supplemental/Verdana Bold.ttf"
+    stretch="normal"
+    style="normal"
+    weight="700"
+  />
+  <type
+    format="ttf"
+    name="Verdana-Italic"
+    fullname="Verdana Italic"
+    family="Verdana"
+    glyphs="/System/Library/Fonts/Supplemental/Verdana Italic.ttf"
+    stretch="normal"
+    style="italic"
+    weight="400"
+  />
+  <type
+    format="ttf"
+    name="Verdana-Bold-Italic"
+    fullname="Verdana Bold Italic"
+    family="Verdana"
+    glyphs="/System/Library/Fonts/Supplemental/Verdana Bold Italic.ttf"
+    stretch="normal"
+    style="italic"
+    weight="700"
+  />
+</typemap>

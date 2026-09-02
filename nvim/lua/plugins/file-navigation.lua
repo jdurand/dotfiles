@@ -47,6 +47,9 @@ return {
   {
     '3rd/image.nvim',
     dependencies = { 'luarocks.nvim' },
+    init = function()
+      vim.env.MAGICK_CONFIGURE_PATH = vim.fn.stdpath('config') .. '/imagemagick'
+    end,
     opts = {
       rocks = {
         hererocks = true,
@@ -125,6 +128,14 @@ return {
 
       -- Open the directory of the current file, or the working directory if the file is absent (e.g., after switching branches).
       nnoremap('<C-f>', function()
+        for _, win_id in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+          local buf_id = vim.api.nvim_win_get_buf(win_id)
+          if vim.bo[buf_id].filetype == 'neo-tree' then
+            require('neo-tree.command').execute({ action = 'close' })
+            return
+          end
+        end
+
         local buf_name = vim.api.nvim_buf_get_name(0)
         local dir_name = vim.fn.fnamemodify(buf_name, ":p:h")
 

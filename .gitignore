@@ -14,6 +14,7 @@ zsh/waffle-plugins/
 
 # Lazygit
 lazygit/state.yml
+lazygit/github_pull_requests.json
 
 # Karabiner
 karabiner/assets

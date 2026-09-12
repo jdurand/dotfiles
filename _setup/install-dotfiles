@@ -164,6 +164,11 @@ create_symlink "$HOME/.dotfiles/starship/starship.toml" "$HOME/.config/starship.
 create_symlink "$HOME/.dotfiles/fish/config.fish" "$HOME/.config/fish/config.fish"
 create_symlink "$HOME/.dotfiles/fish/fish_plugins" "$HOME/.config/fish/fish_plugins"
 
+# Antigravity CLI global agents
+mkdir -p "$HOME/.gemini/config/agents/assistant"
+create_symlink "$HOME/.dotfiles/antigravity/agents/assistant/agent.md" \
+  "$HOME/.gemini/config/agents/assistant/agent.md"
+
 # Create a symbolic links for Linux
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   create_symlink "$HOME/.dotfiles/imwheel/imwheelrc" "$HOME/.imwheelrc"

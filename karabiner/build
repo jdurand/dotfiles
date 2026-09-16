@@ -5,6 +5,15 @@ set -euo pipefail
 BASE_DIR="$HOME/.dotfiles/karabiner"
 RULES_DIR="$BASE_DIR/rules"
 OUTPUT="$BASE_DIR/karabiner.json"
+TEMP_OUTPUT=""
+
+cleanup() {
+  if [[ -n "$TEMP_OUTPUT" ]]; then
+    rm -f "$TEMP_OUTPUT"
+  fi
+}
+
+trap cleanup EXIT
 
 # Check dependencies
 if ! command -v jq &>/dev/null; then
@@ -15,13 +24,15 @@ fi
 # Combine all rules into a JSON array
 rules_json=$(jq -s '.' "$RULES_DIR"/*.json)
 
-cp $OUTPUT $OUTPUT.bak
-
-# Inject rules into the first profile's complex_modifications.rules
+# Build beside the live config so the final rename is atomic.
+TEMP_OUTPUT=$(mktemp "$BASE_DIR/.karabiner.json.XXXXXX")
 jq --argjson rules "$rules_json" '
   .profiles[0].complex_modifications.rules = $rules
-' "$OUTPUT.bak" > "$OUTPUT"
+' "$OUTPUT" > "$TEMP_OUTPUT"
 
-rm $OUTPUT.bak
+jq empty "$TEMP_OUTPUT"
+chmod "$(stat -f '%Lp' "$OUTPUT")" "$TEMP_OUTPUT"
+mv "$TEMP_OUTPUT" "$OUTPUT"
+TEMP_OUTPUT=""
 
 echo "✅ Built $OUTPUT"

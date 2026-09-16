@@ -3,8 +3,10 @@ local dotfiles_dir = vim.fn.expand('~/.dotfiles')
 
 if cwd == dotfiles_dir or cwd:find(dotfiles_dir .. '/') == 1 then
   local karabiner_rules_path = dotfiles_dir .. '/karabiner/rules'
+  local group = vim.api.nvim_create_augroup('KarabinerRulesWatch', { clear = true })
 
   vim.api.nvim_create_autocmd('BufWritePost', {
+    group = group,
     pattern = karabiner_rules_path .. '/*.json',
     callback = function()
       vim.notify('Rebuilding Karabiner config...', vim.log.levels.INFO, { title = 'Karabiner' })

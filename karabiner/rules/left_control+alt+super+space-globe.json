@@ -1,0 +1,21 @@
+{
+  "description": "Left-Control + Alt + Super + Space => Globe/fn",
+  "enabled": true,
+  "manipulators": [
+    {
+      "from": {
+        "key_code": "spacebar",
+        "modifiers": {
+          "mandatory": ["left_control", "option", "command"]
+        }
+      },
+      "to": [
+        {
+          "key_code": "fn",
+          "modifiers": []
+        }
+      ],
+      "type": "basic"
+    }
+  ]
+}

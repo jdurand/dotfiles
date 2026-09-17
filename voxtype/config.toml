@@ -1,0 +1,89 @@
+# Voxtype Configuration
+
+state_file = "auto"
+engine = "whisper"
+
+[hotkey]
+key = "SCROLLLOCK"
+modifiers = []
+mode = "push_to_talk"
+enabled = false
+
+[audio]
+device = "default"
+sample_rate = 16000
+max_duration_secs = 60
+pause_media = false
+duck_media = false
+duck_media_volume_percent = 34
+duck_media_fade_ms = 150
+
+[audio.feedback]
+enabled = false
+theme = "default"
+volume = 0.699999988079071
+
+[whisper]
+model = "base.en"
+language = "en"
+translate = false
+mode = "local"
+flash_attention = false
+on_demand_loading = false
+gpu_isolation = false
+
+[output]
+mode = "type"
+fallback_to_clipboard = true
+type_delay_ms = 0
+auto_submit = false
+shift_enter_newlines = false
+pre_type_delay_ms = 0
+
+[output.notification]
+on_recording_start = false
+on_recording_stop = false
+on_transcription = true
+show_engine_icon = true
+
+[osd]
+frontend = "quickshell"
+style = "default"
+layout = "orb"
+enabled = true
+position = "top-center"
+width_px = 400
+height_px = 48
+margin_px = 24
+top_margin = 0.85
+opacity = 0.6
+waveform_window_secs = 3.0
+peak_decay_db_per_sec = 6.0
+waveform_gain = 10.0
+
+[osd.frame]
+background = "background"
+border = "state"
+glow = true
+halo = true
+
+[text]
+spoken_punctuation = false
+smart_auto_submit = true
+
+[vad]
+enabled = true
+backend = "auto"
+threshold = 0.5
+
+[meeting]
+enabled = false
+
+[meeting.diarization]
+enabled = false
+
+[meeting.audio]
+source = "mic"
+
+[status]
+icon_theme = "emoji"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Cycle: normal → maximize (keeps waybar) → real fullscreen → normal
+# Cycle: normal → maximize (keeps the bar) → real fullscreen → normal
 # State mapping: 0=normal, 1=maximize (dispatch 1), 2=real fullscreen (dispatch 0)
 fullscreen=$(hyprctl activewindow -j | jq '.fullscreen')
 if [ "$fullscreen" = "0" ]; then

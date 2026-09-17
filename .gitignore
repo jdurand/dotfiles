@@ -28,6 +28,9 @@ karabiner/karabiner.json
 fish/fish_variables
 fish/config.local.fish
 
+# Ghostty
+ghostty/config.local
+
 # Tmuxinator
 tmuxinator/tmuxinator.local
 

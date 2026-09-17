@@ -120,3 +120,5 @@ async-backend = epoll
 
 # Legacy encoding sends Alt+Shift+Enter the same as Alt+Enter; send CSI-u so tmux can match M-S-Enter.
 keybind = alt+shift+enter=csi:13;4u
+
+config-file = ?config.local

@@ -144,8 +144,8 @@ trigger_lock() {
     /System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend
   elif command -v swaylock >/dev/null 2>&1; then
     swaylock -f -c 2f2f2f
-  elif command -v hyprlock >/dev/null 2>&1 && [[ -f ~/.config/hypr/hyprlock.conf ]]; then
-    hyprlock
+  elif command -v omarchy-system-lock >/dev/null 2>&1; then
+    omarchy-system-lock
   elif command -v loginctl >/dev/null 2>&1; then
     loginctl lock-session
   elif command -v xdg-screensaver >/dev/null 2>&1; then

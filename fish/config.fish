@@ -2,7 +2,7 @@
 
 # Set environment variables
 # ------------------------------------------------------------------------------
-set -x PATH $PATH $HOME/.local/bin
+set -x PATH $HOME/.local/bin $PATH
 set -x PATH $PATH $HOME/go/bin
 set -x PATH $PATH $ANDROID_HOME/emulator
 set -x PATH $PATH $ANDROID_HOME/platform-tools

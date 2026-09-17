@@ -60,7 +60,8 @@ o.bind("SUPER + SHIFT + G", "Move window to workspace 5", hl.dsp.window.move({ w
 o.bind("SUPER + SHIFT + B", "Move window to workspace 6", hl.dsp.window.move({ workspace = "6" }))
 
 o.bind("SUPER + SHIFT + CTRL + G", "Google Chat", { webapp = "https://chat.google.com/", focus = true })
-o.bind("SUPER + CTRL + ALT + SPACE", "Toggle dictation", "hyprvoice toggle")
+o.bind("ISO_Next_Group", "Start dictation (push-to-talk)", "voxtype record start")
+o.bind("ISO_Next_Group", "Stop dictation (push-to-talk)", "voxtype record stop", { release = true })
 o.bind("SUPER + EQUAL", "Zoom in", "hyprctl -q keyword cursor:zoom_factor $(hyprctl getoption cursor:zoom_factor | awk '/^float.*/ {print $2 * 1.1}')")
 o.bind("SUPER + MINUS", "Zoom out", "hyprctl -q keyword cursor:zoom_factor $(hyprctl getoption cursor:zoom_factor | awk '/^float.*/ {print $2 * 0.9}')")
 o.bind("SUPER + KP_ADD", "Zoom in (numpad)", "hyprctl -q keyword cursor:zoom_factor $(hyprctl getoption cursor:zoom_factor | awk '/^float.*/ {print $2 * 1.1}')")

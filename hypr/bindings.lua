@@ -9,6 +9,7 @@ for _, keys in ipairs({
 }) do
   hl.unbind(keys)
 end
+hl.unbind("F9")
 
 o.bind("SUPER + SUPER_L", "Launch apps", "omarchy-menu toggle apps", { release = true })
 o.bind("SUPER + O", "Omarchy menu", "omarchy-menu toggle root")
@@ -67,6 +68,19 @@ o.bind("ISO_Next_Group", "Start dictation (push-to-talk)", function()
   hl.dispatch(hl.dsp.exec_cmd("voxtype record start"))
 end, { long_press = true })
 o.bind("ISO_Next_Group", "Stop or toggle dictation", function()
+  if globe_held then
+    globe_held = false
+    hl.dispatch(hl.dsp.exec_cmd("voxtype record stop"))
+  else
+    hl.dispatch(hl.dsp.exec_cmd("voxtype record toggle"))
+  end
+end, { release = true })
+o.bind("F9", "Dictation", function() end)
+o.bind("F9", "Start dictation (push-to-talk)", function()
+  globe_held = true
+  hl.dispatch(hl.dsp.exec_cmd("voxtype record start"))
+end, { long_press = true })
+o.bind("F9", "Stop or toggle dictation", function()
   if globe_held then
     globe_held = false
     hl.dispatch(hl.dsp.exec_cmd("voxtype record stop"))

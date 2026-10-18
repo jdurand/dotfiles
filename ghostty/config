@@ -43,6 +43,14 @@ clipboard-trim-trailing-spaces = true
 # Confirm before closing
 confirm-close-surface = false
 
+# Global floating assistant terminal. The Quick Terminal is excluded from
+# AeroSpace window management, so it does not enter the tiling tree.
+keybind = global:ctrl+grave_accent=toggle_quick_terminal
+quick-terminal-position = center
+quick-terminal-size = 90%,90%
+quick-terminal-screen = mouse
+quick-terminal-space-behavior = move
+
 # This setting hides the mouse cursor while typing to reduce distractions.
 mouse-hide-while-typing = true
 

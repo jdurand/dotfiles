@@ -31,6 +31,18 @@ fi
 # Load local config
 test -e "${HOME}/.zshrc.local" && source "${HOME}/.zshrc.local"
 
+# Ghostty Quick Terminal is the global view into the existing tmux assistant
+# session. Keep normal Ghostty shells unchanged; only the Quick Terminal
+# attaches here, so it shares the same agent process as prefix + a.
+if [[ "${GHOSTTY_QUICK_TERMINAL:-}" == "1" ]] &&
+  [[ -z "${TMUX:-}" ]] &&
+  command -v tmux >/dev/null 2>&1; then
+  exec tmux new-session -A \
+    -c "${PWD}" \
+    -s "assistant-terminal" \
+    "${HOME}/.dotfiles/scripts/tmux-assistant-shell"
+fi
+
 # Load user aliases
 source ~/.zsh/aliases.zsh
 

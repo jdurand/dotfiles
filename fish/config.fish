@@ -219,6 +219,18 @@ if test -e "$HOME/.config/fish/config.local.fish"
   source "$HOME/.config/fish/config.local.fish"
 end
 
+# Ghostty Quick Terminal is the global view into the existing tmux assistant
+# session. Keep normal Fish shells unchanged; only the Quick Terminal
+# attaches here, so it shares the same agent process as prefix + a.
+if set -q GHOSTTY_QUICK_TERMINAL
+  if test "$GHOSTTY_QUICK_TERMINAL" = "1"; and not set -q TMUX; and type -q tmux
+    exec tmux new-session -A \
+      -c "$PWD" \
+      -s assistant-terminal \
+      "$HOME/.dotfiles/scripts/tmux-assistant-shell"
+  end
+end
+
 # OpenClaw Completion
 if test -e "$HOME/.openclaw/completions/openclaw.fish"
   source "$HOME/.openclaw/completions/openclaw.fish"

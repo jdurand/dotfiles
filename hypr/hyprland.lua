@@ -28,4 +28,5 @@ require("default.hypr.toggles")
 -- Personal window rules migrated from the legacy Hyprland configuration.
 o.window({ tag = "floating-window" }, { size = { 1280, 768 } })
 o.window({ class = "^zen$", title = "^$" }, { float = true, center = true })
+o.window({ class = "^chrome-gemini\\.google\\.com__app-.*$" }, { float = true, center = true, size = { 1280, 768 } })
 o.window({ title = "^Export\\sImage.*$" }, { center = true })

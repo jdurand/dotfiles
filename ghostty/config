@@ -43,8 +43,8 @@ clipboard-trim-trailing-spaces = true
 # Confirm before closing
 confirm-close-surface = false
 
-# Global floating assistant terminal. The Quick Terminal is excluded from
-# AeroSpace window management, so it does not enter the tiling tree.
+# Floating assistant terminal. Hyprland provides a Linux fallback for this
+# same shortcut; Ghostty handles it natively on macOS.
 keybind = global:ctrl+grave_accent=toggle_quick_terminal
 quick-terminal-position = center
 quick-terminal-size = 90%,90%

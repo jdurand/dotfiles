@@ -163,6 +163,7 @@ alias cat='bat --paging=never'
 alias mux='tmuxinator'
 alias top='btop'
 # alias claude="$HOME/.claude/local/claude"
+alias powernap='caffeinate -i pmset displaysleepnow'
 
 # Pick a git worktree with fzf and cd into it ('>' marks the current one)
 function gwt --description 'cd into a git worktree picked with fzf'

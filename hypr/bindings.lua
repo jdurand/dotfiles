@@ -64,12 +64,12 @@ o.bind("SUPER + SHIFT + B", "Move window to workspace 6", hl.dsp.window.move({ w
 o.bind("SUPER + SHIFT + CTRL + G", "Google Chat", { webapp = "https://chat.google.com/", focus = true })
 o.bind("CTRL + G", "Toggle Gemini", "~/.config/hypr/toggle-gemini.sh")
 local globe_held = false
-o.bind("ISO_Next_Group", "Dictation", function() end)
-o.bind("ISO_Next_Group", "Start dictation (push-to-talk)", function()
+o.bind("SUPER + CTRL + ALT + SPACE", "Dictation", function() end)
+o.bind("SUPER + CTRL + ALT + SPACE", "Start dictation (push-to-talk)", function()
   globe_held = true
   hl.dispatch(hl.dsp.exec_cmd("voxtype record start"))
 end, { long_press = true })
-o.bind("ISO_Next_Group", "Stop or toggle dictation", function()
+o.bind("SUPER + CTRL + ALT + SPACE", "Stop or toggle dictation", function()
   if globe_held then
     globe_held = false
     hl.dispatch(hl.dsp.exec_cmd("voxtype record stop"))

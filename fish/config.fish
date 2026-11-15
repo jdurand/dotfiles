@@ -106,6 +106,21 @@ set brew_prefix (get_brew_prefix)
 
 if test -n "$brew_prefix"
   $brew_prefix/bin/brew shellenv | source
+  # On Linux, keep Homebrew paths after system paths (/usr/bin) so brew formulas
+  # (like dbus or systemd) never shadow native system binaries/daemons.
+  if test (uname) = "Linux"
+    for p in "$brew_prefix/bin" "$brew_prefix/sbin"
+      while set -l idx (contains -i -- $p $fish_user_paths)
+        set -e fish_user_paths[$idx]
+      end
+      while set -l idx (contains -i -- $p $PATH)
+        set -e PATH[$idx]
+      end
+      if test -d "$p"
+        set -gx PATH $PATH "$p"
+      end
+    end
+  end
 end
 
 # Plugins

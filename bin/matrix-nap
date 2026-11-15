@@ -15,7 +15,7 @@
 # - Duration accepts plain seconds or units: s/m/h/d (e.g., 5s, 5m, 1h).
 # - Keeps the machine awake while running:
 #     macOS:    caffeinate (background)
-#     Linux:    systemd-inhibit (background) if available
+#     Linux:    omarchy-toggle-idle, Hyprland +noidle window tag, and systemd-inhibit
 # - No GNU `timeout` required. Foreground `cmatrix` stays interactive.
 # - On timeout, sends TERM, then KILL (0.5s later) to end cleanly.
 #
@@ -69,6 +69,16 @@ fi
 
 # --- sleep inhibitor (background only; never wraps your TTY) ---
 INHIB_PID=""
+OMARCHY_IDLE_TOGGLED=false
+HYPR_WIN_ADDR=""
+
+hypr_tag_window() {
+  local addr="$1" tag="$2"
+  hyprctl dispatch "hl.dsp.window.tag({ window = \"address:$addr\", tag = \"$tag\" })" >/dev/null 2>&1 \
+    || hyprctl dispatch tagwindow "$tag" "address:$addr" >/dev/null 2>&1 \
+    || true
+}
+
 start_inhibitor() {
   if command -v caffeinate >/dev/null 2>&1; then
     if [[ -n "$DURATION" ]]; then
@@ -77,16 +87,60 @@ start_inhibitor() {
       caffeinate -dimsu &
     fi
     INHIB_PID=$!
+    return
+  fi
+
+  # 1. systemd-inhibit (inhibits logind sleep/idle via D-Bus)
+  # Prefer /usr/bin/systemd-inhibit so Linuxbrew's systemd/dbus doesn't shadow it
+  local systemd_inhibit_bin=""
+  if [[ -x /usr/bin/systemd-inhibit ]]; then
+    systemd_inhibit_bin="/usr/bin/systemd-inhibit"
   elif command -v systemd-inhibit >/dev/null 2>&1; then
+    systemd_inhibit_bin="systemd-inhibit"
+  fi
+  if [[ -n "$systemd_inhibit_bin" ]]; then
     if [[ -n "$DURATION" ]]; then
-      systemd-inhibit --what=idle:sleep --why="matrix-nap" sleep "$DURATION" &
+      "$systemd_inhibit_bin" --what=idle:sleep --why="matrix-nap" sleep "$DURATION" &
     else
-      systemd-inhibit --what=idle:sleep --why="matrix-nap" tail -f /dev/null &
+      "$systemd_inhibit_bin" --what=idle:sleep --why="matrix-nap" tail -f /dev/null &
     fi
     INHIB_PID=$!
   fi
+
+  # 2. Omarchy idle toggle (disables Quickshell IdleMonitor screensaver/lock timers)
+  if command -v omarchy-toggle-idle >/dev/null 2>&1; then
+    if ! omarchy-toggle-idle status 2>/dev/null | grep -q '"enabled":true'; then
+      omarchy-toggle-idle stay-awake >/dev/null 2>&1 && OMARCHY_IDLE_TOGGLED=true
+    fi
+  fi
+
+  # 3. Hyprland window-level Wayland idle inhibitor (+noidle -> idle_inhibit = "always")
+  if command -v hyprctl >/dev/null 2>&1; then
+    local active_json
+    active_json="$(hyprctl activewindow -j 2>/dev/null || true)"
+    if [[ -n "$active_json" ]] && ! grep -q '"noidle"' <<<"$active_json"; then
+      HYPR_WIN_ADDR="$(grep -o '"address": *"[^"]*"' <<<"$active_json" | head -n1 | cut -d'"' -f4)"
+      if [[ -n "$HYPR_WIN_ADDR" ]]; then
+        hypr_tag_window "$HYPR_WIN_ADDR" "+noidle"
+      fi
+    fi
+  fi
 }
-stop_inhibitor() { [[ -n "${INHIB_PID}" ]] && kill "${INHIB_PID}" 2>/dev/null || true; }
+
+stop_inhibitor() {
+  if [[ -n "${INHIB_PID}" ]]; then
+    kill "${INHIB_PID}" 2>/dev/null || true
+    INHIB_PID=""
+  fi
+  if $OMARCHY_IDLE_TOGGLED; then
+    omarchy-toggle-idle allow-idle >/dev/null 2>&1 || true
+    OMARCHY_IDLE_TOGGLED=false
+  fi
+  if [[ -n "${HYPR_WIN_ADDR}" ]]; then
+    hypr_tag_window "$HYPR_WIN_ADDR" "-noidle"
+    HYPR_WIN_ADDR=""
+  fi
+}
 
 # Focus monitoring for lock behavior
 # Uses system-level window focus detection since cmatrix consumes terminal input

@@ -9,7 +9,14 @@ export PATH="$PATH:$HOME/.local/bin"
 if [[ "$OSTYPE" == "darwin"* ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+  if [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    # Keep Linuxbrew after system paths (/usr/bin) so brew formulas (e.g. dbus/systemd)
+    # don't shadow native system binaries.
+    PATH="${PATH//\/home\/linuxbrew\/.linuxbrew\/bin:/}"
+    PATH="${PATH//\/home\/linuxbrew\/.linuxbrew\/sbin:/}"
+    export PATH="$PATH:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin"
+  fi
 else
   eval "$(brew shellenv)"
 fi

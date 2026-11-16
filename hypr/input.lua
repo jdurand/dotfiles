@@ -12,6 +12,9 @@ hl.config({
       clickfinger_behavior = true,
       scroll_factor = 0.4,
     },
+    touchdevice = {
+      output = "HDMI-A-1",
+    },
   },
 })
 

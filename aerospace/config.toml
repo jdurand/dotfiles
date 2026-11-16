@@ -143,6 +143,15 @@ Y = 'built-in'          # Meetings/Y on the smaller built-in display
 # ====================
 
 # Floating windows
+# Video players
+[[on-window-detected]]
+if.app-id = 'com.apple.QuickTimePlayerX'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-name-regex-substring = '^(VLC|IINA|mpv|Infuse|Elmedia( Video)? Player|Movist( Pro)?)$'
+run = 'layout floating'
+
 [[on-window-detected]]
 if.app-id = 'com.googlecode.iterm2'
 run = 'layout floating'

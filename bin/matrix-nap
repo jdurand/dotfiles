@@ -171,6 +171,11 @@ setup_cmatrix_jp_shim() {
 #include <wchar.h>
 
 static int (*real_waddch)(WINDOW *, chtype) = NULL;
+#if !defined(__APPLE__)
+static int (*real_start_color)(void) = NULL;
+static int (*real_init_pair)(short, short, short) = NULL;
+static int (*real_use_default_colors)(void) = NULL;
+#endif
 
 #if defined(__APPLE__)
 #define DYLD_INTERPOSE(_replacement, _replacee) \
@@ -222,6 +227,42 @@ static int utf8_encode(unsigned int codepoint, char *out) {
 }
 #endif
 
+static int matrix_start_color(void) {
+#if defined(__APPLE__)
+    // dyld leaves calls from this interposer bound to the original functions.
+    // dlsym would return the interposed function and recurse.
+    int ret = start_color();
+    use_default_colors();
+    return ret;
+#else
+    if (!real_start_color) {
+        real_start_color = dlsym(RTLD_NEXT, "start_color");
+    }
+    if (!real_use_default_colors) {
+        real_use_default_colors = dlsym(RTLD_NEXT, "use_default_colors");
+    }
+    int ret = real_start_color ? real_start_color() : ERR;
+    if (real_use_default_colors) {
+        real_use_default_colors();
+    }
+    return ret;
+#endif
+}
+
+static int matrix_init_pair(short pair, short f, short b) {
+    if (b == COLOR_BLACK) {
+        b = -1;
+    }
+#if defined(__APPLE__)
+    return init_pair(pair, f, b);
+#else
+    if (!real_init_pair) {
+        real_init_pair = dlsym(RTLD_NEXT, "init_pair");
+    }
+    return real_init_pair ? real_init_pair(pair, f, b) : ERR;
+#endif
+}
+
 static int matrix_waddch(WINDOW *win, chtype ch) {
     if (ch >= 0x3000 && ch <= 0x303f) {
         unsigned int codepoint = matrix_katakana(ch);
@@ -258,9 +299,17 @@ static int matrix_waddch(WINDOW *win, chtype ch) {
 
 #if defined(__APPLE__)
 DYLD_INTERPOSE(matrix_waddch, waddch);
+DYLD_INTERPOSE(matrix_start_color, start_color);
+DYLD_INTERPOSE(matrix_init_pair, init_pair);
 #else
 int waddch(WINDOW *win, chtype ch) {
     return matrix_waddch(win, ch);
+}
+int start_color(void) {
+    return matrix_start_color();
+}
+int init_pair(short pair, short f, short b) {
+    return matrix_init_pair(pair, f, b);
 }
 #endif
 EOF

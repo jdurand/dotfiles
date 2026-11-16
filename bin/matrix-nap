@@ -2,16 +2,18 @@
 # matrix-nap — Matrix-style “screensaver” that prevents sleep.
 #
 # USAGE
-#   matrix-nap                     # cyan, bold, screensaver (-b -s), until keypress
+#   matrix-nap                     # cyan, bold, screensaver (-b -s -c if JP font present), until keypress
 #   matrix-nap 10                  # 10 seconds (or 10s), cyan/bold/saver
-#   matrix-nap 5m -C red           # 5 minutes, red
+#   matrix-nap 5m --color red      # 5 minutes, red (or -C red)
+#   matrix-nap --rainbow           # rainbow mode (or -r)
 #   matrix-nap 1h --lock           # 1 hour, then lock screen
 #   matrix-nap --lock              # lock immediately when terminal loses focus
-#   matrix-nap -C green -B         # green, bold OFF (your -B overrides)
+#   matrix-nap --ascii             # force ASCII characters (skip auto -c)
+#   matrix-nap -C green -B         # green, all-bold
 #
 # NOTES
-# - Defaults added unless you override:  -b  -s  -C cyan
-#   (-s = exit on any key; pass -n to disable that, or your own -C/-B/-b)
+# - Defaults added unless you override:  -b  -s  -C cyan  [-c if Japanese font detected]
+#   (-s = exit on any key; pass -n to disable bold, or your own --color/--rainbow/-C/-B/-b/--ascii)
 # - Duration accepts plain seconds or units: s/m/h/d (e.g., 5s, 5m, 1h).
 # - Keeps the machine awake while running:
 #     macOS:    caffeinate (background)
@@ -22,6 +24,43 @@
 # Tested on: macOS, Arch Linux (Hyprland)
 
 set -u
+
+show_help() {
+  cat << 'EOF'
+matrix-nap — Matrix-style screensaver that prevents system idle/sleep
+
+USAGE:
+  matrix-nap [<duration>] [options] [-- <cmatrix-args>...]
+
+DURATION:
+  <N>[s|m|h|d]          Run for N seconds (default), minutes, hours, or days
+                        Examples: 30, 10s, 5m, 1h
+
+OPTIONS:
+  --color <color>       Matrix color: green, red, blue, white, yellow, cyan,
+  --color=<color>       magenta, black (default: cyan; same as -C <color>)
+  --rainbow             Rainbow color mode (same as -r)
+  --font-size <size>    Temporary terminal font size (e.g., 10, 20, -4, +4);
+  --font-size=<size>    automatically restored on exit
+  --ascii, --no-jp      Use standard ASCII characters instead of auto Japanese (-c)
+  --lock                Lock screen when terminal loses focus or duration expires
+  -h, --help            Show this help message and exit
+
+CMATRIX PASSTHROUGH OPTIONS:
+  -c                    Force Japanese katakana characters
+  -b / -B / -n          Bold on (default) / all bold / no bold
+  -a                    Asynchronous scroll
+  -u <0-10>             Screen update delay (default: 4)
+  -m                    Lambda mode
+  -o                    Old-style scrolling
+
+EXAMPLES:
+  matrix-nap                        # Cyan Japanese matrix until keypress
+  matrix-nap 15m --color green      # Green matrix for 15 minutes
+  matrix-nap --rainbow --lock       # Rainbow matrix; lock when focus changes
+  matrix-nap 1h --ascii             # Classic ASCII matrix for 1 hour
+EOF
+}
 
 # --- parse duration ---
 parse_duration() {
@@ -39,12 +78,58 @@ parse_duration() {
 
 DURATION=""
 LOCK=false
+FORCE_ASCII=false
+FONT_SIZE=""
 CM_ARGS=()
 
-# --- CLI parsing: [<duration>] [--lock] [cmatrix args...] ---
+# --- CLI parsing: [<duration>] [--lock] [--ascii] [--color <c>] [--rainbow] [--font-size <s >] [cmatrix args...] ---
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --lock) LOCK=true; shift ;;
+    -h|--help)
+      show_help
+      exit 0
+      ;;
+    --lock)
+      LOCK=true
+      shift
+      ;;
+    --ascii|--no-jp)
+      FORCE_ASCII=true
+      shift
+      ;;
+    --rainbow)
+      CM_ARGS+=( -r )
+      shift
+      ;;
+    --color)
+      if [[ $# -lt 2 || -z "${2:-}" ]]; then
+        echo "matrix-nap: --color requires a color name (green, red, blue, white, yellow, cyan, magenta, black)" >&2
+        exit 1
+      fi
+      CM_ARGS+=( -C "$2" )
+      shift 2
+      ;;
+    --color=*)
+      CM_ARGS+=( -C "${1#--color=}" )
+      shift
+      ;;
+    --font-size)
+      if [[ $# -lt 2 || ! "${2:-}" =~ ^[+-]?[0-9]+$ ]]; then
+        echo "matrix-nap: --font-size requires a numeric size or delta (e.g., 12, -3, +4)" >&2
+        exit 1
+      fi
+      FONT_SIZE="$2"
+      shift 2
+      ;;
+    --font-size=*)
+      val="${1#--font-size=}"
+      if [[ ! "$val" =~ ^[+-]?[0-9]+$ ]]; then
+        echo "matrix-nap: --font-size requires a numeric size or delta (e.g., 12, -3, +4)" >&2
+        exit 1
+      fi
+      FONT_SIZE="$val"
+      shift
+      ;;
     *)
       if [[ -z "$DURATION" ]] && parse_duration "$1" >/dev/null 2>&1; then
         DURATION="$(parse_duration "$1")"; shift
@@ -55,16 +140,180 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# --- defaults: add -C cyan, -s, -b unless user provided equivalents ---
-if [[ ! " ${CM_ARGS[*]} " =~ " -C " ]]; then
+# --- fix cmatrix -c Japanese characters on Linux/macOS (waddch truncates Unicode) ---
+CMATRIX_ENV=()
+setup_cmatrix_jp_shim() {
+  local platform
+  platform="$(uname)"
+  [[ "$platform" == "Linux" || "$platform" == "Darwin" ]] || return 0
+
+  local cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/matrix-nap"
+  local lib_file
+  local compiler
+  if [[ "$platform" == "Darwin" ]]; then
+    compiler="$(command -v cc 2>/dev/null || true)"
+    [[ -n "$compiler" ]] || return 0
+    lib_file="$cache_dir/libcmatrix_jp.dylib"
+  else
+    compiler="$(command -v gcc 2>/dev/null || true)"
+    [[ -n "$compiler" ]] || return 0
+    lib_file="$cache_dir/libcmatrix_jp.so"
+  fi
+  local src_file="$cache_dir/cmatrix_jp.c"
+
+  if [[ ! -f "$lib_file" || "$0" -nt "$lib_file" ]]; then
+    mkdir -p "$cache_dir"
+    cat << 'EOF' > "$src_file"
+#define _GNU_SOURCE
+#define _XOPEN_SOURCE_EXTENDED 1
+#include <dlfcn.h>
+#include <curses.h>
+#include <wchar.h>
+
+static int (*real_waddch)(WINDOW *, chtype) = NULL;
+
+#if defined(__APPLE__)
+#define DYLD_INTERPOSE(_replacement, _replacee) \
+    __attribute__((used)) static struct { \
+        const void *replacement; \
+        const void *replacee; \
+    } _interpose_##_replacee \
+    __attribute__((section("__DATA,__interpose"))) = { \
+        (const void *)(unsigned long)&_replacement, \
+        (const void *)(unsigned long)&_replacee \
+    }
+#endif
+
+static unsigned int matrix_katakana(unsigned int ch) {
+    unsigned int idx = ch - 0x3000;
+    return (idx < 56) ? (0xff66 + idx) : ('0' + (idx - 56));
+}
+
+#if defined(__APPLE__)
+static int (*real_waddnstr)(WINDOW *, const char *, int) = NULL;
+static void *ncurses_handle = NULL;
+
+static void resolve_mac_ncurses(void) {
+    if (!ncurses_handle) {
+        ncurses_handle = dlopen("/usr/lib/libncurses.5.4.dylib", RTLD_LAZY);
+    }
+    if (!real_waddch && ncurses_handle) {
+        real_waddch = dlsym(ncurses_handle, "waddch$NCURSES60");
+    }
+    if (!real_waddnstr && ncurses_handle) {
+        real_waddnstr = dlsym(ncurses_handle, "waddnstr$NCURSES60");
+    }
+}
+
+static int utf8_encode(unsigned int codepoint, char *out) {
+    if (codepoint <= 0x7f) {
+        out[0] = (char)codepoint;
+        return 1;
+    }
+    if (codepoint <= 0x7ff) {
+        out[0] = (char)(0xc0 | (codepoint >> 6));
+        out[1] = (char)(0x80 | (codepoint & 0x3f));
+        return 2;
+    }
+    out[0] = (char)(0xe0 | (codepoint >> 12));
+    out[1] = (char)(0x80 | ((codepoint >> 6) & 0x3f));
+    out[2] = (char)(0x80 | (codepoint & 0x3f));
+    return 3;
+}
+#endif
+
+static int matrix_waddch(WINDOW *win, chtype ch) {
+    if (ch >= 0x3000 && ch <= 0x303f) {
+        unsigned int codepoint = matrix_katakana(ch);
+#if defined(__APPLE__)
+        char utf8[4] = {0};
+        resolve_mac_ncurses();
+        if (real_waddnstr) {
+            int length = utf8_encode(codepoint, utf8);
+            return real_waddnstr(win, utf8, length);
+        }
+#else
+        wchar_t wc = (wchar_t)codepoint;
+        return waddnwstr(win, &wc, 1);
+#endif
+    }
+#if defined(__APPLE__)
+    if ((unsigned int)ch <= 0x7f) {
+        char ascii[2] = {(char)ch, '\0'};
+        resolve_mac_ncurses();
+        if (real_waddnstr) {
+            return real_waddnstr(win, ascii, 1);
+        }
+    }
+#endif
+    if (!real_waddch) {
+#if defined(__APPLE__)
+        resolve_mac_ncurses();
+#else
+        real_waddch = dlsym(RTLD_NEXT, "waddch");
+#endif
+    }
+    return real_waddch ? real_waddch(win, ch) : ERR;
+}
+
+#if defined(__APPLE__)
+DYLD_INTERPOSE(matrix_waddch, waddch);
+#else
+int waddch(WINDOW *win, chtype ch) {
+    return matrix_waddch(win, ch);
+}
+#endif
+EOF
+    if [[ "$platform" == "Darwin" ]]; then
+      "$compiler" -dynamiclib -fPIC -O2 "$src_file" -o "$lib_file" \
+        -undefined dynamic_lookup 2>/dev/null || return 0
+    else
+      "$compiler" -shared -fPIC -O2 "$src_file" -o "$lib_file" \
+        -ldl -lncursesw 2>/dev/null || return 0
+    fi
+  fi
+
+  if [[ "$platform" == "Darwin" ]]; then
+    # CMatrix is linked with macOS ncurses' two-level namespace. Force a flat
+    # namespace so the inserted waddch replacement can interpose that symbol.
+    CMATRIX_ENV=( "DYLD_FORCE_FLAT_NAMESPACE=1" "DYLD_INSERT_LIBRARIES=$lib_file" )
+  else
+    CMATRIX_ENV=( "LD_PRELOAD=$lib_file" )
+  fi
+}
+setup_cmatrix_jp_shim
+
+has_japanese_matrix_support() {
+  # cmatrix -c requires our shim plus a font covering U+FF66 (ｦ).
+  if [[ "$(uname)" == "Linux" || "$(uname)" == "Darwin" ]]; then
+    [[ ${#CMATRIX_ENV[@]} -gt 0 ]] || return 1
+  fi
+  if command -v fc-list >/dev/null 2>&1; then
+    [[ -n "$(fc-list :charset=ff66 2>/dev/null | head -n 1)" ]]
+    return $?
+  elif [[ "$(uname)" == "Darwin" ]]; then
+    # macOS ships Hiragino Sans / Apple SD Gothic Neo with half-width katakana by default
+    return 0
+  fi
+  return 1
+}
+
+# --- defaults: add -C cyan, -s, -b, and -c (if supported) unless user provided equivalents ---
+if [[ ! " ${CM_ARGS[*]} " =~ " -C " && ! " ${CM_ARGS[*]} " =~ " -r " ]]; then
   CM_ARGS=( -C cyan "${CM_ARGS[@]}" )
 fi
 if [[ ! " ${CM_ARGS[*]} " =~ " -s " ]]; then
   CM_ARGS=( -s "${CM_ARGS[@]}" )
 fi
-# respect user toggling bold with -B
-if [[ ! " ${CM_ARGS[*]} " =~ " -b " && ! " ${CM_ARGS[*]} " =~ " -B " ]]; then
+# respect user toggling bold with -B or -n
+if [[ ! " ${CM_ARGS[*]} " =~ " -b " && ! " ${CM_ARGS[*]} " =~ " -B " && ! " ${CM_ARGS[*]} " =~ " -n " ]]; then
   CM_ARGS=( -b "${CM_ARGS[@]}" )
+fi
+# default to -c (Japanese characters) when required font + shim are available
+if ! $FORCE_ASCII && [[ ! " ${CM_ARGS[*]} " =~ " -c " && ! " ${CM_ARGS[*]} " =~ " -m " && ! " ${CM_ARGS[*]} " =~ " -l " && ! " ${CM_ARGS[*]} " =~ " -x " ]]; then
+  if has_japanese_matrix_support; then
+    CM_ARGS=( -c "${CM_ARGS[@]}" )
+  fi
 fi
 
 # --- sleep inhibitor (background only; never wraps your TTY) ---
@@ -209,25 +458,90 @@ trigger_lock() {
   fi
 }
 
+# --- terminal font size adjustment (zooms in-place and resets on exit) ---
+FONT_ZOOMED=false
+
+get_base_font_size() {
+  local cfg="${XDG_CONFIG_HOME:-$HOME/.config}/ghostty/config"
+  local sz=""
+  if [[ -f "$cfg" ]]; then
+    sz="$(grep -E '^[[:space:]]*font-size[[:space:]]*=' "$cfg" | tail -n1 | sed -E 's/.*=[[:space:]]*([0-9]+).*/\1/')"
+  fi
+  printf '%s\n' "${sz:-15}"
+}
+
+apply_font_size() {
+  [[ -n "$FONT_SIZE" ]] || return 0
+  local delta=0
+  if [[ "$FONT_SIZE" =~ ^[+-] ]]; then
+    delta=$(( FONT_SIZE ))
+  else
+    local base
+    base="$(get_base_font_size)"
+    delta=$(( FONT_SIZE - base ))
+  fi
+  (( delta == 0 )) && return 0
+
+  if [[ "$(uname)" == "Darwin" ]]; then
+    local key="="
+    (( delta < 0 )) && key="-"
+    local steps=${delta#-}
+    osascript -e "tell application \"System Events\"
+      keystroke \"0\" using {command down}
+      repeat $steps times
+        keystroke \"$key\" using {command down}
+      end repeat
+    end tell" >/dev/null 2>&1 && FONT_ZOOMED=true
+  elif command -v wtype >/dev/null 2>&1; then
+    local key="equal"
+    (( delta < 0 )) && key="minus"
+    local steps=${delta#-}
+    local wargs=( -M ctrl -k 0 )
+    local i
+    for (( i = 0; i < steps; i++ )); do
+      wargs+=( -k "$key" )
+    done
+    wargs+=( -m ctrl )
+    wtype "${wargs[@]}" >/dev/null 2>&1 && FONT_ZOOMED=true
+  fi
+
+  if $FONT_ZOOMED; then
+    # Let terminal finish SIGWINCH resize before cmatrix initializes LINES/COLS
+    sleep 0.08
+  fi
+}
+
+reset_font_size() {
+  $FONT_ZOOMED || return 0
+  if [[ "$(uname)" == "Darwin" ]]; then
+    osascript -e 'tell application "System Events" to keystroke "0" using {command down}' >/dev/null 2>&1 || true
+  elif command -v wtype >/dev/null 2>&1; then
+    wtype -M ctrl -k 0 -m ctrl >/dev/null 2>&1 || true
+  fi
+  FONT_ZOOMED=false
+}
+
 # Always restore terminal and stop inhibitor
 cleanup() {
   stty sane 2>/dev/null || true
+  reset_font_size
   stop_focus_monitor
   stop_inhibitor
 }
 trap cleanup EXIT INT TERM
 
 start_inhibitor
+apply_font_size
 start_focus_monitor
 
 # --- run cmatrix in FOREGROUND; if timed, use timeout approach ---
 STATUS=0
 if [[ -z "$DURATION" ]]; then
-  cmatrix "${CM_ARGS[@]}"
+  env "${CMATRIX_ENV[@]}" cmatrix "${CM_ARGS[@]}"
   STATUS=$?
 else
   # Start cmatrix in background and track its PID
-  cmatrix "${CM_ARGS[@]}" &
+  env "${CMATRIX_ENV[@]}" cmatrix "${CM_ARGS[@]}" &
   CMATRIX_PID=$!
 
   # Start timeout killer in background

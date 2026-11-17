@@ -19,4 +19,4 @@ hl.config({
 })
 
 o.window("(Alacritty|kitty|foot)", { scroll_touchpad = 1.5 })
-o.window("com.mitchellh.ghostty", { scroll_touchpad = 0.2 })
+o.window("com\\.mitchellh\\.ghostty(\\.quick)?", { scroll_touchpad = 0.2 })

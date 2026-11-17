@@ -3,9 +3,11 @@ for _, keys in ipairs({
   "SUPER + G", "SUPER + O", "SUPER + P", "SUPER + J", "SUPER + K",
   "SUPER + BACKSPACE", "SUPER + comma", "SUPER + TAB", "SUPER + W",
   "SUPER + SPACE", "SUPER + SHIFT + comma", "SUPER + code:20",
-  "SUPER + code:21", "SUPER + L", "SUPER + CTRL + L", "SUPER + F",
-  "SUPER + SLASH", "SUPER + SHIFT + B", "SUPER + SHIFT + E",
-  "SUPER + SHIFT + G", "SUPER + SHIFT + SLASH", "SUPER + SHIFT + CTRL + G",
+  "SUPER + code:21", "SUPER + SHIFT + code:20", "SUPER + L",
+  "SUPER + CTRL + L", "SUPER + CTRL + H", "SUPER + CTRL + K",
+  "SUPER + F", "SUPER + grave", "SUPER + SLASH", "SUPER + SHIFT + B",
+  "SUPER + SHIFT + E", "SUPER + SHIFT + G", "SUPER + SHIFT + Y",
+  "SUPER + SHIFT + SLASH", "SUPER + SHIFT + CTRL + G",
 }) do
   hl.unbind(keys)
 end
@@ -13,7 +15,7 @@ hl.unbind("F9")
 
 o.bind("SUPER + SUPER_L", "Launch apps", "omarchy-menu toggle apps", { release = true })
 o.bind("SUPER + O", "Omarchy menu", "omarchy-menu toggle root")
-o.bind("SUPER + GRAVE", "Ghostty terminal", { launch = "ghostty", focus = "com.mitchellh.ghostty" })
+o.bind("SUPER + GRAVE", "Ghostty terminal", { launch = "ghostty", focus = "com\\.mitchellh\\.ghostty$" })
 o.bind("CTRL + GRAVE", "Toggle quick terminal", "~/.config/hypr/toggle-quick-terminal.sh")
 o.bind("SUPER + BACKSPACE", "Close window", hl.dsp.window.close())
 o.bind("SUPER + F", "Cycle fullscreen (maximize/full/normal)", "hypr-fullscreen-cycle")

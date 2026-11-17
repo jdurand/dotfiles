@@ -511,7 +511,6 @@ trigger_lock() {
 FONT_ZOOMED=false
 FONT_TERMINAL_ID=""
 FONT_TERMINAL_TTY=""
-FONT_WINDOW_ADDR=""
 
 get_base_font_size() {
   local cfg="${XDG_CONFIG_HOME:-$HOME/.config}/ghostty/config"
@@ -588,29 +587,21 @@ apply_font_size() {
         keystroke \"$key\" using {command down}
       end repeat
     end tell" >/dev/null 2>&1 && FONT_ZOOMED=true
-  elif command -v hyprctl >/dev/null 2>&1; then
-    FONT_WINDOW_ADDR="$(hyprctl activewindow -j 2>/dev/null |
-      grep -o '"address": *"[^"]*"' | cut -d'"' -f4)"
-    [[ -n "$FONT_WINDOW_ADDR" ]] || return 0
-    local key="equal" i
-    (( delta < 0 )) && key="minus"
-    if hyprctl dispatch sendshortcut "CTRL,0,address:$FONT_WINDOW_ADDR" >/dev/null 2>&1; then
-      FONT_ZOOMED=true
-      for (( i = 0; i < ${delta#-}; i++ )); do
-        hyprctl dispatch sendshortcut "CTRL,$key,address:$FONT_WINDOW_ADDR" >/dev/null 2>&1 || break
-      done
-    fi
   elif command -v wtype >/dev/null 2>&1; then
-    local key="equal"
+    local key="equal" i
     (( delta < 0 )) && key="minus"
     local steps=${delta#-}
     local wargs=( -M ctrl -k 0 )
-    local i
     for (( i = 0; i < steps; i++ )); do
       wargs+=( -k "$key" )
     done
     wargs+=( -m ctrl )
     wtype "${wargs[@]}" >/dev/null 2>&1 && FONT_ZOOMED=true
+  fi
+
+  if $FONT_ZOOMED; then
+    # Let terminal finish SIGWINCH resize before cmatrix initializes LINES/COLS
+    sleep 0.08
   fi
 }
 
@@ -620,11 +611,6 @@ reset_font_size() {
     # Address the original surface even when --lock has moved focus elsewhere.
     if ! ghostty_font_action reset_font_size >/dev/null; then
       echo "matrix-nap: could not reset Ghostty font size" >&2
-      return 1
-    fi
-  elif [[ -n "$FONT_WINDOW_ADDR" ]]; then
-    if ! hyprctl dispatch sendshortcut "CTRL,0,address:$FONT_WINDOW_ADDR" >/dev/null 2>&1; then
-      echo "matrix-nap: could not reset terminal font size" >&2
       return 1
     fi
   elif [[ "$(uname)" == "Darwin" ]]; then

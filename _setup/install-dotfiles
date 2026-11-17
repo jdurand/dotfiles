@@ -71,12 +71,12 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     install_package_if_needed "${package}"
   done
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  install_pacman_packages rust fish fisher
+  install_pacman_packages rust fish fisher cmatrix
 
   if command -v yay &>/dev/null; then
-    yay -S --needed --noconfirm kanata
+    yay -S --needed --noconfirm kanata tmuxinator
   else
-    warn "Skipping Kanata installation; install kanata from the AUR."
+    warn "Skipping AUR package installation; install kanata and tmuxinator from the AUR."
   fi
 
   if command -v ghostty &>/dev/null; then
@@ -182,7 +182,7 @@ mkdir -p ~/.config
 
 # Symlink directories inside ~/.dotfiles to ~/.config
 cd ~/.dotfiles
-for dir in alacritty kitty ghostty tmuxinator nvim bat lazygit karabiner yazi btop mise gh-dash tuicr; do
+for dir in alacritty kitty ghostty tmux tmuxinator nvim bat lazygit karabiner yazi btop mise gh-dash tuicr; do
   if [ -d "$dir" ]; then
     create_symlink "$HOME/.dotfiles/$dir" "$HOME/.config/$dir"
   else
@@ -213,7 +213,9 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 
   # Omarchy config (hooks and extensions, not theme-managed dirs)
   mkdir -p "$HOME/.config/omarchy/hooks" "$HOME/.config/omarchy/extensions"
-  create_symlink "$HOME/.dotfiles/omarchy/hooks/theme-set" "$HOME/.config/omarchy/hooks/theme-set"
+  if [ -e "$HOME/.dotfiles/omarchy/hooks/theme-set" ]; then
+    create_symlink "$HOME/.dotfiles/omarchy/hooks/theme-set" "$HOME/.config/omarchy/hooks/theme-set"
+  fi
   create_symlink "$HOME/.dotfiles/omarchy/extensions/menu.sh" "$HOME/.config/omarchy/extensions/menu.sh"
 
   # Keep theme-managed Omarchy directories local, but link tracked branding files.
@@ -222,7 +224,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   done
 
   # Link only tracked Hyprland files so machine-specific lock and sunset configs remain local.
-  for file in autostart.lua bindings.lua hyprland.lua input.lua looknfeel.lua monitors.lua xdph.conf; do
+  for file in autostart.lua bindings.lua hyprland.lua input.lua looknfeel.lua monitors.lua toggle-gemini.sh toggle-quick-terminal.sh xdph.conf; do
     create_symlink "$HOME/.dotfiles/hypr/$file" "$HOME/.config/hypr/$file"
   done
 

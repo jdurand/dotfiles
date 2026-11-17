@@ -15,10 +15,11 @@ To streamline the installation process, run the `./setup` script. This script wi
 - Optionally install SketchyBar along with its dependencies
 - Create or correct configuration symlinks, backing up conflicting local configs
 
-On Arch Linux, the script installs `rust`, `fish`, and `fisher` with Pacman.
+On Arch Linux, the script installs `rust`, `fish`, `fisher`, and `cmatrix` with Pacman,
+and `kanata` and `tmuxinator` from the AUR.
 On Omarchy, it links the tracked Hyprland files plus Omarchy hooks, extensions,
 and branding files while leaving theme-managed directories local.
-It also installs `kanata` and configures the Apple MTP keyboard to send Escape
+It also configures the Apple MTP keyboard with `kanata` to send Escape
 when Caps Lock is tapped and Control when it is held.
 
 ### Optional Features

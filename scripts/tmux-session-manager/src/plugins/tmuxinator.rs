@@ -15,15 +15,18 @@ impl TmuxinatorPlugin {
     pub fn new() -> Self {
         let mut config_dirs = Vec::new();
 
-        // Default tmuxinator config locations
+        // Default tmuxinator config locations (~/.tmuxinator and ~/.config/tmuxinator)
         if let Some(home) = dirs::home_dir() {
-            config_dirs.push(format!("{}/.config/tmuxinator", home.display()));
             config_dirs.push(format!("{}/.tmuxinator", home.display()));
+            config_dirs.push(format!("{}/.config/tmuxinator", home.display()));
         }
 
         // Check XDG_CONFIG_HOME
         if let Ok(xdg_config) = std::env::var("XDG_CONFIG_HOME") {
-            config_dirs.push(format!("{}/tmuxinator", xdg_config));
+            let xdg_dir = format!("{}/tmuxinator", xdg_config.trim_end_matches('/'));
+            if !config_dirs.contains(&xdg_dir) {
+                config_dirs.push(xdg_dir);
+            }
         }
 
         Self {
@@ -48,7 +51,9 @@ impl TmuxinatorPlugin {
                     if extension == "yml" || extension == "yaml" {
                         if let Some(file_stem) = path.file_stem() {
                             if let Some(name) = file_stem.to_str() {
-                                configs.push((name.to_string(), path.to_string_lossy().to_string()));
+                                if !configs.iter().any(|(existing, _)| existing == name) {
+                                    configs.push((name.to_string(), path.to_string_lossy().to_string()));
+                                }
                             }
                         }
                     }
@@ -187,7 +192,7 @@ impl SessionPlugin for TmuxinatorPlugin {
         Err(anyhow!("Tmuxinator config not found for session: {}", session_name))
     }
 
-    async fn switch(&self, session_name: &str, _metadata: &SessionMetadata) -> Result<()> {
+    async fn switch(&self, session_name: &str, metadata: &SessionMetadata) -> Result<()> {
         if self.tmux.has_session(session_name).await {
             // Session already exists, just switch to it
             if TmuxClient::is_inside_tmux() {
@@ -196,11 +201,14 @@ impl SessionPlugin for TmuxinatorPlugin {
                 self.tmux.attach_session(session_name).await
             }
         } else {
-            // Start tmuxinator session
-            let output = Command::new("tmuxinator")
-                .args(&["start", session_name])
-                .output()
-                .await?;
+            // Start tmuxinator session (pass -p so configs from both ~/.tmuxinator
+            // and ~/.config/tmuxinator work additively)
+            let mut cmd = Command::new("tmuxinator");
+            cmd.arg("start").arg(session_name);
+            if let Some(config_path) = metadata.get_property("config_path") {
+                cmd.arg("-p").arg(config_path);
+            }
+            let output = cmd.output().await?;
 
             if !output.status.success() {
                 let stderr = String::from_utf8_lossy(&output.stderr);
@@ -216,12 +224,14 @@ impl SessionPlugin for TmuxinatorPlugin {
         }
     }
 
-    async fn start(&self, session_name: &str, _metadata: &SessionMetadata) -> Result<()> {
+    async fn start(&self, session_name: &str, metadata: &SessionMetadata) -> Result<()> {
         // Start in background without attaching
-        let output = Command::new("tmuxinator")
-            .args(&["start", session_name, "--detach"])
-            .output()
-            .await?;
+        let mut cmd = Command::new("tmuxinator");
+        cmd.arg("start").arg(session_name).arg("--detach");
+        if let Some(config_path) = metadata.get_property("config_path") {
+            cmd.arg("-p").arg(config_path);
+        }
+        let output = cmd.output().await?;
 
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);

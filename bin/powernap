@@ -1,0 +1,253 @@
+#!/usr/bin/env bash
+# powernap — Turn off displays (DPMS off / displaysleepnow) while keeping the
+#            system awake until the display wakes, a duration expires, or Ctrl+C.
+#
+# USAGE
+#   powernap                  # Turn off displays & inhibit sleep until wake or Ctrl+C
+#   powernap 30m              # Turn off displays & inhibit sleep for 30 minutes
+#   powernap 1h               # Turn off displays & inhibit sleep for 1 hour
+#
+# NOTES
+# - Duration accepts plain seconds or units: s/m/h/d (e.g., 30, 10s, 5m, 1h).
+# - Keeps the machine awake while displays are off:
+#     macOS:    caffeinate -i + pmset displaysleepnow
+#     Linux:    omarchy-toggle-idle, Hyprland +noidle window tag, systemd-inhibit,
+#               and omarchy-brightness-display off / hyprctl dpms off
+#
+# Tested on: macOS, Arch Linux (Hyprland / Omarchy)
+
+set -u
+
+show_help() {
+  cat << 'EOF'
+powernap — Turn off displays while keeping the system awake
+
+USAGE:
+  powernap [<duration>] [options]
+
+DURATION:
+  <N>[s|m|h|d]          Keep system awake for at most N seconds (default),
+                        minutes, hours, or days (Examples: 30, 10s, 30m, 1h).
+                        If omitted, runs until displays wake or Ctrl+C.
+
+OPTIONS:
+  -h, --help            Show this help message and exit
+
+EXAMPLES:
+  powernap              # Turn off displays and stay awake until wake or Ctrl+C
+  powernap 30m          # Turn off displays and stay awake for up to 30 minutes
+  powernap 2h           # Turn off displays and stay awake for up to 2 hours
+EOF
+}
+
+parse_duration() {
+  local arg="$1"
+  [[ "$arg" =~ ^([0-9]+)([smhdSMHD]?)$ ]] || return 1
+  local n="${BASH_REMATCH[1]}" u="${BASH_REMATCH[2],,}"
+  case "$u" in
+    ""|"s") printf '%s\n' "$n" ;;
+    "m")    printf '%s\n' $(( n * 60 )) ;;
+    "h")    printf '%s\n' $(( n * 3600 )) ;;
+    "d")    printf '%s\n' $(( n * 86400 )) ;;
+    *) return 1 ;;
+  esac
+}
+
+DURATION=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h|--help)
+      show_help
+      exit 0
+      ;;
+    *)
+      if [[ -z "$DURATION" ]] && parse_duration "$1" >/dev/null 2>&1; then
+        DURATION="$(parse_duration "$1")"
+        shift
+      else
+        echo "powernap: unknown argument '$1' (see 'powernap --help')" >&2
+        exit 1
+      fi
+      ;;
+  esac
+done
+
+INHIB_PID=""
+OMARCHY_IDLE_TOGGLED=false
+HYPR_WIN_ADDR=""
+
+hypr_tag_window() {
+  local addr="$1" tag="$2"
+  hyprctl dispatch "hl.dsp.window.tag({ window = \"address:$addr\", tag = \"$tag\" })" >/dev/null 2>&1 \
+    || hyprctl dispatch tagwindow "$tag" "address:$addr" >/dev/null 2>&1 \
+    || true
+}
+
+start_inhibitor() {
+  if command -v caffeinate >/dev/null 2>&1; then
+    # Use -i (idle sleep) and -s (system sleep on AC), but NOT -d so displays can sleep.
+    if [[ -n "$DURATION" ]]; then
+      caffeinate -is -t "$DURATION" &
+    else
+      caffeinate -is &
+    fi
+    INHIB_PID=$!
+    return
+  fi
+
+  # 1. systemd-inhibit (inhibits logind sleep/idle via D-Bus)
+  # Prefer /usr/bin/systemd-inhibit so Linuxbrew's systemd/dbus doesn't shadow it
+  local systemd_inhibit_bin=""
+  if [[ -x /usr/bin/systemd-inhibit ]]; then
+    systemd_inhibit_bin="/usr/bin/systemd-inhibit"
+  elif command -v systemd-inhibit >/dev/null 2>&1; then
+    systemd_inhibit_bin="systemd-inhibit"
+  fi
+  if [[ -n "$systemd_inhibit_bin" ]]; then
+    if [[ -n "$DURATION" ]]; then
+      "$systemd_inhibit_bin" --what=idle:sleep --why="powernap" sleep "$DURATION" &
+    else
+      "$systemd_inhibit_bin" --what=idle:sleep --why="powernap" tail -f /dev/null &
+    fi
+    INHIB_PID=$!
+  fi
+
+  # 2. Omarchy idle toggle (disables Quickshell IdleMonitor screensaver/lock timers)
+  if command -v omarchy-toggle-idle >/dev/null 2>&1; then
+    if ! omarchy-toggle-idle status 2>/dev/null | grep -q '"enabled":true'; then
+      omarchy-toggle-idle stay-awake >/dev/null 2>&1 && OMARCHY_IDLE_TOGGLED=true
+    fi
+  fi
+
+  # 3. Hyprland window-level Wayland idle inhibitor (+noidle -> idle_inhibit = "always")
+  if command -v hyprctl >/dev/null 2>&1; then
+    local active_json
+    active_json="$(hyprctl activewindow -j 2>/dev/null || true)"
+    if [[ -n "$active_json" ]] && ! grep -q '"noidle"' <<<"$active_json"; then
+      HYPR_WIN_ADDR="$(grep -o '"address": *"[^"]*"' <<<"$active_json" | head -n1 | cut -d'"' -f4)"
+      if [[ -n "$HYPR_WIN_ADDR" ]]; then
+        hypr_tag_window "$HYPR_WIN_ADDR" "+noidle"
+      fi
+    fi
+  fi
+}
+
+stop_inhibitor() {
+  if [[ -n "${INHIB_PID}" ]]; then
+    kill "${INHIB_PID}" 2>/dev/null || true
+    wait "${INHIB_PID}" 2>/dev/null || true
+    INHIB_PID=""
+  fi
+  if $OMARCHY_IDLE_TOGGLED; then
+    omarchy-toggle-idle allow-idle >/dev/null 2>&1 || true
+    OMARCHY_IDLE_TOGGLED=false
+  fi
+  if [[ -n "${HYPR_WIN_ADDR}" ]]; then
+    hypr_tag_window "$HYPR_WIN_ADDR" "-noidle"
+    HYPR_WIN_ADDR=""
+  fi
+}
+
+sleep_displays() {
+  if [[ "$(uname)" == "Darwin" ]]; then
+    pmset displaysleepnow
+    return $?
+  fi
+
+  if command -v omarchy-brightness-keyboard >/dev/null 2>&1; then
+    omarchy-brightness-keyboard off >/dev/null 2>&1 || true
+  fi
+
+  if command -v omarchy-brightness-display >/dev/null 2>&1; then
+    omarchy-brightness-display off >/dev/null 2>&1 && return 0
+  fi
+
+  if command -v hyprctl >/dev/null 2>&1; then
+    hyprctl dispatch 'hl.dsp.dpms({ action = "disable" })' >/dev/null 2>&1 \
+      || hyprctl dispatch dpms off >/dev/null 2>&1
+    return $?
+  fi
+
+  echo "powernap: no supported display sleep backend found" >&2
+  return 1
+}
+
+wake_displays() {
+  if [[ "$(uname)" == "Darwin" ]]; then
+    if display_is_asleep; then
+      caffeinate -u -t 1 >/dev/null 2>&1 || true
+    fi
+    return 0
+  fi
+
+  if command -v omarchy-system-wake >/dev/null 2>&1; then
+    omarchy-system-wake >/dev/null 2>&1 || true
+  else
+    if command -v omarchy-brightness-display >/dev/null 2>&1; then
+      omarchy-brightness-display on >/dev/null 2>&1 || true
+    elif command -v hyprctl >/dev/null 2>&1; then
+      hyprctl dispatch 'hl.dsp.dpms({ action = "enable" })' >/dev/null 2>&1 \
+        || hyprctl dispatch dpms on >/dev/null 2>&1 || true
+    fi
+    if command -v omarchy-brightness-keyboard >/dev/null 2>&1; then
+      omarchy-brightness-keyboard restore >/dev/null 2>&1 || true
+    fi
+  fi
+}
+
+display_is_asleep() {
+  if [[ "$(uname)" == "Darwin" ]]; then
+    if command -v python3 >/dev/null 2>&1; then
+      python3 -c 'import ctypes, sys; cg = ctypes.CDLL("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics"); sys.exit(0 if cg.CGDisplayIsAsleep(cg.CGMainDisplayID()) else 1)' 2>/dev/null
+      return $?
+    fi
+    return 1
+  elif command -v hyprctl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+    hyprctl monitors -j 2>/dev/null \
+      | jq -e '[.[] | select(.disabled == false)] | length > 0 and any(.dpmsStatus == false)' >/dev/null 2>&1
+    return $?
+  fi
+  return 1
+}
+
+CLEANED_UP=false
+cleanup() {
+  $CLEANED_UP && return 0
+  CLEANED_UP=true
+  wake_displays
+  stop_inhibitor
+}
+trap cleanup EXIT INT TERM HUP
+
+start_inhibitor
+
+# Brief pause so the Enter key release from launching powernap doesn't
+# immediately wake the display (e.g. via Hyprland key_press_enables_dpms).
+sleep 0.3
+
+sleep_displays || exit 1
+
+# Wait up to ~2s for the display to report asleep.
+SAW_ASLEEP=false
+for (( i = 0; i < 10; i++ )); do
+  if display_is_asleep; then
+    SAW_ASLEEP=true
+    break
+  fi
+  sleep 0.2
+done
+
+START_SECONDS=$SECONDS
+while true; do
+  if [[ -n "$DURATION" ]] && (( SECONDS - START_SECONDS >= DURATION )); then
+    break
+  fi
+  if [[ -n "$INHIB_PID" ]] && ! kill -0 "$INHIB_PID" 2>/dev/null; then
+    break
+  fi
+  if $SAW_ASLEEP && ! display_is_asleep; then
+    break
+  fi
+  sleep 1
+done

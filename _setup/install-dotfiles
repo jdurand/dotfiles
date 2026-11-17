@@ -231,14 +231,14 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     sudo systemctl enable --now kanata.service
     sudo systemctl restart kanata.service
   fi
-
-  # Symlink bin scripts to ~/.local/bin
-  mkdir -p "$HOME/.local/bin"
-  for script in "$HOME/.dotfiles/bin/"*; do
-    [ -f "$script" ] && [ -x "$script" ] && \
-      create_symlink "$script" "$HOME/.local/bin/$(basename "$script")"
-  done
 fi
+
+# Symlink bin scripts to ~/.local/bin
+mkdir -p "$HOME/.local/bin"
+for script in "$HOME/.dotfiles/bin/"*; do
+  [ -f "$script" ] && [ -x "$script" ] && \
+    create_symlink "$script" "$HOME/.local/bin/$(basename "$script")"
+done
 
 # Install fish plugins
 fish -c '

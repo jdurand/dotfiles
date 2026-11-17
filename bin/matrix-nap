@@ -509,6 +509,9 @@ trigger_lock() {
 
 # --- terminal font size adjustment (zooms in-place and resets on exit) ---
 FONT_ZOOMED=false
+FONT_TERMINAL_ID=""
+FONT_TERMINAL_TTY=""
+FONT_WINDOW_ADDR=""
 
 get_base_font_size() {
   local cfg="${XDG_CONFIG_HOME:-$HOME/.config}/ghostty/config"
@@ -519,8 +522,52 @@ get_base_font_size() {
   printf '%s\n' "${sz:-15}"
 }
 
+ghostty_font_action() {
+  osascript - "$1" "$FONT_TERMINAL_ID" "$FONT_TERMINAL_TTY" << 'EOF'
+on run argv
+  set actionName to item 1 of argv
+  set terminalID to item 2 of argv
+  set terminalTTY to item 3 of argv
+  tell application "Ghostty"
+    if terminalID is "" then
+      set matches to every terminal whose tty is terminalTTY
+      if (count of matches) is not 1 then error "Cannot identify the matrix-nap terminal"
+      set targetTerminal to item 1 of matches
+    else
+      set targetTerminal to terminal id terminalID
+    end if
+    if not (perform action actionName on targetTerminal) then error "Font action failed"
+    return id of targetTerminal
+  end tell
+end run
+EOF
+}
+
 apply_font_size() {
   [[ -n "$FONT_SIZE" ]] || return 0
+
+  if [[ "$(uname)" == "Darwin" ]] &&
+      [[ "${TERM_PROGRAM:-}" == "ghostty" || -n "${GHOSTTY_RESOURCES_DIR:-}" ]]; then
+    local action="set_font_size:$FONT_SIZE"
+    case "$FONT_SIZE" in
+      +0|-0) return 0 ;;
+      +*) action="increase_font_size:${FONT_SIZE#+}" ;;
+      -*) action="decrease_font_size:${FONT_SIZE#-}" ;;
+    esac
+    if [[ -n "${TMUX:-}" ]]; then
+      FONT_TERMINAL_TTY="$(tmux display-message -p '#{client_tty}')" || return 0
+    else
+      FONT_TERMINAL_TTY="$(tty)" || return 0
+    fi
+    # One native action avoids queued zoom keystrokes and intermediate sizes.
+    if FONT_TERMINAL_ID="$(ghostty_font_action "$action")"; then
+      FONT_ZOOMED=true
+    else
+      echo "matrix-nap: could not set Ghostty font size" >&2
+    fi
+    return 0
+  fi
+
   local delta=0
   if [[ "$FONT_SIZE" =~ ^[+-] ]]; then
     delta=$(( FONT_SIZE ))
@@ -541,6 +588,18 @@ apply_font_size() {
         keystroke \"$key\" using {command down}
       end repeat
     end tell" >/dev/null 2>&1 && FONT_ZOOMED=true
+  elif command -v hyprctl >/dev/null 2>&1; then
+    FONT_WINDOW_ADDR="$(hyprctl activewindow -j 2>/dev/null |
+      grep -o '"address": *"[^"]*"' | cut -d'"' -f4)"
+    [[ -n "$FONT_WINDOW_ADDR" ]] || return 0
+    local key="equal" i
+    (( delta < 0 )) && key="minus"
+    if hyprctl dispatch sendshortcut "CTRL,0,address:$FONT_WINDOW_ADDR" >/dev/null 2>&1; then
+      FONT_ZOOMED=true
+      for (( i = 0; i < ${delta#-}; i++ )); do
+        hyprctl dispatch sendshortcut "CTRL,$key,address:$FONT_WINDOW_ADDR" >/dev/null 2>&1 || break
+      done
+    fi
   elif command -v wtype >/dev/null 2>&1; then
     local key="equal"
     (( delta < 0 )) && key="minus"
@@ -553,16 +612,22 @@ apply_font_size() {
     wargs+=( -m ctrl )
     wtype "${wargs[@]}" >/dev/null 2>&1 && FONT_ZOOMED=true
   fi
-
-  if $FONT_ZOOMED; then
-    # Let terminal finish SIGWINCH resize before cmatrix initializes LINES/COLS
-    sleep 0.08
-  fi
 }
 
 reset_font_size() {
   $FONT_ZOOMED || return 0
-  if [[ "$(uname)" == "Darwin" ]]; then
+  if [[ -n "$FONT_TERMINAL_ID" ]]; then
+    # Address the original surface even when --lock has moved focus elsewhere.
+    if ! ghostty_font_action reset_font_size >/dev/null; then
+      echo "matrix-nap: could not reset Ghostty font size" >&2
+      return 1
+    fi
+  elif [[ -n "$FONT_WINDOW_ADDR" ]]; then
+    if ! hyprctl dispatch sendshortcut "CTRL,0,address:$FONT_WINDOW_ADDR" >/dev/null 2>&1; then
+      echo "matrix-nap: could not reset terminal font size" >&2
+      return 1
+    fi
+  elif [[ "$(uname)" == "Darwin" ]]; then
     osascript -e 'tell application "System Events" to keystroke "0" using {command down}' >/dev/null 2>&1 || true
   elif command -v wtype >/dev/null 2>&1; then
     wtype -M ctrl -k 0 -m ctrl >/dev/null 2>&1 || true
@@ -577,7 +642,9 @@ cleanup() {
   stop_focus_monitor
   stop_inhibitor
 }
-trap cleanup EXIT INT TERM
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 start_inhibitor
 apply_font_size
@@ -586,11 +653,12 @@ start_focus_monitor
 # --- run cmatrix in FOREGROUND; if timed, use timeout approach ---
 STATUS=0
 if [[ -z "$DURATION" ]]; then
-  env "${CMATRIX_ENV[@]}" cmatrix "${CM_ARGS[@]}"
+  # Inherited dimensions override the current PTY size in ncurses.
+  env -u LINES -u COLUMNS "${CMATRIX_ENV[@]}" cmatrix "${CM_ARGS[@]}"
   STATUS=$?
 else
   # Start cmatrix in background and track its PID
-  env "${CMATRIX_ENV[@]}" cmatrix "${CM_ARGS[@]}" &
+  env -u LINES -u COLUMNS "${CMATRIX_ENV[@]}" cmatrix "${CM_ARGS[@]}" &
   CMATRIX_PID=$!
 
   # Start timeout killer in background
@@ -612,6 +680,7 @@ fi
 
 # --- optional lock after exit (if focus monitor didn't trigger it) ---
 if $LOCK; then
+  reset_font_size
   trigger_lock
 fi
 
